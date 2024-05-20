@@ -38,9 +38,9 @@ interface Props {
 
 const Gamelist: React.FC<Props> = ({ gameslist }) => {
   return (
-    <div className='flex justify-center w-fit space-x-2'>
+    <div className='flex flex-wrap w-full justify-center sm:justify-around'>
       {gameslist.map((game) => (
-        <div key={game.id} className='w-60'>
+        <div key={game.id} className='w-96 mb-4'>
           <Card className='h-60'>
             <CardHeader>
               <CardTitle>{game.game}</CardTitle>
