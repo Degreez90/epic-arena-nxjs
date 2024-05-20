@@ -14,7 +14,3 @@ export const config = {
   // for more information about configuring your Middleware
   matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
 }
-
-// import { authMiddleware } from '@clerk/nextjs'
-
-// export default authMiddleware({})
