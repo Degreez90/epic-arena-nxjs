@@ -1,4 +1,4 @@
-import mongoose, { Schema, Model, HydratedDocument } from 'mongoose'
+import mongoose, { Schema, Model, Query, HydratedDocument } from 'mongoose'
 import validator from 'validator'
 import crypto from 'crypto'
 
@@ -6,8 +6,8 @@ interface IUser {
   firstName: string
   lastName: string
   email: string
-  // password?: string
-  // passwordConfirm?: string
+  password?: string
+  passwordConfirm?: string
   phone?: string
   images?: string[]
   role?: 'admin' | 'user'
@@ -71,7 +71,7 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
   { timestamps: true }
 )
 
-userSchema.pre(/^find/, function (next) {
+userSchema.pre<Query<IUserModel, IUserModel>>(/^find/, function (next) {
   // this points to the current query
   this.find({ accountStatus: { $ne: false } })
   next()
