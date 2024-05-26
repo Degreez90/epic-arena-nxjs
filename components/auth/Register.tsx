@@ -1,4 +1,13 @@
 import * as React from 'react'
+
+import type {
+  GetServerSidePropsContext,
+  InferGetServerSidePropsType,
+} from 'next'
+import { getServerSession } from 'next-auth/next'
+
+import { authOptions } from '@/app/api/auth/[...nextauth]/options'
+
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -10,15 +19,9 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { SignIn, SignOut } from '@/components/auth/Auth-Components'
 
-const register: React.FunctionComponent = () => {
+const Register = () => {
   return (
     <Card className='w-[350px]'>
       <CardHeader>
@@ -26,6 +29,7 @@ const register: React.FunctionComponent = () => {
         <CardDescription>Fill out these fields</CardDescription>
       </CardHeader>
       <CardContent>
+        <SignIn />
         <form>
           <div className='grid w-full items-center gap-4'>
             <div className='flex flex-col space-y-1.5'>
@@ -70,4 +74,4 @@ const register: React.FunctionComponent = () => {
   )
 }
 
-export default register
+export default Register
