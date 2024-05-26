@@ -1,11 +1,12 @@
-import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import Google from 'next-auth/providers/google'
+import NextAuth from 'next-auth'
 
-export const options = {
+export const authOptions = {
   providers: [
-    GoogleProvider({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
     CredentialsProvider({
       name: 'Credentials',
@@ -38,4 +39,33 @@ export const options = {
       },
     }),
   ],
+  basePath: '/auth/signup',
+  callbacks: {
+    authorized({ request, auth }) {
+      const { pathname } = request.nextUrl
+      if (pathname === '/middleware-example') return !!auth
+      return true
+    },
+    jwt({ token, trigger, session, account }) {
+      if (trigger === 'update') token.name = session.user.name
+      if (account?.provider === 'keycloak') {
+        return { ...token, accessToken: account.access_token }
+      }
+      return token
+    },
+    async session({ session, token }) {
+      if (token?.accessToken) {
+        session.accessToken = token.accessToken
+      }
+      return session
+    },
+  },
 }
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    accessToken?: string
+  }
+}
+
+export const { handlers, auth, signIn, signOut } = NextAuth(authOptions)
