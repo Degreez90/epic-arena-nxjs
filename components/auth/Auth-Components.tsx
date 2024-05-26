@@ -1,3 +1,4 @@
+'use client'
 import { signIn, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 
@@ -6,13 +7,10 @@ export function SignIn({
   ...props
 }: { provider?: string } & React.ComponentPropsWithRef<typeof Button>) {
   return (
-    <form
-      action={async () => {
-        'use server'
-        await signIn(provider)
-      }}
-    >
-      <Button {...props}>Sign In</Button>
+    <form>
+      <Button type='submit' onClick={() => signIn()} {...props}>
+        Sign In
+      </Button>
     </form>
   )
 }
@@ -21,7 +19,6 @@ export function SignOut(props: React.ComponentPropsWithRef<typeof Button>) {
   return (
     <form
       action={async () => {
-        'use server'
         await signOut()
       }}
       className='w-full'
