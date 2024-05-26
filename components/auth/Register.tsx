@@ -1,13 +1,4 @@
 import * as React from 'react'
-
-import type {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from 'next'
-import { getServerSession } from 'next-auth/next'
-
-import { authOptions } from '@/app/api/auth/[...nextauth]/options'
-
 import { Button } from '@/components/ui/button'
 import {
   Card,
