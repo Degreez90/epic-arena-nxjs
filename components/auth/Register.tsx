@@ -12,6 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SignIn, SignOut } from '@/components/auth/Auth-Components'
 
+import { FcGoogle } from 'react-icons/fc'
+
 const Register = () => {
   return (
     <Card className='w-[350px]'>
@@ -20,7 +22,13 @@ const Register = () => {
         <CardDescription>Fill out these fields</CardDescription>
       </CardHeader>
       <CardContent>
-        <SignIn />
+        <div className='flex text-3xl'>
+          🔏
+          <SignIn />
+          <Button className='bg-slate-600'>
+            <FcGoogle />
+          </Button>
+        </div>
         <form>
           <div className='grid w-full items-center gap-4'>
             <div className='flex flex-col space-y-1.5'>
