@@ -30,6 +30,7 @@ export const RegisterForm = () => {
     defaultValues: {
       email: '',
       password: '',
+      vPassword: '',
       firstName: '',
       lastName: '',
     },
@@ -120,7 +121,7 @@ export const RegisterForm = () => {
                       {...field}
                       disabled={isPending}
                       placeholder='x-xxx-xxx-xxx'
-                      type='email'
+                      type='tel'
                     />
                   </FormControl>
                   <FormMessage />
@@ -133,6 +134,24 @@ export const RegisterForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      disabled={isPending}
+                      placeholder='********'
+                      type='password'
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='vPassword'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
