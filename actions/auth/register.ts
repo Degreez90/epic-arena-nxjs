@@ -9,31 +9,36 @@ import { RegisterSchema } from '@/schemas'
 // import { sendVerificationEmail } from '@/lib/mail'
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
-  const validatedFields = RegisterSchema.safeParse(values)
+  // const validatedFields = RegisterSchema.safeParse(values)
+  console.log('register hit')
 
-  if (!validatedFields.success) {
-    return { error: 'Invalid fields' }
-  }
+  return { error: 'Invalid Fields' }
 
-  const { email, password, name } = validatedFields.data
-  const hashedPassword = await bcrypt.hash(password, 10)
+  return { success: 'Registered' }
 
-  const existingUser = await getUserByEmail(email)
+  // if (!validatedFields.success) {
+  //   return { error: 'Invalid fields' }
+  // }
 
-  if (existingUser) {
-    return { error: 'Email already in use!' }
-  }
+  // const { email, password, firstName } = validatedFields.data
+  // const hashedPassword = await bcrypt.hash(password, 10)
 
-  await db.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-    },
-  })
+  // const existingUser = await getUserByEmail(email)
 
-  const verificationToken = await generateVerificationToken(email)
-  await sendVerificationEmail(verificationToken.email, verificationToken.token)
+  // if (existingUser) {
+  //   return { error: 'Email already in use!' }
+  // }
 
-  return { success: 'Confirmation email sent!' }
+  // await db.user.create({
+  //   data: {
+  //     firstName,
+  //     email,
+  //     password: hashedPassword,
+  //   },
+  // })
+
+  // const verificationToken = await generateVerificationToken(email)
+  // await sendVerificationEmail(verificationToken.email, verificationToken.token)
+
+  // return { success: 'Confirmation email sent!' }
 }
