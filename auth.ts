@@ -1,6 +1,8 @@
 import CredentialsProvider from 'next-auth/providers/credentials'
 import Google from 'next-auth/providers/google'
 import NextAuth, { DefaultSession } from 'next-auth'
+import { MongoDBAdapter } from '@auth/mongodb-adapter'
+import clientPromise from './lib/db'
 
 declare module 'next-auth' {
   /**
@@ -35,6 +37,7 @@ export const authOptions = {
       }
     },
   },
+  adapter: MongoDBAdapter(clientPromise),
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authOptions)
