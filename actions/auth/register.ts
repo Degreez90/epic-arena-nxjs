@@ -2,43 +2,53 @@
 
 import * as z from 'zod'
 import bcrypt from 'bcryptjs'
-// import { db } from '@/lib/db'
+import clientPromise from '@/lib/db'
 import { RegisterSchema } from '@/schemas'
 // import { getUserByEmail } from '@/data/user'
 // import { generateVerificationToken } from '@/lib/token'
 // import { sendVerificationEmail } from '@/lib/mail'
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
-  // const validatedFields = RegisterSchema.safeParse(values)
+  const validatedFields = RegisterSchema.safeParse(values)
   console.log('register hit')
 
-  return { error: 'Invalid Fields' }
+  const client = await clientPromise
+  const db = client.db() // Specify the name of your database if it's not the default one
+  // const usersCollection = db.collection('users') // Specify the name of your collection
 
-  return { success: 'Registered' }
+  // return { error: 'Invalid Fields' }
 
-  // if (!validatedFields.success) {
-  //   return { error: 'Invalid fields' }
-  // }
+  // return { success: 'Registered' }
 
-  // const { email, password, firstName } = validatedFields.data
-  // const hashedPassword = await bcrypt.hash(password, 10)
+  if (!validatedFields.success) {
+    return { error: 'Invalid fields' }
+  }
+
+  const { email, password, vPassword, firstName, lastName, phoneNumber } =
+    validatedFields.data
+  const hashedPassword = await bcrypt.hash(password, 10)
 
   // const existingUser = await getUserByEmail(email)
 
+  if (password !== vPassword) {
+    return { error: 'Passwords do not match' }
+  }
   // if (existingUser) {
   //   return { error: 'Email already in use!' }
   // }
 
-  // await db.user.create({
-  //   data: {
-  //     firstName,
-  //     email,
-  //     password: hashedPassword,
-  //   },
-  // })
+  await db.collection('user').insertOne({
+    data: {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      password: hashedPassword,
+    },
+  })
 
-  // const verificationToken = await generateVerificationToken(email)
-  // await sendVerificationEmail(verificationToken.email, verificationToken.token)
+  const verificationToken = await generateVerificationToken(email)
+  await sendVerificationEmail(verificationToken.email, verificationToken.token)
 
-  // return { success: 'Confirmation email sent!' }
+  return { success: 'Confirmation email sent!' }
 }
