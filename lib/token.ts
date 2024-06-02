@@ -14,21 +14,18 @@ export const generateTwoFactorToken = async (email: string) => {
 
   const client = await clientPromise
   const db = client.db()
+  const collection = db.collection('twofactorToken')
 
   if (existingToken) {
-    await db.collection('twoFactorToken').deleteOne({
-      where: {
-        id: existingToken.id,
-      },
+    await collection.deleteOne({
+      id: existingToken.id,
     })
   }
 
-  const twoFactorToken = await db.twoFactorToken.create({
-    data: {
-      email,
-      token,
-      expires,
-    },
+  const twoFactorToken = await collection.insertOne({
+    email,
+    token,
+    expires,
   })
 
   return twoFactorToken

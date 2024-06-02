@@ -4,7 +4,7 @@ import * as z from 'zod'
 import bcrypt from 'bcryptjs'
 import clientPromise from '@/lib/db'
 import { RegisterSchema } from '@/schemas'
-// import { getUserByEmail } from '@/data/user'
+import { getUserByEmail } from '@/data/user'
 // import { generateVerificationToken } from '@/lib/token'
 // import { sendVerificationEmail } from '@/lib/mail'
 
@@ -28,7 +28,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     validatedFields.data
   const hashedPassword = await bcrypt.hash(password, 10)
 
-  // const existingUser = await getUserByEmail(email)
+  const existingUser = await getUserByEmail(email)
 
   if (password !== vPassword) {
     return { error: 'Passwords do not match' }
@@ -38,13 +38,11 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   // }
 
   await db.collection('user').insertOne({
-    data: {
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      password: hashedPassword,
-    },
+    firstName,
+    lastName,
+    email,
+    phoneNumber,
+    password: hashedPassword,
   })
 
   const verificationToken = await generateVerificationToken(email)
