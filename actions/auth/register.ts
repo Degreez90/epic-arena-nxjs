@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs'
 import clientPromise from '@/lib/db'
 import { RegisterSchema } from '@/schemas'
 import { getUserByEmail } from '@/data/user'
-// import { generateVerificationToken } from '@/lib/token'
+import { generateVerificationToken } from '@/lib/token'
 // import { sendVerificationEmail } from '@/lib/mail'
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
@@ -13,8 +13,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   console.log('register hit')
 
   const client = await clientPromise
-  const db = client.db() // Specify the name of your database if it's not the default one
-  // const usersCollection = db.collection('users') // Specify the name of your collection
+  const db = client.db()
 
   // return { error: 'Invalid Fields' }
 
@@ -33,9 +32,9 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   if (password !== vPassword) {
     return { error: 'Passwords do not match' }
   }
-  // if (existingUser) {
-  //   return { error: 'Email already in use!' }
-  // }
+  if (existingUser) {
+    return { error: 'Email already in use!' }
+  }
 
   await db.collection('user').insertOne({
     firstName,
