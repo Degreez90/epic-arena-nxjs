@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 import clientPromise from '@/lib/db'
 import { getVerificationTokenByEmail } from '@/data/verification-token'
-import { getPasswordResetokenByEmail } from '@/data/password-reset-token'
+import { getPasswordResetTokenByEmail } from '@/data/password-reset-token'
 import { getTwoFactorTokenByEmail } from '@/data/two-factor-token'
 
 export const generateTwoFactorToken = async (email: string) => {
@@ -18,7 +18,7 @@ export const generateTwoFactorToken = async (email: string) => {
 
   if (existingToken) {
     await collection.deleteOne({
-      id: existingToken.id,
+      _id: existingToken.id,
     })
   }
 
@@ -35,22 +35,22 @@ export const generatePasswordResetToken = async (email: string) => {
   const token = uuidv4()
   const expires = new Date(new Date().getTime() + 5 * 60 * 1000)
 
-  const existingToken = await getPasswordResetokenByEmail(email)
+  const existingToken = await getPasswordResetTokenByEmail(email)
+
+  const client = await clientPromise
+  const db = client.db()
+  const collection = db.collection('PasswordResetToken')
 
   if (existingToken) {
-    await db.passwordResetToken.delete({
-      where: {
-        id: existingToken.id,
-      },
+    await collection.deleteOne({
+      _id: existingToken.id,
     })
   }
 
-  const passwordResetToken = await db.passwordResetToken.create({
-    data: {
-      email,
-      token,
-      expires,
-    },
+  const passwordResetToken = await collection.insertOne({
+    email,
+    token,
+    expires,
   })
 
   return passwordResetToken
@@ -62,20 +62,20 @@ export const generateVerificationToken = async (email: string) => {
 
   const existingToken = await getVerificationTokenByEmail(email)
 
+  const client = await clientPromise
+  const db = client.db()
+  const collection = db.collection('VerificationToken')
+
   if (existingToken) {
-    await db.verificationToken.delete({
-      where: {
-        id: existingToken.id,
-      },
+    await collection.deleteOne({
+      _id: existingToken.id,
     })
   }
 
-  const verificationToken = await db.verificationToken.create({
-    data: {
-      email,
-      token,
-      expires,
-    },
+  const verificationToken = await collection.insertOne({
+    email,
+    token,
+    expires,
   })
 
   return verificationToken
