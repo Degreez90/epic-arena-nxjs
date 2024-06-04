@@ -14,6 +14,8 @@ const options = {
   },
 }
 
+console.log(uri)
+
 let client
 let clientPromise: Promise<MongoClient>
 
