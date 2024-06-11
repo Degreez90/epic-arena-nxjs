@@ -10,11 +10,22 @@ export const {
   signOut,
 } = NextAuth({
   pages: {
-    signIn: '/auth/login',
-    error: '/auth/error',
+    signIn: '/login',
+  },
+  events: {
+    async linkAccount({ user }) {
+      const client = await clientPromise
+      const db = client.db()
+      await db.collection('user').updateOne(
+        {
+          id: user.id,
+        },
+        { $set: { emailVerified: new Date() } }
+      )
+    },
   },
   // callbacks: {},
-  // adapter: MongoDBAdapter(clientPromise),
+  adapter: MongoDBAdapter(clientPromise),
   // session: { strategy: 'jwt' },
   ...authConfig,
 })
