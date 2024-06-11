@@ -1,3 +1,4 @@
+'use client'
 import { auth } from '@/auth'
 
 const SettingsPage = async () => {
