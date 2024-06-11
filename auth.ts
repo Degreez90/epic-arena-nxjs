@@ -1,43 +1,20 @@
-import CredentialsProvider from 'next-auth/providers/credentials'
-import Google from 'next-auth/providers/google'
-import NextAuth, { DefaultSession } from 'next-auth'
+import NextAuth from 'next-auth'
 import { MongoDBAdapter } from '@auth/mongodb-adapter'
 import clientPromise from './lib/db'
+import authConfig from '@/auth.config'
 
-declare module 'next-auth' {
-  /**
-   * Returned by `auth`, `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
-   */
-  interface Session {
-    user: {
-      /** The user's postal address. */
-      address: string
-      /**
-       * By default, TypeScript merges new interface properties and overwrites existing ones.
-       * In this case, the default session user properties will be overwritten,
-       * with the new ones defined above. To keep the default session user properties,
-       * you need to add them back into the newly declared interface.
-       */
-    } & DefaultSession['user']
-  }
-}
-
-export const authOptions = {
-  providers: [Google],
-  callbacks: {
-    session({ session, token, user }) {
-      // `session.user.address` is now a valid property, and will be type-checked
-      // in places like `useSession().data.user` or `auth().user`
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          address: user.address,
-        },
-      }
-    },
+export const {
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut,
+} = NextAuth({
+  pages: {
+    signIn: '/auth/login',
+    error: '/auth/error',
   },
-  adapter: MongoDBAdapter(clientPromise),
-}
-
-export const { handlers, auth, signIn, signOut } = NextAuth(authOptions)
+  // callbacks: {},
+  // adapter: MongoDBAdapter(clientPromise),
+  // session: { strategy: 'jwt' },
+  ...authConfig,
+})
