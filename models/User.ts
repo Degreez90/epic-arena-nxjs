@@ -1,8 +1,15 @@
-import mongoose, { Schema, Model, Query, HydratedDocument } from 'mongoose'
+import mongoose, {
+  Schema,
+  Model,
+  Query,
+  HydratedDocument,
+  ObjectId,
+} from 'mongoose'
 import validator from 'validator'
 import crypto from 'crypto'
 
 interface IUser {
+  _id: ObjectId
   firstName: string
   lastName: string
   email: string
