@@ -1,7 +1,6 @@
 'use server'
 
 import * as z from 'zod'
-import bcrypt from 'bcryptjs'
 import { AuthError } from 'next-auth'
 
 import clientPromise from '@/lib/db'

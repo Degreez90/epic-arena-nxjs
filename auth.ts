@@ -3,6 +3,7 @@ import { MongoDBAdapter } from '@auth/mongodb-adapter'
 import clientPromise from './lib/db'
 import authConfig from '@/auth.config'
 import { getUserById } from './data/user'
+import { getAccountByUserId } from './data/accounts'
 
 export const {
   handlers: { GET, POST },
@@ -57,13 +58,13 @@ export const {
         session.user.id = token.sub
       }
 
-      if (token.role && session.user) {
-        session.user.role = token.role as UserRole
-      }
+      // if (token.role && session.user) {
+      //   session.user.role = token.role as UserRole
+      // }
 
       if (session.user) {
         session.user.name = token.name
-        session.user.email = token.email
+        session.user.email = token.email as string
         session.user.isOAuth = token.isOAuth as boolean
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean
       }

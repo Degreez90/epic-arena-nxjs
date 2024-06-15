@@ -1,7 +1,5 @@
 import NextAuth, { type DefaultSession } from 'next-auth'
 
-import { UserType } from './models/User'
-
 export type ExtendedUser = DefaultSession['user'] & {
   isTwoFactorEnabled: boolean
   isOAuth: boolean
