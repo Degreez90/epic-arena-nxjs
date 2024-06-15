@@ -6,7 +6,6 @@ import mongoose, {
   ObjectId,
 } from 'mongoose'
 import validator from 'validator'
-import crypto from 'crypto'
 
 interface IUser {
   _id: ObjectId
