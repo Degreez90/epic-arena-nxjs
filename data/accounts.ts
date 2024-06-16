@@ -1,11 +1,8 @@
-import clientPromise from '@/lib/db'
+import { db } from '@/lib/db'
 
 export const getAccountByUserId = async (userId: string) => {
-  const client = await clientPromise
-  const db = client.db()
-
   try {
-    const account = await db.collection('account').findOne({
+    const account = await db.account.findMany({
       userId,
     })
 
