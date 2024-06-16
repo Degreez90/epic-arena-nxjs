@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth'
 import { MongoDBAdapter } from '@auth/mongodb-adapter'
-import clientPromise from './lib/db'
+import { PrismaAdapter } from '@auth/prisma-adapter'
+import { db } from './lib/db'
 import authConfig from '@/auth.config'
 import { getUserById } from './data/user'
 import { getAccountByUserId } from './data/accounts'
@@ -16,8 +17,6 @@ export const {
   },
   events: {
     async linkAccount({ user }) {
-      const client = await clientPromise
-      const db = client.db()
       await db.collection('user').updateOne(
         {
           id: user.id,
@@ -89,7 +88,7 @@ export const {
       return token
     },
   },
-  adapter: MongoDBAdapter(clientPromise),
+  adapter: PrismaAdapter(db),
   session: { strategy: 'jwt' },
   ...authConfig,
 })

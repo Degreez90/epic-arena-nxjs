@@ -1,12 +1,8 @@
-import clientPromise from '@/lib/db'
-import { UserType } from '@/models/User'
+import { db } from '@/lib/db'
 
 export const getUserByEmail = async (email: string) => {
   try {
-    const client = await clientPromise
-    const db = client.db()
-    const collection = db.collection('users')
-    const user = await collection.findOne({ email })
+    const user = await db.user.findFirst({ where: { email } })
 
     return user
   } catch {
@@ -16,11 +12,7 @@ export const getUserByEmail = async (email: string) => {
 
 export const getUserById = async (id?: string) => {
   try {
-    const client = await clientPromise
-    const db = client.db()
-    const collection = db.collection('users')
-    const user = await collection.findOne({ id })
-
+    const user = await db.user.findFirst({ where: { id } })
     return user
   } catch {
     return null
