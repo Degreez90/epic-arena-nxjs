@@ -22,10 +22,6 @@ export const login = async (
   if (!validatedFields.success) {
     return { error: 'Invalid fields!' }
   }
-
-  const client = await clientPromise
-  const db = client.db()
-
   const { email, password, code } = validatedFields.data
 
   const existingUser = await getUserByEmail(email)
