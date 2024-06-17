@@ -62,7 +62,8 @@ export const {
       // }
 
       if (session.user) {
-        session.user.name = token.name
+        session.user.fName = token.fName as string
+        session.user.lName = token.lName as string
         session.user.email = token.email as string
         session.user.isOAuth = token.isOAuth as boolean
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean
@@ -80,7 +81,8 @@ export const {
       const existingAccount = await getAccountByUserId(existingUser.id)
 
       token.isOAuth = !!existingAccount
-      token.name = existingUser.firstName
+      token.fName = existingUser.fName
+      token.lName = existingUser.lName
       token.email = existingUser.email
       token.role = existingUser.role
       token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled
