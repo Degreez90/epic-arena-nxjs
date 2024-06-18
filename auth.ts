@@ -17,17 +17,16 @@ export const {
   },
   events: {
     async linkAccount({ user }) {
-      await db.collection('user').updateOne(
-        {
-          id: user.id,
-        },
-        { $set: { emailVerified: new Date() } }
-      )
+      await db.user.update({
+        where: { id: user.id },
+        data: { emailVerified: new Date() },
+      })
     },
   },
   callbacks: {
     async signIn({ user, account }) {
       //Allow OAuth without email verification
+      console.log('auth.ts, user: ', user)
       if (account?.provider !== 'credentials') return true
 
       const existingUser = await getUserById(user.id)

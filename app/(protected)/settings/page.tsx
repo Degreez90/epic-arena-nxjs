@@ -1,4 +1,5 @@
 'use client'
+
 import { auth } from '@/auth'
 
 const SettingsPage = async () => {
@@ -6,3 +7,5 @@ const SettingsPage = async () => {
 
   return <div>{JSON.stringify(session)}</div>
 }
+
+export default SettingsPage

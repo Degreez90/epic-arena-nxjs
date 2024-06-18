@@ -2,7 +2,7 @@
 
 import * as z from 'zod'
 import { AuthError } from 'next-auth'
-
+import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
 import { signIn } from '@/auth'
 import { LoginSchema } from '@/schemas'
@@ -25,6 +25,8 @@ export const login = async (
 
   const { email, password, code } = validatedFields.data
 
+  console.log('login hit')
+
   const existingUser = await getUserByEmail(email)
 
   if (!existingUser || !existingUser.email || !existingUser.password) {
@@ -32,28 +34,25 @@ export const login = async (
   }
 
   // if (!existingUser.emailVerified) {
-  //   const verificationToken = await generateVerificationToken(
-  //     existingUser.email
-  //   );
+  //   // const verificationToken = await generateVerificationToken(
+  //   //   existingUser.email
+  //   // );
 
-  //   await sendVerificationEmail(
-  //     verificationToken.email,
-  //     verificationToken.token
-  //   );
+  //   // await sendVerificationEmail(
+  //   //   verificationToken.email,
+  //   //   verificationToken.token
+  //   // );
 
-  //   return { success: "Confirmation email sent!" };
+  //   return { success: 'Confirmation email sent!' }
   // }
 
   // if (existingUser.isTwoFactorEnabled && existingUser.email) {
   //   // Check password before proceeding with 2FA
-  //   const isPasswordValid = await bcrypt.compare(
-  //     password,
-  //     existingUser.password
-  //   );
+  const isPasswordValid = await bcrypt.compare(password, existingUser.password)
 
-  //   if (!isPasswordValid) {
-  //     return { error: "Invalid credentials!" };
-  //   }
+  if (!isPasswordValid) {
+    return { error: 'Invalid credentials!' }
+  }
 
   //   if (code) {
   //     const twoFactorToken = await getTwoFactorTokenByEmail(existingUser.email);

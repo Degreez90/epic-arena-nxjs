@@ -3,10 +3,10 @@ import { db } from '@/lib/db'
 export const getAccountByUserId = async (userId: string) => {
   try {
     const account = await db.account.findMany({
-      userId,
+      where: { userId },
     })
 
-    console.log('lib/db: account: ', account)
+    console.log('data/db: account: ', account)
 
     return account
   } catch {
