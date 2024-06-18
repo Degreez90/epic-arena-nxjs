@@ -19,8 +19,8 @@ import {
 import { CardWrapper } from '@/components/auth/Card-Wrapper'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-// import { FormError } from "@/components/form-error";
-// import { FormSuccess } from "@/components/form-success";
+import { FormError } from '@/components/Form-Error'
+import { FormSuccess } from '@/components/Form-Success'
 import { login } from '@/actions/auth/login'
 
 export const LoginForm = () => {
@@ -62,9 +62,9 @@ export const LoginForm = () => {
             setSuccess(data.success)
           }
 
-          if (data?.twoFactor) {
-            setShowTwoFactor(true)
-          }
+          // if (data?.twoFactor) {
+          //   setShowTwoFactor(true)
+          // }
         })
         .catch(() => setError('Something went wrong!'))
     })
@@ -148,8 +148,8 @@ export const LoginForm = () => {
               </>
             )}
           </div>
-          {/* <FormError message={error || errorUrl} />
-          <FormSuccess message={success} /> */}
+          <FormError message={error || errorUrl} />
+          <FormSuccess message={success} />
           <Button type='submit' disabled={isPending} className='w-full'>
             {showTwoFactor ? 'Confirm' : 'Login'}
           </Button>

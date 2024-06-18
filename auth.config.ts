@@ -10,6 +10,16 @@ export default {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      profile: (profile) => {
+        console.log('Profile info: ', profile)
+        return {
+          id: profile.sub,
+          fName: profile.given_name,
+          lName: profile.family_name,
+          email: profile.email,
+          image: profile.picture,
+        }
+      },
     }),
     Credentials({
       async authorize(credentials): Promise<any> {
