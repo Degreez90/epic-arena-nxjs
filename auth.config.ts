@@ -11,7 +11,7 @@ export default {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       profile: (profile) => {
-        console.log('Profile info: ', profile)
+        console.log('auth.config.ts / Profile info: ', profile)
         return {
           id: profile.sub,
           fName: profile.given_name,
