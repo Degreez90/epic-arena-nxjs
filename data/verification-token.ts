@@ -1,12 +1,10 @@
-import clientPromise from '@/lib/db'
+import { db } from '@/lib/db'
 
 export const getVerificationTokenByToken = async (token: string) => {
-  const client = await clientPromise
-  const db = client.db()
-  const collection = db.collection('VerificationToken')
-
   try {
-    const verificationToken = await collection.find({ token })
+    const verificationToken = await db.verificationToken.findUnique({
+      where: { token },
+    })
 
     return verificationToken
   } catch {
@@ -15,11 +13,10 @@ export const getVerificationTokenByToken = async (token: string) => {
 }
 
 export const getVerificationTokenByEmail = async (email: string) => {
-  const client = await clientPromise
-  const db = client.db()
-  const collection = db.collection('VerificationToken')
   try {
-    const verificationToken = await collection.find({ email })
+    const verificationToken = await db.verificationToken.findFirst({
+      where: { email },
+    })
 
     return verificationToken
   } catch {

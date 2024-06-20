@@ -1,10 +1,11 @@
 import NextAuth from 'next-auth'
 import { MongoDBAdapter } from '@auth/mongodb-adapter'
 import { PrismaAdapter } from '@auth/prisma-adapter'
-import { db } from './lib/db'
+import { db } from '@/lib/db'
 import authConfig from '@/auth.config'
-import { getUserById } from './data/user'
-import { getAccountByUserId } from './data/accounts'
+import { getUserById } from '@/data/user'
+import { getAccountByUserId } from '@/data/accounts'
+import { getTwoFactorConfirmationByUserId } from '@/data/two-factor-confirmation'
 
 export const {
   handlers: { GET, POST },
@@ -27,26 +28,27 @@ export const {
     async signIn({ user, account }) {
       //Allow OAuth without email verification
       console.log('auth.ts, user: ', user)
+
       if (account?.provider !== 'credentials') return true
 
       const existingUser = await getUserById(user.id)
 
-      // //Prevent sign in without email verification
-      // if (!existingUser?.emailVerified) return false
+      //Prevent sign in without email verification
+      if (!existingUser?.emailVerified) return false
 
-      // //2FA check
-      // if (existingUser.isTwoFactorEnabled) {
-      //   const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
-      //     existingUser.id
-      //   )
+      //2FA check
+      if (existingUser.isTwoFactorEnabled) {
+        const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
+          existingUser.id
+        )
 
-      //   if (!twoFactorConfirmation) return false
+        if (!twoFactorConfirmation) return false
 
-      //   //Delete the two factor confirmation for next sign in
-      //   await db.twoFactorConfirmation.delete({
-      //     where: { id: twoFactorConfirmation.id },
-      //   })
-      // }
+        //Delete the two factor confirmation for next sign in
+        await db.twoFactorConfirmation.delete({
+          where: { id: twoFactorConfirmation.id },
+        })
+      }
 
       return true
     },

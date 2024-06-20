@@ -1,11 +1,13 @@
-import React from 'react'
+import { Suspense } from 'react'
 import { LoginForm } from '@/components/auth/Login-Form'
 
 const signup = () => {
   return (
-    <div>
-      <LoginForm />
-    </div>
+    <Suspense fallback={<div>..loading</div>}>
+      <div>
+        <LoginForm />
+      </div>
+    </Suspense>
   )
 }
 
