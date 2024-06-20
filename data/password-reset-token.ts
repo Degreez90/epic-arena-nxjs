@@ -1,12 +1,22 @@
-import clientPromise from '@/lib/db'
+import { db } from '@/lib/db'
+
+export const getPasswordResetTokenByToken = async (token: string) => {
+  try {
+    const passwordResetToken = await db.passwordResetToken.findUnique({
+      where: { token },
+    })
+
+    return passwordResetToken
+  } catch {
+    return null
+  }
+}
 
 export const getPasswordResetTokenByEmail = async (token: string) => {
-  const client = await clientPromise
-  const db = client.db()
-  const collection = db.collection('twofactorToken')
-
   try {
-    const passwordResetToken = await collection.findOne({ token })
+    const passwordResetToken = await db.passwordResetToken.findFirst({
+      where: { token },
+    })
 
     return passwordResetToken
   } catch {
