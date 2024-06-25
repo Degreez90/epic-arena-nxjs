@@ -54,8 +54,10 @@ export const generateVerificationToken = async (email: string) => {
   const token = uuidv4()
   const expires = new Date(new Date().getTime() + 3600 * 1000)
 
-  const existingToken = await getVerificationTokenByEmail(email)
+  console.log('lib/token.ts email: ', email, 'token: ', token)
 
+  const existingToken = await getVerificationTokenByEmail(email)
+  console.log('lib/token.ts Existing token: ', existingToken)
   if (existingToken) {
     await db.verificationToken.delete({
       where: {
