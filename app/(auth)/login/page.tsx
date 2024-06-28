@@ -4,9 +4,7 @@ import { LoginForm } from '@/components/auth/Login-Form'
 const signup = () => {
   return (
     <Suspense fallback={<div>..loading</div>}>
-      <div>
-        <LoginForm />
-      </div>
+      <LoginForm />
     </Suspense>
   )
 }
