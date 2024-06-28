@@ -33,3 +33,10 @@ export const LoginSchema = z.object({
   }),
   code: z.optional(z.string()),
 })
+
+export const LoginTokenSchema = z.object({
+  email: z.string().email({
+    message: 'Email is required',
+  }),
+  existingToken: z.optional(z.string()),
+})
