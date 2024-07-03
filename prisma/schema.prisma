@@ -27,11 +27,13 @@ model User {
   password              String?
   vPassword             String?
   phoneNumber           String?
+  tournaments           String[]
   image                 String?
   role                  UserRole               @default(USER)
   accounts              Account[]
   isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
+  createdAt             DateTime               @default(now())
 }
 
 model Account {

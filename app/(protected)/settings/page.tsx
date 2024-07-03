@@ -1,11 +1,20 @@
-'use client'
-
-import { auth } from '@/auth'
+import { LogoutButton } from '@/components/auth/buttons/logout-button'
+import { Button } from '@/components/ui/button'
+import { currentUser } from '@/lib/auth'
 
 const SettingsPage = async () => {
-  const session = await auth()
+  const user = await currentUser()
 
-  return <div>{JSON.stringify(session)}</div>
+  return (
+    <div>
+      <div>{`Hello, ${user?.fName}`}</div>
+      <div>
+        <LogoutButton>
+          <Button variant={'secondary'}>Logout</Button>
+        </LogoutButton>
+      </div>
+    </div>
+  )
 }
 
 export default SettingsPage

@@ -7,7 +7,11 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prisma:push": "prisma db push",
+    "prisma:generate": "prisma generate",
+    "prisma:studio": "prisma studio",
+    "db:update": "npm run prisma:push && npm run prisma:generate"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.2.0",

@@ -4,8 +4,8 @@ import { signIn } from '@/auth'
 import { getUserByEmail } from '@/data/user'
 import { getVerificationTokenByToken } from '@/data/verification-token'
 import { db } from '@/lib/db'
-import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
 import { AuthError } from 'next-auth'
+import { isRedirectError } from 'next/dist/client/components/redirect'
 
 export const newVerification = async (token: string) => {
   const existingToken = await getVerificationTokenByToken(token)
@@ -40,10 +40,13 @@ export const newVerification = async (token: string) => {
     await signIn('credentials', {
       existingToken: existingToken.token,
       email: existingUser.email,
-      redirectTo: DEFAULT_LOGIN_REDIRECT,
+      redirect: false,
+      // redirectTo: DEFAULT_LOGIN_REDIRECT,
     })
   } catch (error) {
-    console.log('signIn error: ', error)
+    if (isRedirectError(error)) {
+      throw error
+    }
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
@@ -52,7 +55,6 @@ export const newVerification = async (token: string) => {
           return { error: 'Something went wrong!' }
       }
     }
-
     throw error
   }
 
