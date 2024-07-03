@@ -2,7 +2,13 @@ import React from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Container from '@/components/Container'
 
-const Headline = () => {
+import { ExtendedUser } from '@/next-auth'
+
+interface HeadlineProps {
+  user: ExtendedUser | null
+}
+
+const Headline: React.FC<HeadlineProps> = ({ user }) => {
   return (
     <Container>
       <div className='flex p-3 justify-between'>
@@ -13,7 +19,7 @@ const Headline = () => {
         </div>
         <div>
           <Avatar>
-            <AvatarImage src='https://github.com/shadcn.png' alt='@shadcn' />
+            <AvatarImage src={user?.image} alt='@shadcn' />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
         </div>

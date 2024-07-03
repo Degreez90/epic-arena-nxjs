@@ -66,6 +66,7 @@ export const {
         session.user.fName = token.fName as string
         session.user.lName = token.lName as string
         session.user.email = token.email as string
+        session.user.image = token.image as string
         session.user.isOAuth = token.isOAuth as boolean
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean
       }
@@ -73,6 +74,7 @@ export const {
       return session
     },
     async jwt({ token }) {
+      console.log(`from: auth.ts: `, token)
       if (!token.sub) return token
 
       const existingUser = await getUserById(token.sub)
@@ -85,6 +87,7 @@ export const {
       token.fName = existingUser.fName
       token.lName = existingUser.lName
       token.email = existingUser.email
+      token.image = existingUser.image
       token.role = existingUser.role
       token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled
 

@@ -2,17 +2,20 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { BeatLoader } from 'react-spinners'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { newVerification } from '@/actions/auth/new-verification'
 import { CardWrapper } from '@/components/auth/Card-Wrapper'
 import { FormError } from '@/components/Form-Error'
 import { FormSuccess } from '@/components/Form-Success'
+import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
 
 export const NewVerificationForm = () => {
   const [error, setError] = useState<string | undefined>('')
   const [success, setSuccess] = useState<string | undefined>('')
 
   const searchParams = useSearchParams()
+
+  const router = useRouter()
 
   const token = searchParams.get('token')
   console.log('%cSearch params token: ', 'color: red', token)
@@ -30,6 +33,9 @@ export const NewVerificationForm = () => {
       .then((data) => {
         if (data.success) {
           setSuccess(data.success)
+          setTimeout(() => {
+            router.push(DEFAULT_LOGIN_REDIRECT)
+          }, 2000)
         } else if (data.error) {
           setError(data.error)
         }
@@ -37,7 +43,7 @@ export const NewVerificationForm = () => {
       .catch(() => {
         setError('Something went wrong!')
       })
-  }, [token, success, error])
+  }, [token, success, error, router])
 
   useEffect(() => {
     onSubmit()
