@@ -31,6 +31,7 @@ export default {
         //   validatedFields.data?.verificationToken
         // )
 
+        //Login user if they validate their email
         if ('email' in credentials && 'existingToken' in credentials) {
           const validatedFields = LoginTokenSchema.safeParse(credentials)
 
@@ -44,6 +45,7 @@ export default {
           }
         }
 
+        //login user normally via email and password
         if ('email' in credentials && 'password') {
           const validatedFields = LoginSchema.safeParse(credentials)
 

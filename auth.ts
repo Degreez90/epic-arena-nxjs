@@ -6,6 +6,7 @@ import authConfig from '@/auth.config'
 import { getUserById } from '@/data/user'
 import { getAccountByUserId } from '@/data/accounts'
 import { getTwoFactorConfirmationByUserId } from '@/data/two-factor-confirmation'
+import { getSession } from 'next-auth/react'
 
 export const {
   handlers: { GET, POST },
@@ -53,6 +54,15 @@ export const {
       return true
     },
 
+    // async redirect() {
+    //   const session = await getSession()
+    //   if (!session?.user.userName) {
+    //     return '/nickname'
+    //   } else {
+    //     return '/sign-in'
+    //   }
+    // },
+
     async session({ token, session }) {
       if (token.sub && session.user) {
         session.user.id = token.sub
@@ -63,12 +73,14 @@ export const {
       // }
 
       if (session.user) {
+        session.user.id = token.id as string
         session.user.fName = token.fName as string
         session.user.lName = token.lName as string
         session.user.email = token.email as string
         session.user.image = token.image as string
         session.user.isOAuth = token.isOAuth as boolean
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean
+        session.user.userName = token.userName as string
       }
 
       return session
@@ -82,7 +94,7 @@ export const {
       if (!existingUser) return token
 
       const existingAccount = await getAccountByUserId(existingUser.id)
-
+      token.id = existingUser.id
       token.isOAuth = !!existingAccount
       token.fName = existingUser.fName
       token.lName = existingUser.lName
@@ -90,6 +102,7 @@ export const {
       token.image = existingUser.image
       token.role = existingUser.role
       token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled
+      token.userName = existingUser.userName
 
       return token
     },
