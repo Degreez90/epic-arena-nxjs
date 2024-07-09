@@ -17,11 +17,12 @@ const Headline: React.FC<HeadlineProps> = ({ user }) => {
             Epic Arena Tourneys
           </h3>
         </div>
-        <div>
-          <Avatar>
+        <div className='flex'>
+          <Avatar className='mx-4'>
             <AvatarImage src={user?.image} alt='@shadcn' />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
+          <div className='flex items-center'>{user?.fName}</div>
         </div>
       </div>
     </Container>

@@ -3,6 +3,10 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import AuthProvider from '@/context/AuthProvider'
 
+//redux
+import { store } from '@/store'
+import { Provider } from 'react-redux'
+
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
