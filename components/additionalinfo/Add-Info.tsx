@@ -25,11 +25,14 @@ import additonalInfo from '@/actions/additional-info/additonal-info'
 import { ADDITIONAL_INFO } from '@/routes'
 
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useRouter } from 'next/navigation'
 
 const AddInfo = () => {
   const [error, setError] = useState<string | undefined>('')
   const [success, setSuccess] = useState<string | undefined>('')
   const [isPending, startTransition] = useTransition()
+
+  const router = useRouter()
 
   const user = useCurrentUser()
 
@@ -46,13 +49,15 @@ const AddInfo = () => {
 
     if (user) {
       startTransition(() => {
-        additonalInfo(user.id, values, ADDITIONAL_INFO)
+        additonalInfo(user.id, values)
           .then((data) => {
             if (data?.error) {
               form.reset()
               setError(data.error)
             }
             if (data.sucess) {
+              setSuccess(data.sucess)
+              setTimeout(() => router.push(ADDITIONAL_INFO))
               form.reset()
               setSuccess(data.sucess)
             }

@@ -7,8 +7,7 @@ import * as z from 'zod'
 
 const additonalInfo = async (
   userId: string,
-  values: z.infer<typeof AdditionInfoSchema>,
-  callbackUrl: string
+  values: z.infer<typeof AdditionInfoSchema>
 ) => {
   const validatedFields = AdditionInfoSchema.safeParse(values)
 
