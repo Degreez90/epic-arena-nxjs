@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth'
 import {
+  ADDITIONAL_INFO,
   DEFAULT_LOGIN_REDIRECT,
   apiAuthPrefix,
   authRoutes,
@@ -13,6 +14,7 @@ const { auth } = NextAuth(authConfig)
 export default auth((req) => {
   const { nextUrl } = req
   const isLoggedIn = !!req.auth
+  const user = req.auth?.user
 
   console.log('Router: ', req.nextUrl.pathname)
   console.log('isLoggedIn: ', isLoggedIn)
@@ -27,6 +29,9 @@ export default auth((req) => {
   }
 
   if (isAuthRoute) {
+    //If user does not have a userName
+    if (nextUrl.pathname === ADDITIONAL_INFO && isLoggedIn && !user?.userName)
+      return
     if (isLoggedIn) {
       return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
     }
