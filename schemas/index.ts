@@ -42,7 +42,7 @@ export const LoginTokenSchema = z.object({
 })
 
 export const AdditionInfoSchema = z.object({
-  userName: z.string().email({
+  userName: z.string().min(6, {
     message: 'User Name is required',
   }),
 })

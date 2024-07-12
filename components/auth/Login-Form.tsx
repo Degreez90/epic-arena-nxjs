@@ -71,90 +71,92 @@ export const LoginForm = () => {
   }
 
   return (
-    <CardWrapper
-      headerLabel='Welcome back'
-      backButtonLabel="Don't have an account?"
-      backButtonHref='/register'
-      showSocial
-    >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-          <div className='space-y-4'>
-            {showTwoFactor && (
-              <FormField
-                control={form.control}
-                name='code'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Two factor code</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={isPending}
-                        placeholder='123456'
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-            {!showTwoFactor && (
-              <>
+    <div className='my-20'>
+      <CardWrapper
+        headerLabel='Welcome back'
+        backButtonLabel="Don't have an account?"
+        backButtonHref='/register'
+        showSocial
+      >
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+            <div className='space-y-4'>
+              {showTwoFactor && (
                 <FormField
                   control={form.control}
-                  name='email'
+                  name='code'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Two factor code</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           disabled={isPending}
-                          placeholder='john.doe@example.com'
-                          type='email'
+                          placeholder='123456'
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name='password'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isPending}
-                          placeholder='********'
-                          type='password'
-                        />
-                      </FormControl>
-                      <Button
-                        size='sm'
-                        variant='link'
-                        asChild
-                        className='px-0 font-normal flex justify-end'
-                      >
-                        <Link href='/auth/reset'>Forgot password?</Link>
-                      </Button>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
-            )}
-          </div>
-          <FormError message={error || errorUrl} />
-          <FormSuccess message={success} />
-          <Button type='submit' disabled={isPending} className='w-full'>
-            {showTwoFactor ? 'Confirm' : 'Login'}
-          </Button>
-        </form>
-      </Form>
-    </CardWrapper>
+              )}
+              {!showTwoFactor && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name='email'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            disabled={isPending}
+                            placeholder='john.doe@example.com'
+                            type='email'
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name='password'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            disabled={isPending}
+                            placeholder='********'
+                            type='password'
+                          />
+                        </FormControl>
+                        <Button
+                          size='sm'
+                          variant='link'
+                          asChild
+                          className='px-0 font-normal flex justify-end'
+                        >
+                          <Link href='/auth/reset'>Forgot password?</Link>
+                        </Button>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+            </div>
+            <FormError message={error || errorUrl} />
+            <FormSuccess message={success} />
+            <Button type='submit' disabled={isPending} className='w-full'>
+              {showTwoFactor ? 'Confirm' : 'Login'}
+            </Button>
+          </form>
+        </Form>
+      </CardWrapper>
+    </div>
   )
 }
