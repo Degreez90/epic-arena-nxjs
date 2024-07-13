@@ -5,7 +5,7 @@ const Container = ({
 }: Readonly<{
   children: React.ReactNode
 }>) => {
-  return <div className='max-w-full m-auto'>{children}</div>
+  return <div className='max-w-full m-auto mx-4'>{children}</div>
 }
 
 export default Container
