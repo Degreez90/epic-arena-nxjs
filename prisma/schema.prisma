@@ -18,6 +18,18 @@ enum UserRole {
   USER
 }
 
+//User Types
+type Record {
+  wins   Int @default(0)
+  losses Int @default(0)
+}
+
+type Earnings {
+  total          Decimal   @default(0)
+  lastPayout     Decimal   @default(0)
+  lastPayoutDate DateTime?
+}
+
 model User {
   id                    String                 @id @default(auto()) @map("_id") @db.ObjectId
   fName                 String?
@@ -34,6 +46,8 @@ model User {
   accounts              Account[]
   isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
+  record                Record?
+  earnings              Earnings?
   createdAt             DateTime               @default(now())
 }
 

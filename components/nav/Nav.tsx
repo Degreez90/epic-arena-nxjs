@@ -2,8 +2,7 @@ import React from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Container from '@/components/Container'
 import { TiThMenu } from 'react-icons/ti'
-
-import { ExtendedUser } from '@/next-auth'
+import { currentUser } from '@/lib/auth'
 
 import {
   Sheet,
@@ -16,11 +15,8 @@ import {
 import { LogoutButton } from '@/components/auth/buttons/logout-button'
 import { Button } from '../ui/button'
 
-interface HeadlineProps {
-  user: ExtendedUser | null
-}
-
-const Headline: React.FC<HeadlineProps> = ({ user }) => {
+const Nav: React.FC = async () => {
+  const user = await currentUser()
   return (
     <Container>
       <div className='flex p-3 justify-between'>
@@ -59,4 +55,4 @@ const Headline: React.FC<HeadlineProps> = ({ user }) => {
   )
 }
 
-export default Headline
+export default Nav
