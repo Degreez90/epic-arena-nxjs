@@ -24,10 +24,19 @@ type Record {
   losses Int @default(0)
 }
 
+//Must be Int type because of prisma
 type Earnings {
-  total          Decimal   @default(0)
-  lastPayout     Decimal   @default(0)
+  total          Int       @default(0)
+  lastPayout     Int       @default(0)
   lastPayoutDate DateTime?
+}
+
+//Must be Int type because of prisma
+type Balance {
+  promotionalBalance  Int @default(0)
+  pendingBalance      Int @default(0)
+  withdrawableBalance Int @default(0)
+  depositLimit        Int @default(50000)
 }
 
 model User {
@@ -48,6 +57,7 @@ model User {
   twoFactorConfirmation TwoFactorConfirmation?
   record                Record?
   earnings              Earnings?
+  balance               Balance?
   createdAt             DateTime               @default(now())
 }
 
