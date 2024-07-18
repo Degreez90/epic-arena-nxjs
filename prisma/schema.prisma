@@ -57,7 +57,9 @@ model User {
   twoFactorConfirmation TwoFactorConfirmation?
   record                Record?
   earnings              Earnings?
-  balance               Balance?
+  balance               Balance
+  teams                 Team[]
+  participants          Participant[]
   createdAt             DateTime               @default(now())
 }
 
@@ -113,4 +115,49 @@ model TwoFactorConfirmation {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
+}
+
+//* Team Model
+model Team {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
+  teamName     String
+  roster       String[]
+  activeRoster String[]
+  record       Record
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamName, userId])
+}
+
+//*Game types
+
+//* Game Model
+model Game {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  gameTitle String
+  category  String?
+  rules     Json?
+}
+
+//* Tournament Model
+model Tournament {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  destription  String
+  participants Participant[]
+}
+
+//* Participant Model
+model Participant {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  position      String
+  tournament_id String     @db.ObjectId
+  userId        String     @db.ObjectId
+  user          User       @relation(fields: [userId], references: [id])
+  tournamentId  String     @db.ObjectId
+  tournament    Tournament @relation(fields: [tournamentId], references: [id])
+
+  @@unique([id, userId, tournament_id])
 }
