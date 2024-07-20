@@ -131,7 +131,7 @@ model Team {
   @@unique([teamName, userId])
 }
 
-//*Game types
+//TODO:: Game types
 
 //* Game Model
 model Game {
@@ -144,20 +144,73 @@ model Game {
 //* Tournament Model
 model Tournament {
   id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  uid          Int           @unique
   name         String
   destription  String
   participants Participant[]
+  Stage        Stage[]
 }
 
-//* Participant Model
+// Participant Model
 model Participant {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-  position      String
-  tournament_id String     @db.ObjectId
-  userId        String     @db.ObjectId
-  user          User       @relation(fields: [userId], references: [id])
-  tournamentId  String     @db.ObjectId
-  tournament    Tournament @relation(fields: [tournamentId], references: [id])
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  tournament_id Int
+  userId        String @db.ObjectId
 
-  @@unique([id, userId, tournament_id])
+  user       User       @relation(fields: [userId], references: [id])
+  tournament Tournament @relation(fields: [tournament_id], references: [uid])
+
+  @@unique([userId, tournament_id]) //Only 1 participant per tournament
+}
+
+//Stage Model
+model Stage {
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  uid           Int     @unique
+  tournament_id String  @db.ObjectId
+  name          String
+  type          Type
+  number        Int
+  settings      Setting
+
+  tournament Tournament @relation(fields: [tournament_id], references: [id])
+
+  Group Group[]
+  Round Round[]
+
+  @@unique([id, tournament_id])
+}
+
+enum Type {
+  single_elimination
+  double_elimination
+  round_robin
+}
+
+type Setting {
+  consolationFinal  Boolean
+  seedOrdering      String[]
+  matchesChildCount Int
+  size              Int
+  grandFinal        String
+  balanceByes       Boolean
+}
+
+model Group {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  uid      Int
+  number   Int
+  stage_id Int
+
+  stage Stage @relation(fields: [stage_id], references: [uid])
+}
+
+model Round {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  uid      Int
+  number   Int
+  group_id Int
+  stage_id Int
+
+  stage Stage @relation(fields: [stage_id], references: [uid])
 }
