@@ -41,7 +41,6 @@ export const newVerification = async (token: string) => {
       existingToken: existingToken.token,
       email: existingUser.email,
       redirect: false,
-      // redirectTo: DEFAULT_LOGIN_REDIRECT,
     })
   } catch (error) {
     if (isRedirectError(error)) {

@@ -22,7 +22,7 @@ import React, { useState, useTransition } from 'react'
 
 import additonalInfo from '@/actions/additional-info/additonal-info'
 
-import { ADDITIONAL_INFO } from '@/routes'
+import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
 
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useRouter } from 'next/navigation'
@@ -57,7 +57,7 @@ const AddInfo = () => {
             }
             if (data.sucess) {
               setSuccess(data.sucess)
-              setTimeout(() => router.push(ADDITIONAL_INFO))
+              setTimeout(() => router.push(DEFAULT_LOGIN_REDIRECT))
               form.reset()
               setSuccess(data.sucess)
             }

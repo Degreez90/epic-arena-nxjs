@@ -18,7 +18,7 @@ export const authRoutes = [
   '/error',
   '/reset',
   '/new-password',
-  '/additionalinfo',
+  ,
 ]
 
 /**
@@ -35,7 +35,7 @@ export const apiAuthPrefix = '/api/auth'
 export const DEFAULT_LOGIN_REDIRECT = '/settings'
 
 /**
- *The route for collect a users username
+ *The route for collecting a users username
  * @type {string}
  */
-export const ADDITIONAL_INFO = '/additionalInfo'
+export const ADDITIONAL_INFO = '/additionalinfo'
