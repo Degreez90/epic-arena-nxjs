@@ -37,7 +37,11 @@ export const {
       //Prevent sign in without email verification
       if (!existingUser?.emailVerified) return false
 
-      //2FA check
+      // 2FA check
+      /*
+      !:: 2FA Currently throws an error when trying to 
+      !:: redirect after Email Verification
+      */
       if (existingUser.isTwoFactorEnabled) {
         const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
           existingUser.id

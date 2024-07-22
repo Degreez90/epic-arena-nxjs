@@ -41,7 +41,7 @@ export const NewVerificationForm = () => {
         }
       })
       .catch(() => {
-        setError('Something went wrong!')
+        setError('Page error')
       })
   }, [token, success, error, router])
 

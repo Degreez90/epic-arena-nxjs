@@ -8,10 +8,18 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// prisma/schema.prisma
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  // uncomment next line if you use Prisma <5.10
+  // directUrl = env("DATABASE_URL_UNPOOLED")
 }
+
+// datasource db {
+//   provider = "mongodb"
+//   url      = env("DATABASE_URL")
+// }
 
 enum UserRole {
   ADMIN
@@ -19,28 +27,35 @@ enum UserRole {
 }
 
 //User Types
-type Record {
-  wins   Int @default(0)
-  losses Int @default(0)
+model Record {
+  id     String @id @default(cuid())
+  wins   Int    @default(0)
+  losses Int    @default(0)
+  User   User[]
+  Team   Team[]
 }
 
 //Must be Int type because of prisma
-type Earnings {
+model Earnings {
+  id             String    @id @default(cuid())
   total          Int       @default(0)
   lastPayout     Int       @default(0)
   lastPayoutDate DateTime?
+  User           User[]
 }
 
 //Must be Int type because of prisma
-type Balance {
-  promotionalBalance  Int @default(0)
-  pendingBalance      Int @default(0)
-  withdrawableBalance Int @default(0)
-  depositLimit        Int @default(50000)
+model Balance {
+  id                  String @id @default(cuid())
+  promotionalBalance  Int    @default(0)
+  pendingBalance      Int    @default(0)
+  withdrawableBalance Int    @default(0)
+  depositLimit        Int    @default(50000)
+  User                User[]
 }
 
 model User {
-  id                    String                 @id @default(auto()) @map("_id") @db.ObjectId
+  id                    String                 @id @default(cuid())
   fName                 String?
   lName                 String?
   userName              String?                @unique
@@ -55,17 +70,19 @@ model User {
   accounts              Account[]
   isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
-  record                Record?
-  earnings              Earnings?
-  balance               Balance
+  record                Record?                @relation(fields: [recordId], references: [id])
+  earningsId            String?
+  earnings              Earnings?              @relation(fields: [earningsId], references: [id])
+  balanceId             String?
+  balance               Balance?               @relation(fields: [balanceId], references: [id])
   teams                 Team[]
   participants          Participant[]
   createdAt             DateTime               @default(now())
+  recordId              String?
 }
 
 model Account {
-  id                String  @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String  @db.ObjectId
+  id                String  @id @default(cuid())
   type              String
   provider          String
   providerAccountId String
@@ -76,14 +93,14 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
 model VerificationToken {
-  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  id      String   @id @default(cuid())
   email   String
   token   String   @unique
   expires DateTime
@@ -92,7 +109,7 @@ model VerificationToken {
 }
 
 model PasswordResetToken {
-  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  id      String   @id @default(cuid())
   email   String
   token   String   @unique
   expires DateTime
@@ -101,7 +118,7 @@ model PasswordResetToken {
 }
 
 model TwoFactorToken {
-  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  id      String   @id @default(cuid())
   email   String
   token   String   @unique
   expires DateTime
@@ -110,8 +127,8 @@ model TwoFactorToken {
 }
 
 model TwoFactorConfirmation {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  userId String @db.ObjectId
+  id     String @id @default(cuid())
+  userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
@@ -119,14 +136,15 @@ model TwoFactorConfirmation {
 
 //* Team Model
 model Team {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId       String   @db.ObjectId
+  id           String   @id @default(cuid())
+  userId       String
   teamName     String
   roster       String[]
   activeRoster String[]
-  record       Record
+  record       Record   @relation(fields: [recordId], references: [id])
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recordId String
 
   @@unique([teamName, userId])
 }
@@ -135,7 +153,7 @@ model Team {
 
 //* Game Model
 model Game {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  id        String  @id @default(cuid())
   gameTitle String
   category  String?
   rules     Json?
@@ -143,8 +161,7 @@ model Game {
 
 //* Tournament Model
 model Tournament {
-  id           String        @id @default(auto()) @map("_id") @db.ObjectId
-  uid          Int           @unique
+  id           String        @id @default(cuid())
   name         String
   destription  String
   participants Participant[]
@@ -153,32 +170,30 @@ model Tournament {
 
 // Participant Model
 model Participant {
-  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  id            String     @id @default(cuid())
   tournament_id Int
-  userId        String @db.ObjectId
-
-  user       User       @relation(fields: [userId], references: [id])
-  tournament Tournament @relation(fields: [tournament_id], references: [uid])
+  userId        String
+  tournamentId  String
+  user          User       @relation(fields: [userId], references: [id])
+  tournament    Tournament @relation(fields: [tournamentId], references: [id])
 
   @@unique([userId, tournament_id]) //Only 1 participant per tournament
 }
 
 //Stage Model
 model Stage {
-  id            String  @id @default(auto()) @map("_id") @db.ObjectId
-  uid           Int     @unique
-  tournament_id String  @db.ObjectId
-  name          String
-  type          Type
-  number        Int
-  settings      Setting
+  id           String     @id @default(cuid())
+  name         String
+  type         Type
+  number       Int
+  settingId    String
+  settings     Setting    @relation(fields: [settingId], references: [id])
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  Group        Group[]
+  Round        Round[]
 
-  tournament Tournament @relation(fields: [tournament_id], references: [id])
-
-  Group Group[]
-  Round Round[]
-
-  @@unique([id, tournament_id])
+  @@unique([id, tournamentId])
 }
 
 enum Type {
@@ -187,30 +202,28 @@ enum Type {
   round_robin
 }
 
-type Setting {
+model Setting {
+  id                String   @id @default(cuid())
   consolationFinal  Boolean
   seedOrdering      String[]
   matchesChildCount Int
   size              Int
   grandFinal        String
   balanceByes       Boolean
+  Stage             Stage[]
 }
 
 model Group {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  uid      Int
-  number   Int
-  stage_id Int
-
-  stage Stage @relation(fields: [stage_id], references: [uid])
+  id      String @id @default(cuid())
+  number  Int
+  stageId String
+  stage   Stage  @relation(fields: [stageId], references: [id])
 }
 
 model Round {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  uid      Int
-  number   Int
-  group_id Int
-  stage_id Int
-
-  stage Stage @relation(fields: [stage_id], references: [uid])
+  id      String @id @default(cuid())
+  number  Int
+  groupId Int
+  stageId String
+  stage   Stage  @relation(fields: [stageId], references: [id])
 }
