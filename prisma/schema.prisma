@@ -61,6 +61,7 @@ model User {
   teams                 Team[]
   participants          Participant[]
   createdAt             DateTime               @default(now())
+  Tournament            Tournament[]
 }
 
 model Account {
@@ -149,6 +150,11 @@ model Tournament {
   destription  String
   participants Participant[]
   Stage        Stage[]
+  status       Status
+  createdby    User          @relation(fields: [userId], references: [id])
+  userId       String        @db.ObjectId
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 // Participant Model
@@ -213,4 +219,47 @@ model Round {
   stage_id Int
 
   stage Stage @relation(fields: [stage_id], references: [uid])
+}
+
+model Match {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  uid         Int
+  number      Int
+  group_id    Int
+  stage_id    Int
+  round_id    Int
+  child_count Int?
+  status      Int?
+  opponent1   Opponent1? @relation(fields: [opponent1Id], references: [id])
+  opponent1Id String     @db.ObjectId
+  Opponent2   Opponent2? @relation(fields: [opponent2Id], references: [id])
+  opponent2Id String?    @db.ObjectId
+}
+
+model Opponent1 {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  position Int?
+  score    Int?
+  result   Result?
+  Match    Match[] //Opp1 can have multiple matches
+}
+
+model Opponent2 {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  position Int?
+  score    Int?
+  result   Result?
+  Match    Match[] //Opp1 can have multple matches
+}
+
+enum Result {
+  win
+  loss
+}
+
+enum Status {
+  pending
+  progress
+  completed
+  archived
 }
