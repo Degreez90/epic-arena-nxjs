@@ -159,13 +159,22 @@ model Game {
   rules     Json?
 }
 
+enum TournamentStatus {
+  ENROLL_OPEN
+  ENROLL_CLOSED
+  IN_PROGRESS
+  FINISHED
+}
+
 //* Tournament Model
 model Tournament {
-  id           String        @id @default(cuid())
-  name         String
-  destription  String
-  participants Participant[]
-  Stage        Stage[]
+  id                  String           @id @default(cuid())
+  name                String
+  status              TournamentStatus @default(ENROLL_CLOSED)
+  managerTournamentId Int              @unique @default(autoincrement())
+  destription         String
+  participants        Participant[]
+  Stage               Stage[]
 }
 
 // Participant Model
@@ -173,8 +182,9 @@ model Participant {
   id            String     @id @default(cuid())
   tournament_id Int
   userId        String
-  tournamentId  String
   user          User       @relation(fields: [userId], references: [id])
+  userName      String
+  tournamentId  String
   tournament    Tournament @relation(fields: [tournamentId], references: [id])
 
   @@unique([userId, tournament_id]) //Only 1 participant per tournament
