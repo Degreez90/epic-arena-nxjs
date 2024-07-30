@@ -75,10 +75,15 @@ model User {
   earnings              Earnings?              @relation(fields: [earningsId], references: [id])
   balanceId             String?
   balance               Balance?               @relation(fields: [balanceId], references: [id])
-  teams                 Team[]
-  participants          Participant[]
-  createdAt             DateTime               @default(now())
-  recordId              String?
+
+  teamId String?
+  team   Team?
+
+  //The participant entries the user is associated with.
+  participants Participant[]
+
+  createdAt DateTime @default(now())
+  recordId  String?
 }
 
 model Account {
@@ -136,17 +141,25 @@ model TwoFactorConfirmation {
 
 //* Team Model
 model Team {
-  id           String   @id @default(cuid())
-  userId       String
-  teamName     String
-  roster       String[]
+  id String @id @default(cuid())
+
+  //Owner of the team
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  teamName String
+
+  //Active team roster
   activeRoster String[]
-  record       Record   @relation(fields: [recordId], references: [id])
 
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  //Team Roster
+  roster String[]
+
+  //Team Record
   recordId String
+  record   Record @relation(fields: [recordId], references: [id])
 
-  @@unique([teamName, userId])
+  @@unique([teamName, ownerId])
 }
 
 //TODO:: Game types
