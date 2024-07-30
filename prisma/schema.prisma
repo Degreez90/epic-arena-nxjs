@@ -16,11 +16,6 @@ datasource db {
   // directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
-// datasource db {
-//   provider = "mongodb"
-//   url      = env("DATABASE_URL")
-// }
-
 enum UserRole {
   ADMIN
   USER
@@ -28,7 +23,7 @@ enum UserRole {
 
 //User Types
 model Record {
-  id     String @id @default(cuid())
+  id     String @id @default(Uuid())
   wins   Int    @default(0)
   losses Int    @default(0)
   User   User[]
@@ -37,7 +32,7 @@ model Record {
 
 //Must be Int type because of prisma
 model Earnings {
-  id             String    @id @default(cuid())
+  id             String    @id @default(Uuid())
   total          Int       @default(0)
   lastPayout     Int       @default(0)
   lastPayoutDate DateTime?
@@ -46,7 +41,7 @@ model Earnings {
 
 //Must be Int type because of prisma
 model Balance {
-  id                  String @id @default(cuid())
+  id                  String @id @default(Uuid())
   promotionalBalance  Int    @default(0)
   pendingBalance      Int    @default(0)
   withdrawableBalance Int    @default(0)
@@ -55,7 +50,7 @@ model Balance {
 }
 
 model User {
-  id                    String                 @id @default(cuid())
+  id                    String                 @id @default(Uuid())
   fName                 String?
   lName                 String?
   userName              String?                @unique
@@ -76,8 +71,9 @@ model User {
   balanceId             String?
   balance               Balance?               @relation(fields: [balanceId], references: [id])
 
-  teamId String?
-  team   Team?
+  teamId    String? @db.Uuid
+  team      Team?   @relation("member", fields: [teamId], references: [id])
+  ownedTeam Team?   @relation("owner")
 
   //The participant entries the user is associated with.
   participants Participant[]
@@ -87,7 +83,7 @@ model User {
 }
 
 model Account {
-  id                String  @id @default(cuid())
+  id                String  @id @default(Uuid())
   type              String
   provider          String
   providerAccountId String
@@ -105,7 +101,7 @@ model Account {
 }
 
 model VerificationToken {
-  id      String   @id @default(cuid())
+  id      String   @id @default(Uuid())
   email   String
   token   String   @unique
   expires DateTime
@@ -114,7 +110,7 @@ model VerificationToken {
 }
 
 model PasswordResetToken {
-  id      String   @id @default(cuid())
+  id      String   @id @default(Uuid())
   email   String
   token   String   @unique
   expires DateTime
@@ -123,7 +119,7 @@ model PasswordResetToken {
 }
 
 model TwoFactorToken {
-  id      String   @id @default(cuid())
+  id      String   @id @default(Uuid())
   email   String
   token   String   @unique
   expires DateTime
@@ -132,7 +128,7 @@ model TwoFactorToken {
 }
 
 model TwoFactorConfirmation {
-  id     String @id @default(cuid())
+  id     String @id @default(Uuid())
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -141,7 +137,7 @@ model TwoFactorConfirmation {
 
 //* Team Model
 model Team {
-  id String @id @default(cuid())
+  id String @id @default(Uuid())
 
   //Owner of the team
   ownerId String
@@ -150,10 +146,10 @@ model Team {
   teamName String
 
   //Active team roster
-  activeRoster String[]
+  activeRoster User[] @relation("member")
 
   //Team Roster
-  roster String[]
+  roster User[] @relation("member")
 
   //Team Record
   recordId String
@@ -166,7 +162,7 @@ model Team {
 
 //* Game Model
 model Game {
-  id        String  @id @default(cuid())
+  id        String  @id @default(Uuid())
   gameTitle String
   category  String?
   rules     Json?
@@ -181,35 +177,54 @@ enum TournamentStatus {
 
 //* Tournament Model
 model Tournament {
-  id                  String           @id @default(cuid())
-  name                String
-  status              TournamentStatus @default(ENROLL_CLOSED)
-  managerTournamentId Int              @unique @default(autoincrement())
-  destription         String
-  participants        Participant[]
-  Stage               Stage[]
+  id          String           @id @default(Uuid())
+  name        String
+  description String
+  status      TournamentStatus @default(ENROLL_CLOSED)
+
+  // The tournament id for the bracket-manager
+  managerTournamentId Int @unique @default(autoincrement())
+
+  // The stages in the Tournament
+  stages Stage[]
+
+  // The participants of the Tournament
+  participants Participant[]
 }
 
 // Participant Model
 model Participant {
-  id            String     @id @default(cuid())
-  tournament_id Int
-  userId        String
-  user          User       @relation(fields: [userId], references: [id])
-  userName      String
-  tournamentId  String
-  tournament    Tournament @relation(fields: [tournamentId], references: [id])
+  id String @id @default(Uuid())
 
-  @@unique([userId, tournament_id]) //Only 1 participant per tournament
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+
+  // Name of participant
+  name String
+
+  // The Team associated with the participant entry
+  teamId String? @db.Uuid
+  team   Team?   @relation(fields: [teamId], references: [id])
+
+  // Users associated with the participant entry
+  users User[]
+
+  // Match results of the participant in the torunament
+  matchResults ParticpantMatchResult[]
+
+  // Match Game results of the particpant in the torunament
+  matchgameResults ParticpantMatchGameResult[]
+
+  @@unique([tournamentId])
 }
 
 // A stage, which can be a round-robin stage or a single/double elimination stage.
 model Stage {
-  id String @id @default(cuid())
+  id Int @id @default(autoincrement())
 
   //The parent tournament of the stage.
   tournamentId String
-  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  tournament   Tournament @relation(fields: [tournamentId], references: [managerTournamentId])
 
   //Name of the stage.
   name String
@@ -221,10 +236,16 @@ model Stage {
   number Int
 
   //Stage settings of a tournament.
-  settingId String
-  settings  StageSettings @relation(fields: [settingId], references: [id])
-  Group     Group[]
-  Round     Round[]
+  settings StageSettings?
+
+  // The group of this stage
+  groups     Group[]
+  // The rounds of this stage
+  rounds     Round[]
+  // The matches of this stage
+  matches    Match[]
+  // The match games of this stage
+  matchGames MatchGame[]
 
   @@unique([id, tournamentId])
 }
@@ -236,7 +257,7 @@ enum StageType {
 }
 
 model Group {
-  id String @id @default(cuid())
+  id String @id @default(Uuid())
 
   //The number of group in a stage.
   number Int
@@ -253,7 +274,7 @@ model Group {
 }
 
 model Round {
-  id String @id @default(cuid())
+  id String @id @default(Uuid())
 
   //The number of a round in its group.
   number Int
@@ -338,7 +359,7 @@ model MatchGame {
 }
 
 model StageSettings {
-  id String @id @default(cuid())
+  id String @id @default(Uuid())
 
   stageId Int   @unique
   stage   Stage @relation(fields: [stageId], references: [id])
