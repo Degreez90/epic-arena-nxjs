@@ -71,15 +71,14 @@ model User {
   balanceId             String?
   balance               Balance?               @relation(fields: [balanceId], references: [id])
 
-  teamId    String? @db.Uuid
-  team      Team?   @relation("member", fields: [teamId], references: [id])
-  ownedTeam Team?   @relation("owner")
+  teamId String? @db.Uuid
 
   //The participant entries the user is associated with.
   participants Participant[]
 
   createdAt DateTime @default(now())
   recordId  String?
+  Team      Team[]
 }
 
 model Account {
@@ -135,6 +134,36 @@ model TwoFactorConfirmation {
   @@unique([userId])
 }
 
+//  |----------------------------------------|
+//  | Contains all the string union types.
+//  |----------------------------------------|
+
+//  The possible types for a double elimination stage's grand final.
+enum GrandFinalType {
+  NONE
+  SIMPLE
+  DOUBLE
+}
+
+// The possible modes for a round-robin stage.
+enum RoundRobinMode {
+  SIMPLE
+  DOUBLE
+}
+
+// Used to order seeds.
+enum SeedOrdering {
+  NATURAL
+  REVERSE
+  HALF_SHIFT
+  REVERSE_HALF_SHIFT
+  PAIR_FLIP
+  INNER_OUTER
+  GROUPS_EFFORT_BALANCED
+  GROUPS_SEED_OPTIMIZED
+  GROUPS_BRACKET_OPTIMIZED
+}
+
 //* Team Model
 model Team {
   id String @id @default(Uuid())
@@ -145,15 +174,11 @@ model Team {
 
   teamName String
 
-  //Active team roster
-  activeRoster User[] @relation("member")
-
-  //Team Roster
-  roster User[] @relation("member")
-
   //Team Record
   recordId String
   record   Record @relation(fields: [recordId], references: [id])
+
+  Participant Participant[]
 
   @@unique([teamName, ownerId])
 }
@@ -177,7 +202,7 @@ enum TournamentStatus {
 
 //* Tournament Model
 model Tournament {
-  id          String           @id @default(Uuid())
+  id          String           @id @default(Uuid()) @db.Uuid
   name        String
   description String
   status      TournamentStatus @default(ENROLL_CLOSED)
@@ -192,9 +217,38 @@ model Tournament {
   participants Participant[]
 }
 
+// The possible results of a duel for a participant.
+enum MatchResult {
+  WIN
+  DRAW
+  LOSS
+}
+
+// The results of a participant in a match game.
+model ParticipantMatchGameResult {
+  id            Int          @id @default(autoincrement())
+  // If `null`, the participant is to be determined.
+  participantId Int?
+  participant   Participant? @relation(fields: [participantId], references: [id])
+  // Indicates where the participant comes from.
+  position      Int?
+  // If this participant forfeits, the other automatically wins.
+  forfeit       Boolean?
+  // The current score of the participant.
+  score         Int?
+  // Tells what is the result of a duel for this participant.
+  result        MatchResult?
+
+  opponent1MatchGameId Int?       @unique
+  opponent1MatchGame   MatchGame? @relation("opponent1", fields: [opponent1MatchGameId], references: [id])
+
+  opponent2MatchGameId Int?       @unique
+  opponent2MatchGame   MatchGame? @relation("opponent2", fields: [opponent2MatchGameId], references: [id])
+}
+
 // Participant Model
 model Participant {
-  id String @id @default(Uuid())
+  id Int @id @default(autoincrement())
 
   tournamentId String
   tournament   Tournament @relation(fields: [tournamentId], references: [id])
@@ -210,12 +264,34 @@ model Participant {
   users User[]
 
   // Match results of the participant in the torunament
-  matchResults ParticpantMatchResult[]
+  matchResults ParticipantMatchResult[]
 
   // Match Game results of the particpant in the torunament
-  matchgameResults ParticpantMatchGameResult[]
+  matchgameResults ParticipantMatchGameResult[]
 
   @@unique([tournamentId])
+}
+
+// The results of a participant in a match.
+model ParticipantMatchResult {
+  id            Int          @id @default(autoincrement())
+  // If `null`, the participant is to be determined.
+  participantId Int?
+  participant   Participant? @relation(fields: [participantId], references: [id])
+  // Indicates where the participant comes from.
+  position      Int?
+  // If this participant forfeits, the other automatically wins.
+  forfeit       Boolean?
+  // The current score of the participant.
+  score         Int?
+  // Tells what is the result of a duel for this participant.
+  result        MatchResult?
+
+  opponent1MatchId Int?   @unique
+  opponent1Match   Match? @relation("opponent1", fields: [opponent1MatchId], references: [id])
+
+  opponent2MatchId Int?   @unique
+  opponent2Match   Match? @relation("opponent2", fields: [opponent2MatchId], references: [id])
 }
 
 // A stage, which can be a round-robin stage or a single/double elimination stage.
@@ -223,7 +299,7 @@ model Stage {
   id Int @id @default(autoincrement())
 
   //The parent tournament of the stage.
-  tournamentId String
+  tournamentId Int
   tournament   Tournament @relation(fields: [tournamentId], references: [managerTournamentId])
 
   //Name of the stage.
@@ -257,14 +333,14 @@ enum StageType {
 }
 
 model Group {
-  id String @id @default(Uuid())
+  id Int @id @default(autoincrement())
 
   //The number of group in a stage.
   number Int
 
   //ID of the parent stage.
-  stageId String
-  stage   Stage  @relation(fields: [stageId], references: [id])
+  stageId Int
+  stage   Stage @relation(fields: [stageId], references: [id])
 
   //The rounds of this group.
   rounds Round[]
@@ -274,18 +350,18 @@ model Group {
 }
 
 model Round {
-  id String @id @default(Uuid())
+  id Int @id @default(autoincrement())
 
-  //The number of a round in its group.
-  number Int
+  //Id of the parent stage.
+  stageId Int
+  stage   Stage @relation(fields: [stageId], references: [id])
 
   //ID of the parent group.
   groupId Int
   group   Group @relation(fields: [groupId], references: [id])
 
-  //Id of the parent stage.
-  stageId String
-  stage   Stage  @relation(fields: [stageId], references: [id])
+  //The number of a round in its group.
+  number Int
 
   //The matches of a round.
   match Match[]
