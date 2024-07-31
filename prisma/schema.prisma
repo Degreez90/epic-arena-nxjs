@@ -23,7 +23,7 @@ enum UserRole {
 
 //User Types
 model Record {
-  id     String @id @default(Uuid())
+  id     String @id @default(uuid())
   wins   Int    @default(0)
   losses Int    @default(0)
   User   User[]
@@ -32,7 +32,7 @@ model Record {
 
 //Must be Int type because of prisma
 model Earnings {
-  id             String    @id @default(Uuid())
+  id             String    @id @default(uuid())
   total          Int       @default(0)
   lastPayout     Int       @default(0)
   lastPayoutDate DateTime?
@@ -41,7 +41,7 @@ model Earnings {
 
 //Must be Int type because of prisma
 model Balance {
-  id                  String @id @default(Uuid())
+  id                  String @id @default(uuid())
   promotionalBalance  Int    @default(0)
   pendingBalance      Int    @default(0)
   withdrawableBalance Int    @default(0)
@@ -50,7 +50,7 @@ model Balance {
 }
 
 model User {
-  id                    String                 @id @default(Uuid())
+  id                    String                 @id @default(uuid())
   fName                 String?
   lName                 String?
   userName              String?                @unique
@@ -71,18 +71,19 @@ model User {
   balanceId             String?
   balance               Balance?               @relation(fields: [balanceId], references: [id])
 
-  teamId String? @db.Uuid
-
   //The participant entries the user is associated with.
   participants Participant[]
 
   createdAt DateTime @default(now())
   recordId  String?
-  Team      Team[]
+  ownedTeam Team?    @relation("owner")
+
+  teamId String? @db.Uuid
+  team   Team?   @relation("member", fields: [teamId], references: [id], onDelete: Cascade)
 }
 
 model Account {
-  id                String  @id @default(Uuid())
+  id                String  @id @default(uuid())
   type              String
   provider          String
   providerAccountId String
@@ -100,7 +101,7 @@ model Account {
 }
 
 model VerificationToken {
-  id      String   @id @default(Uuid())
+  id      String   @id @default(uuid())
   email   String
   token   String   @unique
   expires DateTime
@@ -109,7 +110,7 @@ model VerificationToken {
 }
 
 model PasswordResetToken {
-  id      String   @id @default(Uuid())
+  id      String   @id @default(uuid())
   email   String
   token   String   @unique
   expires DateTime
@@ -118,7 +119,7 @@ model PasswordResetToken {
 }
 
 model TwoFactorToken {
-  id      String   @id @default(Uuid())
+  id      String   @id @default(uuid())
   email   String
   token   String   @unique
   expires DateTime
@@ -127,7 +128,7 @@ model TwoFactorToken {
 }
 
 model TwoFactorConfirmation {
-  id     String @id @default(Uuid())
+  id     String @id @default(uuid())
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -166,11 +167,11 @@ enum SeedOrdering {
 
 //* Team Model
 model Team {
-  id String @id @default(Uuid())
+  id String @id @default(uuid()) @db.Uuid
 
   //Owner of the team
-  ownerId String
-  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String @unique
+  owner   User   @relation("owner", fields: [ownerId], references: [id], onDelete: Cascade)
 
   teamName String
 
@@ -178,16 +179,18 @@ model Team {
   recordId String
   record   Record @relation(fields: [recordId], references: [id])
 
+  roster User[] @relation("member")
+
   Participant Participant[]
 
-  @@unique([teamName, ownerId])
+  @@unique([teamName])
 }
 
 //TODO:: Game types
 
 //* Game Model
 model Game {
-  id        String  @id @default(Uuid())
+  id        String  @id @default(uuid())
   gameTitle String
   category  String?
   rules     Json?
@@ -202,13 +205,15 @@ enum TournamentStatus {
 
 //* Tournament Model
 model Tournament {
-  id          String           @id @default(Uuid()) @db.Uuid
+  id          String           @id @default(uuid()) @db.Uuid
   name        String
   description String
   status      TournamentStatus @default(ENROLL_CLOSED)
 
   // The tournament id for the bracket-manager
   managerTournamentId Int @unique @default(autoincrement())
+
+  teamSize Int?
 
   // The stages in the Tournament
   stages Stage[]
@@ -250,8 +255,8 @@ model ParticipantMatchGameResult {
 model Participant {
   id Int @id @default(autoincrement())
 
-  tournamentId String
-  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  tournamentId Int
+  tournament   Tournament @relation(fields: [tournamentId], references: [managerTournamentId], onDelete: Cascade)
 
   // Name of participant
   name String
@@ -435,7 +440,7 @@ model MatchGame {
 }
 
 model StageSettings {
-  id String @id @default(Uuid())
+  id String @id @default(uuid())
 
   stageId Int   @unique
   stage   Stage @relation(fields: [stageId], references: [id])
