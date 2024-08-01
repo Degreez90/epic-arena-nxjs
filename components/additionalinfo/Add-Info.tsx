@@ -1,7 +1,7 @@
 'use client'
 
 import * as z from 'zod'
-import { CardWrapper } from '@/components/auth/Card-Wrapper'
+import { CardWrapper } from '@/components/Auth/Card-Wrapper'
 import { Button } from '@/components/ui/button'
 import {
   Form,

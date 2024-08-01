@@ -12,7 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { LogoutButton } from '@/components/auth/buttons/logout-button'
+import { LogoutButton } from '@/components/Auth/buttons/logout-button'
 import { Button } from '../ui/button'
 
 const Nav: React.FC = async () => {
