@@ -1,9 +1,7 @@
-import Hero from '@/components/Hero/Hero'
-import Games from '@/components/Games/Games'
-import { currentUser } from '@/lib/auth'
+import Hero from '@/components/hero/Hero'
+import Games from '@/components/games/Games'
 
 export default async function Home() {
-  const user = await currentUser()
   return (
     <div>
       <Hero />
