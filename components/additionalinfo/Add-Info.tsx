@@ -18,7 +18,7 @@ import { useForm } from 'react-hook-form'
 
 import { AdditionInfoSchema } from '@/schemas'
 import { zodResolver } from '@hookform/resolvers/zod'
-import React, { useState, useTransition } from 'react'
+import React, { useState, useTransition, useEffect, useCallback } from 'react'
 
 import additonalInfo from '@/actions/additional-info/additonal-info'
 
@@ -26,25 +26,38 @@ import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
 
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useRouter } from 'next/navigation'
+import type { ExtendedUser } from '@/next-auth'
 
 const AddInfo = () => {
+  const [user, setUser] = useState<ExtendedUser | null | undefined>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | undefined>('')
   const [success, setSuccess] = useState<string | undefined>('')
   const [isPending, startTransition] = useTransition()
 
   const router = useRouter()
 
-  const user = useCurrentUser()
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const currentUser = await useCurrentUser()
+        setUser(currentUser)
+        setIsLoading(false)
+      } catch (error) {
+        setError('Error loading user data')
+        setIsLoading(false)
+      }
+    }
 
-  const isLoading = !user
-  const userError = !user && 'User data not found' // or handle errors based on your context
+    fetchUser()
+  }, [])
 
   if (isLoading) {
     return <div>Loading...</div>
   }
 
-  if (userError) {
-    return <div>Error loading user data</div>
+  if (error) {
+    return <div>{error}</div>
   }
 
   const form = useForm<z.infer<typeof AdditionInfoSchema>>({
@@ -54,29 +67,32 @@ const AddInfo = () => {
     },
   })
 
-  const onSubmit = (values: z.infer<typeof AdditionInfoSchema>) => {
-    setError('')
-    setSuccess('')
+  const onSubmit = useCallback(
+    (values: z.infer<typeof AdditionInfoSchema>) => {
+      setError('')
+      setSuccess('')
 
-    if (user) {
-      startTransition(() => {
-        additonalInfo(user.id, values)
-          .then((data) => {
-            if (data?.error) {
-              form.reset()
-              setError(data.error)
-            }
-            if (data.sucess) {
-              setSuccess(data.sucess)
-              setTimeout(() => router.push(DEFAULT_LOGIN_REDIRECT))
-              form.reset()
-              setSuccess(data.sucess)
-            }
-          })
-          .catch(() => 'something went wrong!')
-      })
-    }
-  }
+      if (user) {
+        startTransition(() => {
+          additonalInfo(user.id, values)
+            .then((data) => {
+              if (data?.error) {
+                form.reset()
+                setError(data.error)
+              }
+              if (data.sucess) {
+                setSuccess(data.sucess)
+                setTimeout(() => router.push(DEFAULT_LOGIN_REDIRECT))
+                form.reset()
+                setSuccess(data.sucess)
+              }
+            })
+            .catch(() => setError('Something went wrong!'))
+        })
+      }
+    },
+    [user, form, router]
+  )
 
   return (
     <CardWrapper
