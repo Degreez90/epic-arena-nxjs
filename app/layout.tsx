@@ -6,7 +6,7 @@ import { auth } from '@/auth'
 
 import AuthProvider from '@/context/AuthProvider'
 
-import Nav from '@/components/nav/Nav'
+import Nav from '@/components/Nav/Nav'
 //redux
 // import { store } from '@/store'
 // import { Provider } from 'react-redux'

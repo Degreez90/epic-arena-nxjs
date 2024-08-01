@@ -29,23 +29,24 @@ export default auth(async (req) => {
   if (isApiAuthRoute) {
     return
   }
-  if (isAuthRoute) {
-    headers.set('x-debug-is-logged-in', isLoggedIn.toString())
-    headers.set('x-debug-has-username', user?.userName ? 'yes' : 'no')
-    headers.set('x-debug-username', user?.userName || 'none')
-    headers.set('x-debug-username', user?.userName as string)
 
+  if (isLoggedIn && !user?.userName && !isAddInfoRoute) {
+    return NextResponse.redirect(new URL(ADDITIONAL_INFO, nextUrl))
+  }
+
+  if (isLoggedIn && user?.userName && isAddInfoRoute) {
+    headers.set('x-debug-redirect', 'DEFAULT_LOGIN_REDIRECT')
+    return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl), {
+      headers,
+    })
+  }
+
+  if (isAuthRoute) {
     if (isLoggedIn && !user?.userName) {
-      headers.set('x-debug-redirect', 'ADDITIONAL_INFO')
-      return NextResponse.redirect(new URL(ADDITIONAL_INFO, nextUrl), {
-        headers,
-      })
+      return NextResponse.redirect(new URL(ADDITIONAL_INFO, nextUrl))
     }
     if (isLoggedIn && user?.userName) {
-      headers.set('x-debug-redirect', 'DEFAULT_LOGIN_REDIRECT')
-      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl), {
-        headers,
-      })
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
     }
     return NextResponse.next({ headers })
   }

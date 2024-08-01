@@ -18,7 +18,6 @@ export const authRoutes = [
   '/error',
   '/reset',
   '/new-password',
-  ,
 ]
 
 /**
