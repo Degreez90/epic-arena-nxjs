@@ -30,14 +30,14 @@ export default auth(async (req) => {
     return
   }
 
-  if (isLoggedIn && user?.userName) {
+  if (isLoggedIn && user && user?.userName) {
     return
   }
 
-  if (isLoggedIn && !user?.userName && isAuthRoute) {
-    return NextResponse.redirect(new URL(ADDITIONAL_INFO, nextUrl), {
-      headers,
-    })
+  if (isLoggedIn && user && !user?.userName) {
+    if (!isAddInfoRoute) {
+      return NextResponse.redirect(new URL(ADDITIONAL_INFO, nextUrl))
+    }
   }
 
   if (isAuthRoute) {

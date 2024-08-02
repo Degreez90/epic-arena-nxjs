@@ -1,5 +1,3 @@
-'use client'
-
 import * as z from 'zod'
 import { CardWrapper } from '@/components/Auth/Card-Wrapper'
 import { Button } from '@/components/ui/button'
@@ -24,17 +22,19 @@ import additonalInfo from '@/actions/additional-info/additonal-info'
 
 import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
 
-import { useCurrentUser } from '@/hooks/use-current-user'
 import { useRouter } from 'next/navigation'
+import { ExtendedUser } from '@/next-auth'
 
-const AddInfo = () => {
+interface UserInfoProps {
+  user?: ExtendedUser
+}
+
+const AddInfo = ({ user }: UserInfoProps) => {
   const [error, setError] = useState<string | undefined>('')
   const [success, setSuccess] = useState<string | undefined>('')
   const [isPending, startTransition] = useTransition()
 
   const router = useRouter()
-
-  const user = useCurrentUser()
 
   const form = useForm<z.infer<typeof AdditionInfoSchema>>({
     resolver: zodResolver(AdditionInfoSchema),
