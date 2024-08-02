@@ -31,6 +31,12 @@ export default auth(async (req) => {
   }
 
   if (isLoggedIn && user && user?.userName) {
+    if (isAddInfoRoute) {
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
+    }
+    if (isAuthRoute) {
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
+    }
     return
   }
 

@@ -22,7 +22,7 @@ const additonalInfo = async (
   } catch (error) {
     console.log(error)
   }
-  return { sucess: 'User Name Created!' }
+  return { success: 'User Name Created!' }
 }
 
 export default additonalInfo
