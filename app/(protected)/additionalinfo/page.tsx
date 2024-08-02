@@ -1,4 +1,4 @@
-import AddInfo from '@/components/AdditionalInfo/Add-Info'
+import AddInfo from '@/components/additionalinfo/Add-Info'
 import React from 'react'
 
 const page = () => {
