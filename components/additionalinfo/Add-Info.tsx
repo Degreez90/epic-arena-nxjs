@@ -55,14 +55,16 @@ const AddInfo = ({ user }: UserInfoProps) => {
               form.reset()
               setError(data.error)
             }
-            if (data.sucess) {
-              setSuccess(data.sucess)
-              setTimeout(() => router.push(DEFAULT_LOGIN_REDIRECT))
+            if (data.success) {
               form.reset()
-              setSuccess(data.sucess)
+              setSuccess(data.success)
+              setTimeout(() => router.push(DEFAULT_LOGIN_REDIRECT), 2000)
             }
           })
-          .catch(() => 'something went wrong!')
+          .catch((error) => {
+            console.log('Error with submissions: ', error)
+            setError(error)
+          })
       })
     }
   }
