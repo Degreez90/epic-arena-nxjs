@@ -4,9 +4,7 @@ import './globals.css'
 import { SessionProvider } from 'next-auth/react'
 import { auth } from '@/auth'
 
-import AuthProvider from '@/context/AuthProvider'
-
-import Nav from '@/components/nav/Nav'
+import Nav from '@/components/Nav/Nav'
 //redux
 // import { store } from '@/store'
 // import { Provider } from 'react-redux'
@@ -28,12 +26,10 @@ export default async function RootLayout({
   return (
     <SessionProvider session={session}>
       <html lang='en'>
-        <AuthProvider>
-          <body className={`${inter.className}`}>
-            <Nav />
-            {children}
-          </body>
-        </AuthProvider>
+        <body className={`${inter.className}`}>
+          <Nav />
+          {children}
+        </body>
       </html>
     </SessionProvider>
   )
