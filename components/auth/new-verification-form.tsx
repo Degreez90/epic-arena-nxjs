@@ -50,16 +50,18 @@ export const NewVerificationForm = () => {
   }, [onSubmit])
 
   return (
-    <CardWrapper
-      headerLabel='Confirm your verification!'
-      backButtonLabel='Back to login'
-      backButtonHref='/auth/login'
-    >
-      <div className='w-full flex items-center justify-center'>
-        {!success && !error && <BeatLoader />}
-        <FormSuccess message={success} />
-        {!success && <FormError message={error} />}
-      </div>
-    </CardWrapper>
+    <div className='my-60'>
+      <CardWrapper
+        headerLabel='Confirm your verification!'
+        backButtonLabel='Back to login'
+        backButtonHref='/auth/login'
+      >
+        <div className='w-full flex items-center justify-center'>
+          {!success && !error && <BeatLoader />}
+          <FormSuccess message={success} />
+          {!success && <FormError message={error} />}
+        </div>
+      </CardWrapper>
+    </div>
   )
 }

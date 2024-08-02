@@ -14,9 +14,11 @@ import {
 } from '@/components/ui/sheet'
 import { LogoutButton } from '@/components/Auth/buttons/logout-button'
 import { Button } from '../ui/button'
+import SideNav from './SideNav'
+import type { ExtendedUser } from '@/next-auth'
 
 const Nav: React.FC = async () => {
-  const user = await currentUser()
+  const user: ExtendedUser | null = (await currentUser()) ?? null
   return (
     <Container>
       <div className='flex p-3 justify-between'>
@@ -26,29 +28,18 @@ const Nav: React.FC = async () => {
           </h3>
         </div>
         <div className='flex space-x-5'>
-          <Avatar className='mx-4'>
-            <AvatarImage src={user?.image} alt='@shadcn' />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
-          <div className='flex items-center'>{user?.fName}</div>
-          <Sheet>
-            <SheetTrigger>
-              {' '}
-              <div className='flex items-center'>
-                <TiThMenu size={30} />
-              </div>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Are you absolutely sure?</SheetTitle>
-                <SheetDescription>
-                  <LogoutButton>
-                    <Button variant={'secondary'}>Logout</Button>
-                  </LogoutButton>
-                </SheetDescription>
-              </SheetHeader>
-            </SheetContent>
-          </Sheet>
+          {user && (
+            <>
+              <Avatar className='mx-4'>
+                <AvatarImage src={user.image} alt={user.fName || 'User'} />
+                <AvatarFallback>
+                  {user.fName ? user.fName[0] : 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className='flex items-center'>{user.fName}</div>
+            </>
+          )}
+          <SideNav />
         </div>
       </div>
     </Container>
