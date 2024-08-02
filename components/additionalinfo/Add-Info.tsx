@@ -36,17 +36,6 @@ const AddInfo = () => {
 
   const user = useCurrentUser()
 
-  const isLoading = !user
-  const userError = !user && 'User data not found' // or handle errors based on your context
-
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
-
-  if (userError) {
-    return <div>Error loading user data</div>
-  }
-
   const form = useForm<z.infer<typeof AdditionInfoSchema>>({
     resolver: zodResolver(AdditionInfoSchema),
     defaultValues: {
