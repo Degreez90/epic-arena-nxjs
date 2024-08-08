@@ -1,12 +1,12 @@
-import { createReadStream } from 'fs'
+import CreateTournament from '@/components/CreateTournament/CreateTournament'
 import React from 'react'
 
-const CreateTournament = () => {
+const CreateTournamentPage = () => {
   return (
-    <>
-      <div>page</div>
-    </>
+    <div className='flex justify-center w-full min-h-screen my-20'>
+      <CreateTournament />
+    </div>
   )
 }
 
-export default CreateTournament
+export default CreateTournamentPage
