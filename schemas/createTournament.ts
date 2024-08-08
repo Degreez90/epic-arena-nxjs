@@ -6,5 +6,5 @@ export const CreateTournamentSchema = z.object({
   type: z.enum(['Single Elimintation', 'Double Elimination'], {
     message: 'Tournament type is required',
   }),
-  thirdPlaceMatch: z.boolean().optional(),
+  thirdPlaceMatch: z.boolean().default(false),
 })

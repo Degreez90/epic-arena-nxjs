@@ -1,31 +1,26 @@
+'use client'
+
 import React from 'react'
+import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Container from '@/components/Container'
-import { TiThMenu } from 'react-icons/ti'
-import { currentUser } from '@/lib/auth'
-
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
-import { LogoutButton } from '@/components/Auth/buttons/logout-button'
-import { Button } from '../ui/button'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import SideNav from './SideNav'
 import type { ExtendedUser } from '@/next-auth'
 
-const Nav: React.FC = async () => {
-  const user: ExtendedUser | null = (await currentUser()) ?? null
+const Nav: React.FC = () => {
+  const user: ExtendedUser | null = useCurrentUser() ?? null
+
   return (
     <Container>
       <div className='flex p-3 justify-between'>
         <div className=' border-black text-black px-5'>
-          <h3 className='scroll-m-20 text-2xl font-semibold tracking-tight'>
+          <Link
+            className='scroll-m-20 text-2xl font-semibold tracking-tight'
+            href='/'
+          >
             Epic Arena Tourneys
-          </h3>
+          </Link>
         </div>
         <div className='flex space-x-5'>
           {user && (
