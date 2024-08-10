@@ -8,3 +8,5 @@ export const CreateTournamentSchema = z.object({
   }),
   thirdPlaceMatch: z.boolean().default(false),
 })
+
+export type CreateTournamentType = z.infer<typeof CreateTournamentSchema>
