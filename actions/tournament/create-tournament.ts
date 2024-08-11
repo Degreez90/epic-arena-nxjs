@@ -10,8 +10,14 @@ const createTournament = async (data: CreateTournamentType) => {
   const tournament = await db.tournament.create({
     data: {
       name: validatedData.tName,
-      type: validatedData.type,
-      thirdPlaceMatch: validatedData.thirdPlaceMatch,
+      description: validatedData.description,
+      status: {
+        create: [
+          {
+            type: validatedData.type,
+          },
+        ],
+      },
     },
   })
 }

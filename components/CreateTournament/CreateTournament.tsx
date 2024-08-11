@@ -29,7 +29,7 @@ const CreateTournament = () => {
     defaultValues: {
       tName: '',
       description: '',
-      type: 'Single Elimintation',
+      type: 'single_elimination',
       thirdPlaceMatch: false,
     },
   })
