@@ -21,6 +21,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     vPassword,
     fName,
     lName,
+    admin,
     phoneNumber,
     isTwoFactorEnabled,
   } = validatedFields.data
@@ -41,6 +42,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
       fName,
       lName,
       email,
+      admin,
       phoneNumber,
       password: hashedPassword,
       isTwoFactorEnabled,
