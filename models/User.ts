@@ -55,6 +55,11 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
       unique: true,
       validate: [validator.isEmail, 'Please provide a valid email'],
     },
+    password: {
+      type: String,
+      minlength: 6,
+      select: false,
+    },
     phone: String,
     images: [String],
     role: {
@@ -79,7 +84,7 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
 
 userSchema.pre<Query<IUserModel, IUserModel>>(/^find/, function (next) {
   // this points to the current query
-  this.find({ accountStatus: { $ne: false } })
+  this.find({ accountStatus: { $ne: 'inactive' } })
   next()
 })
 

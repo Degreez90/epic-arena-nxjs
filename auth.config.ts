@@ -5,6 +5,9 @@ import bcrypt from 'bcryptjs'
 import { LoginSchema, LoginTokenSchema } from '@/schemas'
 import { getUserByEmail } from '@/data/user'
 
+//new code
+import User from '@/models/User'
+
 export default {
   providers: [
     Google({
@@ -36,6 +39,7 @@ export default {
           const validatedFields = LoginTokenSchema.safeParse(credentials)
 
           console.log('validatedFields token: ', validatedFields)
+
           if (validatedFields.success) {
             const email = validatedFields.data.email
             const user = await getUserByEmail(email)
