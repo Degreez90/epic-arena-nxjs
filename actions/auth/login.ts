@@ -3,7 +3,7 @@
 import * as z from 'zod'
 import { AuthError } from 'next-auth'
 import bcrypt from 'bcryptjs'
-import { db } from '@/lib/db'
+import { connectDB } from '@/lib/mongodb'
 import { signIn } from '@/auth'
 import { LoginSchema } from '@/schemas'
 import { getUserByEmail } from '@/data/user'
@@ -12,6 +12,9 @@ import { sendVerificationEmail, sendTwoFactorTokenEmail } from '@/lib/mail'
 import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
 import { generateVerificationToken, generateTwoFactorToken } from '@/lib/token'
 import { getTwoFactorConfirmationByUserId } from '@/data/two-factor-confirmation'
+
+import { TwoFactorToken } from '@/models/TwoFactorToken'
+import { TwoFactorConfirmation } from '@/models/TwoFactorConfirmation'
 
 export const login = async (
   values: z.infer<typeof LoginSchema>,
@@ -74,26 +77,22 @@ export const login = async (
         return { error: 'Code expired!' }
       }
 
-      await db.twoFactorToken.delete({
-        where: { id: twoFactorToken.id },
-      })
+      await TwoFactorToken.findByIdAndDelete(twoFactorToken.id)
 
       const existingConfirmation = await getTwoFactorConfirmationByUserId(
         existingUser.id
       )
 
       if (existingConfirmation) {
-        await db.twoFactorConfirmation.delete({
-          where: { id: existingConfirmation.id },
-        })
+        await TwoFactorConfirmation.findByIdAndDelete(existingConfirmation.id)
       }
 
-      await db.twoFactorConfirmation.create({
+      await TwoFactorConfirmation.create({
         data: { userId: existingUser.id },
       })
     } else {
       const twoFactorToken = await generateTwoFactorToken(existingUser.email)
-      await sendTwoFactorTokenEmail(twoFactorToken.email, twoFactorToken.token)
+      await sendTwoFactorTokenEmail(existingUser.email, twoFactorToken)
 
       return { twoFactor: true }
     }

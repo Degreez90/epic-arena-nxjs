@@ -5,9 +5,6 @@ import bcrypt from 'bcryptjs'
 import { LoginSchema, LoginTokenSchema } from '@/schemas'
 import { getUserByEmail } from '@/data/user'
 
-//new code
-import User from '@/models/User'
-
 export default {
   providers: [
     Google({

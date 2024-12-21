@@ -7,15 +7,19 @@ import mongoose, {
 } from 'mongoose'
 import validator from 'validator'
 
-interface IUser {
+export interface IUser {
   _id: ObjectId
   firstName: string
   lastName: string
+  userName?: string
   email: string
+  emailVerified?: boolean
   password?: string
   passwordConfirm?: string
-  phone?: string
-  images?: string[]
+  admin?: boolean
+  phoneNumber?: string
+  isTwoFactorEnabled: boolean
+  image?: string[]
   role?: 'admin' | 'user'
   accountStatus?: 'active' | 'inactive'
   tournaments?: string[]
@@ -45,6 +49,13 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
     },
     lastName: {
       type: String,
+      required: [true, 'Please tell us your name!'],
+    },
+    userName: {
+      type: String,
+      unique: true,
+      trim: true,
+      minlength: 3,
     },
     email: {
       type: String,
@@ -60,8 +71,16 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
       minlength: 6,
       select: false,
     },
-    phone: String,
-    images: [String],
+    admin: {
+      type: Boolean,
+      default: false,
+    },
+    phoneNumber: String,
+    isTwoFactorEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    image: [String],
     role: {
       type: String,
       enum: ['admin', 'user'],
@@ -88,5 +107,15 @@ userSchema.pre<Query<IUserModel, IUserModel>>(/^find/, function (next) {
   next()
 })
 
-export const User = mongoose.model<IUser, IUserModel>('User', userSchema)
+// Define a type for document creation
+export type CreateUserInput = Omit<IUser, '_id' | 'createdAt' | 'updatedAt'>
+
+// Type the model export properly
+export const User = (mongoose.models?.User ||
+  mongoose.model<IUser, IUserModel>('User', userSchema)) as Model<
+  IUser,
+  {},
+  IUserMethods
+>
+
 export type UserType = HydratedDocument<IUser, IUserMethods>

@@ -1,26 +1,17 @@
 // lib/mongodb.ts
-import { MongoClient } from 'mongodb'
+import mongoose from 'mongoose'
 
-const uri: string = process.env.MONGODB_URI as string
+const { MONGODB_URI } = process.env
 
-let client: MongoClient
-let clientPromise: Promise<MongoClient>
-
-if (!process.env.MONGODB_URI) {
-  throw new Error('Please add your Mongo URI to .env.local')
-}
-
-if (process.env.NODE_ENV === 'development') {
-  // In development mode, use a global variable so the MongoClient instance is not recreated on every hot reload.
-  if (!(global as any)._mongoClientPromise) {
-    client = new MongoClient(uri)
-    ;(global as any)._mongoClientPromise = client.connect()
+export const connectDB = async () => {
+  try {
+    const { connection } = await mongoose.connect(MONGODB_URI as string)
+    if (connection.readyState === 1) {
+      console.log('MongoDB connected successfully')
+      return Promise.resolve(true)
+    }
+  } catch (error) {
+    console.error('MongoDB connection error:', error)
+    return Promise.reject(error)
   }
-  clientPromise = (global as any)._mongoClientPromise
-} else {
-  // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri)
-  clientPromise = client.connect()
 }
-
-export default clientPromise

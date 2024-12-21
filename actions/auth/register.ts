@@ -2,13 +2,16 @@
 
 import * as z from 'zod'
 import bcrypt from 'bcryptjs'
-import { db } from '@/lib/db'
+import { connectDB } from '@/lib/mongodb'
 import { RegisterSchema } from '@/schemas'
 import { getUserByEmail } from '@/data/user'
 import { generateVerificationToken } from '@/lib/token'
 import { sendVerificationEmail } from '@/lib/mail'
+import { CreateUserInput, User, UserType } from '@/models/User'
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
+  await connectDB()
+
   const validatedFields = RegisterSchema.safeParse(values)
 
   if (!validatedFields.success) {
@@ -26,6 +29,18 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     isTwoFactorEnabled,
   } = validatedFields.data
 
+  // Log the values before they are submitted
+  console.log('Registering user with values:', {
+    email,
+    password,
+    vPassword,
+    fName,
+    lName,
+    admin,
+    phoneNumber,
+    isTwoFactorEnabled,
+  })
+
   const hashedPassword = await bcrypt.hash(password, 10)
 
   const existingUser = await getUserByEmail(email)
@@ -37,16 +52,14 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     return { error: 'Email already in use!' }
   }
 
-  await db.user.create({
-    data: {
-      fName,
-      lName,
-      email,
-      admin,
-      phoneNumber,
-      password: hashedPassword,
-      isTwoFactorEnabled,
-    },
+  await User.create<CreateUserInput>({
+    firstName: fName,
+    lastName: lName,
+    email: email.toLowerCase(),
+    admin,
+    phoneNumber,
+    password: hashedPassword,
+    isTwoFactorEnabled,
   })
 
   const verificationToken = await generateVerificationToken(email)
