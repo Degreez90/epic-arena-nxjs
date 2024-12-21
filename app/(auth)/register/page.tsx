@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { RegisterForm } from '@/components/Auth/Register-Form'
+import { RegisterForm } from '@/components/auth/Register-Form'
 
 const RegisterPage = () => {
   return (

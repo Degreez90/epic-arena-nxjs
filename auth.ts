@@ -1,12 +1,14 @@
 import NextAuth from 'next-auth'
 import { MongoDBAdapter } from '@auth/mongodb-adapter'
-import { PrismaAdapter } from '@auth/prisma-adapter'
-import { db } from '@/lib/db'
+import { connectDB } from '@/lib/mongodb'
 import authConfig from '@/auth.config'
 import { getUserById } from '@/data/user'
 import { getAccountByUserId } from '@/data/accounts'
 import { getTwoFactorConfirmationByUserId } from '@/data/two-factor-confirmation'
 import { getSession } from 'next-auth/react'
+
+import { TwoFactorConfirmation } from './models/TwoFactorConfirmation'
+import { User } from '@/models/User'
 
 export const {
   handlers: { GET, POST },
@@ -19,10 +21,11 @@ export const {
   },
   events: {
     async linkAccount({ user }) {
-      await db.user.update({
-        where: { id: user.id },
-        data: { emailVerified: new Date() },
-      })
+      await connectDB() // Ensure the database connection is established
+      await User.updateOne(
+        { id: user.id },
+        { $set: { emailVerified: new Date() } }
+      )
     },
   },
   callbacks: {
@@ -50,24 +53,21 @@ export const {
         if (!twoFactorConfirmation) return false
 
         //Delete the two factor confirmation for next sign in
-        await db.twoFactorConfirmation.delete({
-          where: { id: twoFactorConfirmation.id },
+        await TwoFactorConfirmation.deleteOne({
+          _id: twoFactorConfirmation.id,
         })
       }
 
       return true
     },
 
-    // async redirect() {
-    //   const session = await getSession()
-    //   if (!session?.user.userName) {
-    //     return '/nickname'
-    //   } else {
-    //     return '/sign-in'
-    //   }
-    // },
+    async redirect({ url, baseUrl }) {
+      // Add custom redirect logic here
+      return baseUrl
+    },
 
     async session({ token, session }) {
+      await connectDB() // Ensure the database connection is established
       if (token.sub && session.user) {
         session.user.id = token.sub
       }
@@ -90,6 +90,7 @@ export const {
       return session
     },
     async jwt({ token }) {
+      await connectDB() // Ensure the database connection is established
       console.log(`from: auth.ts: `, token)
       if (!token.sub) return token
 
@@ -100,8 +101,8 @@ export const {
       const existingAccount = await getAccountByUserId(existingUser.id)
       token.id = existingUser.id
       token.isOAuth = !!existingAccount
-      token.fName = existingUser.fName
-      token.lName = existingUser.lName
+      token.fName = existingUser.firstName
+      token.lName = existingUser.lastName
       token.email = existingUser.email
       token.image = existingUser.image
       token.role = existingUser.role
@@ -111,7 +112,6 @@ export const {
       return token
     },
   },
-  adapter: PrismaAdapter(db),
   session: { strategy: 'jwt' },
   ...authConfig,
 })

@@ -1,78 +1,73 @@
 import crypto from 'crypto'
 import { v4 as uuidv4 } from 'uuid'
 
-import { db } from '@/lib/db'
+import { connectDB } from '@/lib/mongodb'
 import { getVerificationTokenByEmail } from '@/data/verification-token'
 import { getPasswordResetTokenByEmail } from '@/data/password-reset-token'
 import { getTwoFactorTokenByEmail } from '@/data/two-factor-token'
+import { TwoFactorToken } from '@/models/TwoFactorToken'
+import { PasswordResetToken } from '@/models/PasswordResetToken'
+import { VerificationToken } from '@/models/verificationToken'
 
 export const generateTwoFactorToken = async (email: string) => {
+  await connectDB() // Ensure the database connection is established
+
   const token = crypto.randomInt(100_000, 1000_000).toString()
   const expires = new Date(new Date().getTime() + 3600 * 1000)
 
   const existingToken = await getTwoFactorTokenByEmail(email)
 
   if (existingToken) {
-    await db.twoFactorToken.delete({
-      where: { id: existingToken.id },
-    })
+    await TwoFactorToken.deleteOne({ _id: existingToken.id })
   }
 
-  const twoFactorToken = await db.twoFactorToken.create({
-    data: { email, token, expires },
+  await TwoFactorToken.create({
+    email,
+    token,
+    expires,
   })
 
-  return twoFactorToken
+  return token
 }
 
 export const generatePasswordResetToken = async (email: string) => {
+  await connectDB() // Ensure the database connection is established
+
   const token = uuidv4()
-  const expires = new Date(new Date().getTime() + 5 * 60 * 1000)
+  const expires = new Date(new Date().getTime() + 3600 * 1000)
 
   const existingToken = await getPasswordResetTokenByEmail(email)
 
   if (existingToken) {
-    await db.passwordResetToken.delete({
-      where: {
-        id: existingToken.id,
-      },
-    })
+    await PasswordResetToken.deleteOne({ _id: existingToken.id })
   }
 
-  const passwordResetToken = await db.passwordResetToken.create({
-    data: {
-      email,
-      token,
-      expires,
-    },
+  await PasswordResetToken.create({
+    email,
+    token,
+    expires,
   })
 
-  return passwordResetToken
+  return token
 }
 
 export const generateVerificationToken = async (email: string) => {
+  await connectDB() // Ensure the database connection is established
+
   const token = uuidv4()
   const expires = new Date(new Date().getTime() + 3600 * 1000)
 
-  console.log('lib/token.ts email: ', email, 'token: ', token)
-
   const existingToken = await getVerificationTokenByEmail(email)
-  console.log('lib/token.ts Existing token: ', existingToken)
+
   if (existingToken) {
-    await db.verificationToken.delete({
-      where: {
-        id: existingToken.id,
-      },
-    })
+    await VerificationToken.deleteOne({ _id: existingToken.id })
   }
 
-  const verificationToken = await db.verificationToken.create({
-    data: {
-      email,
-      token,
-      expires,
-    },
+  await VerificationToken.create({
+    email,
+    token,
+    expires,
   })
 
-  return verificationToken
+  return { token, email }
 }

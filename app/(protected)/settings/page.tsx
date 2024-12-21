@@ -1,5 +1,5 @@
 import { LogoutButton } from '@/components/Auth/buttons/Logout-Button'
-import Container from '@/components/PageComponents/Container'
+import Container from '@/components/pagecomponents/Container'
 import { Button } from '@/components/ui/button'
 import { currentUser } from '@/lib/auth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
