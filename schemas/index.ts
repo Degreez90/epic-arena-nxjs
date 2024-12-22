@@ -20,7 +20,7 @@ export const RegisterSchema = z.object({
     message: 'Password must be at least 6 characters long',
   }),
   admin: z.boolean().default(false),
-  isTwoFactorEnabled: z.boolean(),
+  isTwoFactorEnabled: z.boolean().default(false),
   // date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
   //   message: 'Date must be in the format YYYY-MM-DD',
   // }),
