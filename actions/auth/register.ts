@@ -7,7 +7,7 @@ import { RegisterSchema } from '@/schemas'
 import { getUserByEmail } from '@/data/user'
 import { generateVerificationToken } from '@/lib/token'
 import { sendVerificationEmail } from '@/lib/mail'
-import { CreateUserInput, User, UserType } from '@/models/User'
+import { CreateUserInput, User } from '@/models/User'
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
   await connectDB()
