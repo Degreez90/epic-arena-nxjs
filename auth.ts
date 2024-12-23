@@ -66,6 +66,7 @@ export const {
       return baseUrl
     },
 
+    //:: This is where the session is modified to include the user's data from the token
     async session({ token, session }) {
       await connectDB() // Ensure the database connection is established
       if (token.sub && session.user) {
@@ -89,6 +90,8 @@ export const {
 
       return session
     },
+
+    //:: This is where the token is modified to include the user's data from the database
     async jwt({ token }) {
       await connectDB() // Ensure the database connection is established
       console.log(`from: auth.ts: `, token)
