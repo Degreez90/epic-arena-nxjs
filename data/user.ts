@@ -4,7 +4,8 @@ import { User } from '@/models/User'
 export const getUserByEmail = async (email: string) => {
   try {
     await connectDB() // Ensure the database connection is established
-    const user = await User.findOne({ email })
+    console.log('data/user.ts: ', email)
+    const user = await User.findOne({ email }).lean()
     console.log(user)
     return user
   } catch (error) {

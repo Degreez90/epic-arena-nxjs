@@ -7,7 +7,7 @@ import { getPasswordResetTokenByEmail } from '@/data/password-reset-token'
 import { getTwoFactorTokenByEmail } from '@/data/two-factor-token'
 import { TwoFactorToken } from '@/models/TwoFactorToken'
 import { PasswordResetToken } from '@/models/PasswordResetToken'
-import { VerificationToken } from '@/models/verificationToken'
+import { VerificationToken } from '@/models/VerificationToken'
 
 export const generateTwoFactorToken = async (email: string) => {
   await connectDB() // Ensure the database connection is established

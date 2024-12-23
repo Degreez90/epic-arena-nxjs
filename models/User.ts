@@ -13,7 +13,7 @@ export interface IUser {
   lastName: string
   userName?: string
   email: string
-  emailVerified?: boolean
+  emailVerified?: Date
   password?: string
   passwordConfirm?: string
   admin?: boolean
@@ -61,10 +61,13 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
       type: String,
       required: [true, 'Please provide your email'],
       trim: true,
-      lowercase: true,
       minlength: 3,
       unique: true,
       validate: [validator.isEmail, 'Please provide a valid email'],
+    },
+    emailVerified: {
+      type: Date,
+      default: false,
     },
     password: {
       type: String,
@@ -101,11 +104,11 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
   { timestamps: true }
 )
 
-userSchema.pre<Query<IUserModel, IUserModel>>(/^find/, function (next) {
-  // this points to the current query
-  this.find({ accountStatus: { $ne: 'inactive' } })
-  next()
-})
+// userSchema.pre<Query<IUserModel, IUserModel>>(/^find/, function (next) {
+//   // this points to the current query
+//   this.find({ accountStatus: { $ne: 'inactive' } })
+//   next()
+// })
 
 // Define a type for document creation
 export type CreateUserInput = Omit<IUser, '_id' | 'createdAt' | 'updatedAt'>
