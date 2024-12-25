@@ -1,4 +1,5 @@
 import NextAuth, { type DefaultSession } from 'next-auth'
+import { ObjectId } from 'mongoose'
 
 export type ExtendedUser = DefaultSession['user'] & {
   id: string
