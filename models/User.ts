@@ -67,7 +67,6 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
     },
     emailVerified: {
       type: Date,
-      default: false,
     },
     password: {
       type: String,
