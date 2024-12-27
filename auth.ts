@@ -2,13 +2,14 @@ import NextAuth from 'next-auth'
 import { MongoDBAdapter } from '@auth/mongodb-adapter'
 import { connectDB } from '@/lib/mongodb'
 import authConfig from '@/auth.config'
-import { getUserById } from '@/data/user'
+import { getUserByEmail, getUserById } from '@/data/user'
 import { getAccountByUserId } from '@/data/accounts'
 import { getTwoFactorConfirmationByUserId } from '@/data/two-factor-confirmation'
-import { getSession } from 'next-auth/react'
 
 import { TwoFactorConfirmation } from './models/TwoFactorConfirmation'
+
 import { User } from '@/models/User'
+import clientPromise from '@/lib/mongoclient'
 
 export const {
   handlers: { GET, POST },
@@ -16,14 +17,16 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
+  adapter: MongoDBAdapter(clientPromise),
   pages: {
     signIn: '/login',
   },
   events: {
     async linkAccount({ user }) {
+      console.log('auth.ts, user: running linkAccount', user)
       await connectDB() // Ensure the database connection is established
       await User.updateOne(
-        { id: user.id },
+        { email: user.email },
         { $set: { emailVerified: new Date() } }
       )
     },
@@ -35,6 +38,7 @@ export const {
 
       if (account?.provider !== 'credentials') return true
 
+      if (!user.email) throw new Error('Email is required')
       const existingUser = await getUserById(user.id)
 
       //Prevent sign in without email verification
