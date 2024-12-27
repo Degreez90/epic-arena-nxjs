@@ -28,6 +28,14 @@ const VerificationTokenSchema = new Schema<IVerificationToken>(
   }
 )
 
+// Pre-save hook to ensure email is lowercase
+VerificationTokenSchema.pre('save', function (next) {
+  if (this.isModified('email')) {
+    this.email = this.email.toLowerCase()
+  }
+  next()
+})
+
 // Check if the model already exists before defining it
 const VerificationToken: IVerificationTokenModel =
   mongoose.models.VerificationToken ||

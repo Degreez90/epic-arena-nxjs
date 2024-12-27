@@ -8,7 +8,6 @@ import mongoose, {
 import validator from 'validator'
 
 export interface IUser {
-  _id: ObjectId
   firstName: string
   lastName: string
   userName?: string
@@ -108,6 +107,14 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
 //   this.find({ accountStatus: { $ne: 'inactive' } })
 //   next()
 // })
+
+//: Pre-save hook to ensure email is always lowercase
+userSchema.pre('save', function (next) {
+  if (this.isModified('email')) {
+    this.email = this.email.toLowerCase()
+  }
+  next()
+})
 
 // Define a type for document creation
 export type CreateUserInput = Omit<IUser, '_id' | 'createdAt' | 'updatedAt'>
