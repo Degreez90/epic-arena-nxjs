@@ -61,6 +61,7 @@ export const generateVerificationToken = async (email: string) => {
 
   if (existingToken) {
     await VerificationToken.deleteOne({ _id: existingToken.id })
+    console.log('lib/token.ts: Deleted existing token')
   }
 
   await VerificationToken.create({
