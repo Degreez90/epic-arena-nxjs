@@ -1,4 +1,3 @@
-import NextAuth from 'next-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import {
   ADDITIONAL_INFO,
@@ -7,17 +6,12 @@ import {
   authRoutes,
   publicRoutes,
 } from '@/routes'
+import { getUserInfo } from '@/lib/getUserInfo'
 
-import { currentUser } from './lib/auth'
-import authConfig from '@/auth.config'
-
-const { auth } = NextAuth(authConfig)
-
-export default auth(async (req) => {
-  const user = await currentUser()
+export async function middleware(req: NextRequest) {
   const { nextUrl } = req
-  const isLoggedIn = !!req.auth
-  // const user = req.auth?.user
+
+  const { isLoggedIn, user } = await getUserInfo(req)
 
   const headers = new Headers()
 
@@ -27,52 +21,38 @@ export default auth(async (req) => {
   const isAddInfoRoute = ADDITIONAL_INFO.includes(nextUrl.pathname)
 
   if (isApiAuthRoute) {
-    return
+    return NextResponse.next()
   }
 
-  if (isLoggedIn && user && user?.userName) {
+  if (isLoggedIn && user && user.userName) {
     if (isAddInfoRoute) {
       return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
     }
     if (isAuthRoute) {
       return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
     }
-    return
+    return NextResponse.next()
   }
 
-  if (isLoggedIn && user && !user?.userName) {
+  if (isLoggedIn && user && !user.userName) {
     if (!isAddInfoRoute) {
       return NextResponse.redirect(new URL(ADDITIONAL_INFO, nextUrl))
     }
   }
 
   if (isAuthRoute) {
-    if (isLoggedIn && !user?.userName) {
+    if (isLoggedIn && !user.userName) {
       return NextResponse.redirect(new URL(ADDITIONAL_INFO, nextUrl), {
         headers,
       })
     }
-    if (isLoggedIn && user?.userName) {
+    if (isLoggedIn && user.userName) {
       return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl), {
         headers,
       })
     }
     return NextResponse.next({ headers })
   }
-  // if (isAuthRoute) {
-  //   //If user does not have a userName
-  //   if (isLoggedIn && !user?.userName)
-  //     return Response.redirect(new URL(ADDITIONAL_INFO, nextUrl))
-  //   if (isLoggedIn && !!user?.userName) {
-  //     return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
-  //   }
-  //   return
-  // }
-
-  // if (isAddInfoRoute) {
-  //   if (isLoggedIn && user?.userName)
-  //     return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
-  // }
 
   if (!isLoggedIn && !isPublicRoute) {
     let callbackUrl = nextUrl.pathname
@@ -82,13 +62,13 @@ export default auth(async (req) => {
 
     const encodedCallbackUrl = encodeURIComponent(callbackUrl)
 
-    return Response.redirect(
+    return NextResponse.redirect(
       new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl)
     )
   }
 
-  return
-})
+  return NextResponse.next()
+}
 
 // Optionally, don't invoke Middleware on some paths
 export const config = {
