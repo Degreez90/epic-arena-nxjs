@@ -64,6 +64,7 @@ export const sendTwoFactorTokenEmail = async (email: string, token: string) => {
 }
 
 export const sendVerificationEmail = async (email: string, token: string) => {
+  console.log('Sending verification email', email, token)
   const mailgun = new Mailgun(FormData)
   const mg = mailgun.client({
     username: 'api',
@@ -82,10 +83,10 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   mg.messages
     .create(DOMAIN!, data)
     .then((result) => {
-      console.log(result) // Success
+      console.log('Mail Result: ', result) // Success
     })
     .catch((error) => {
-      console.error(error) // Error handling
+      console.error('Mail error: ', error) // Error handling
     })
 }
 // You can see a record of this email in your logs: https://app.mailgun.com/app/logs.
