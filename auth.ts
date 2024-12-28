@@ -39,7 +39,7 @@ export const {
       if (account?.provider !== 'credentials') return true
 
       if (!user._id) throw new Error('No user ID found')
-      const existingUser = await getUserById(user._id.toString())
+      const existingUser = await getUserById(user._id)
 
       //Prevent sign in without email verification
       if (!existingUser?.emailVerified) return false
@@ -61,6 +61,8 @@ export const {
           _id: twoFactorConfirmation.id,
         })
       }
+
+      user.id = user._id.toString()
 
       return true
     },
@@ -98,17 +100,19 @@ export const {
     },
 
     //:: This is where the token is modified to include the user's data from the database
-    async jwt({ token }) {
+    async jwt({ token, user }) {
       await connectDB() // Ensure the database connection is established
       console.log(`from: auth.ts: `, token)
       if (!token.sub) return token
 
-      const existingUser = await getUserById(token.sub)
+      const tokenUserId = user._id
+
+      const existingUser = await getUserById(tokenUserId)
 
       if (!existingUser) return token
 
       const existingAccount = await getAccountByUserId(existingUser.id)
-      token.id = existingUser.id
+      token.id = existingUser._id
       token.isOAuth = !!existingAccount
       token.fName = existingUser.firstName
       token.lName = existingUser.lastName

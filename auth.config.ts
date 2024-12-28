@@ -40,6 +40,7 @@ export default {
           if (validatedFields.success) {
             const email = validatedFields.data.email
             const user = await getUserByEmail(email)
+
             return user
           } else {
             throw new Error('Invalid credentials')
