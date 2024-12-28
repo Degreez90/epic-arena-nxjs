@@ -38,8 +38,8 @@ export const {
 
       if (account?.provider !== 'credentials') return true
 
-      if (!user.email) throw new Error('Email is required')
-      const existingUser = await getUserById(user.id)
+      if (!user._id) throw new Error('No user ID found')
+      const existingUser = await getUserById(user._id.toString())
 
       //Prevent sign in without email verification
       if (!existingUser?.emailVerified) return false
@@ -73,6 +73,8 @@ export const {
     //:: This is where the session is modified to include the user's data from the token
     async session({ token, session }) {
       await connectDB() // Ensure the database connection is established
+
+      console.log(`session from: auth.ts token: `, token)
       if (token.sub && session.user) {
         session.user.id = token.sub
       }
