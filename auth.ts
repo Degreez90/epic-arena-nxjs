@@ -102,10 +102,10 @@ export const {
     //:: This is where the token is modified to include the user's data from the database
     async jwt({ token, user }) {
       await connectDB() // Ensure the database connection is established
-      console.log(`from: auth.ts: `, token)
+      console.log(`from: auth.ts: `, token, user)
       if (!token.sub) return token
 
-      const tokenUserId = user._id
+      const tokenUserId = user?._id
 
       const existingUser = await getUserById(tokenUserId)
 
