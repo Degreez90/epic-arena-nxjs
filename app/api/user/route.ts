@@ -5,9 +5,10 @@ import { getUserById } from '@/data/user'
 
 export async function GET(req: NextApiRequest, res: NextApiResponse) {
   const session = await auth(req, res)
-  if (!session?.user?.id) {
+  console.log(`session from: user/route.ts: `, session)
+  if (!session?.user?._id) {
     return NextResponse.json({ isLoggedIn: false, user: null })
   }
-  const user = await getUserById(session.user.id)
+  const user = await getUserById(session.user._id)
   return NextResponse.json({ isLoggedIn: true, user })
 }

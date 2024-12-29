@@ -2,6 +2,10 @@ import { register } from '@/actions/auth/register'
 import { RegisterSchema } from '@/schemas/index'
 import * as z from 'zod'
 
+import dotenv from 'dotenv'
+
+dotenv.config()
+
 async function createUser() {
   const data: z.infer<typeof RegisterSchema> = {
     email: 'offitt90@gmail.com',

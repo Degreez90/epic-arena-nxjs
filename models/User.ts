@@ -70,7 +70,6 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
     password: {
       type: String,
       minlength: 6,
-      select: false,
     },
     admin: {
       type: Boolean,

@@ -32,6 +32,8 @@ export const login = async (
 
   const existingUser = await getUserByEmail(email)
 
+  console.log('action/login.ts existingUser: ', existingUser)
+
   if (!existingUser || !existingUser.email || !existingUser.password) {
     return { error: 'Email does not exist!' }
   }
@@ -88,7 +90,7 @@ export const login = async (
       }
 
       await TwoFactorConfirmation.create({
-        data: { userId: existingUser.id },
+        data: { userId: existingUser._id },
       })
     } else {
       const twoFactorToken = await generateTwoFactorToken(existingUser.email)
