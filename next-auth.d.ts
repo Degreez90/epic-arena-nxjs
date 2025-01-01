@@ -5,11 +5,13 @@ import {
   AdapterUser as NextAuthAdapterUser,
 } from 'next-auth'
 
+import { JWT } from 'next-auth/jwt'
+
 export type ExtendedUser = DefaultSession['user'] & {
   _id: ObjectId
   id: string
-  lName: string
-  fName: string
+  lastName: string
+  firstName: string
   email: string
   image?: string
   isTwoFactorEnabled: boolean
@@ -30,5 +32,18 @@ declare module 'next-auth' {
 
   interface AdapterUser extends NextAuthAdapterUser {
     _id?: ObjectId
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    id?: string
+    firstName?: string
+    lastName?: string
+    email?: string
+    image?: string
+    isOAuth?: boolean
+    isTwoFactorEnabled?: boolean
+    userName?: string
   }
 }
