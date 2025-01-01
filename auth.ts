@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth'
+import NextAuth, { Session } from 'next-auth'
 import { MongoDBAdapter } from '@auth/mongodb-adapter'
 import { connectDB } from '@/lib/mongodb'
 import authConfig from '@/auth.config'
@@ -10,6 +10,8 @@ import { TwoFactorConfirmation } from './models/TwoFactorConfirmation'
 
 import { User } from '@/models/User'
 import clientPromise from '@/lib/mongoclient'
+
+import { JWT } from 'next-auth/jwt'
 
 export const {
   handlers: { GET, POST },
@@ -73,7 +75,7 @@ export const {
     },
 
     //:: This is where the session is modified to include the user's data from the token
-    async session({ token, session }) {
+    async session({ token, session }: { token: JWT; session: Session }) {
       await connectDB() // Ensure the database connection is established
 
       console.log(`session from: auth.ts token: `, token)
@@ -87,8 +89,8 @@ export const {
 
       if (session.user) {
         session.user.id = token.id as string
-        session.user.fName = token.fName as string
-        session.user.lName = token.lName as string
+        session.user.firstName = token.fName as string
+        session.user.lastName = token.lastName as string
         session.user.email = token.email as string
         session.user.image = token.image as string
         session.user.isOAuth = token.isOAuth as boolean
@@ -100,8 +102,7 @@ export const {
     },
 
     //:: This is where the token is modified to include the user's data from the database
-    async jwt({ token, user }) {
-      await connectDB() // Ensure the database connection is established
+    async jwt({ token, user }: { token: JWT; user: any }) {
       console.log(`from: auth.ts: `, token, user)
       if (!token.sub) return token
 
@@ -112,10 +113,10 @@ export const {
       if (!existingUser) return token
 
       const existingAccount = await getAccountByUserId(existingUser.id)
-      token.id = existingUser._id
+      token.id = existingUser._id.toString()
       token.isOAuth = !!existingAccount
-      token.fName = existingUser.firstName
-      token.lName = existingUser.lastName
+      token.frstName = existingUser.firstName
+      token.lastName = existingUser.lastName
       token.email = existingUser.email
       token.image = existingUser.image
       token.role = existingUser.role

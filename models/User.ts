@@ -18,7 +18,7 @@ export interface IUser {
   admin?: boolean
   phoneNumber?: string
   isTwoFactorEnabled: boolean
-  image?: string[]
+  image?: string
   role?: 'admin' | 'user'
   accountStatus?: 'active' | 'inactive'
   tournaments?: string[]
@@ -80,7 +80,7 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
       type: Boolean,
       default: false,
     },
-    image: [String],
+    image: String,
     role: {
       type: String,
       enum: ['admin', 'user'],

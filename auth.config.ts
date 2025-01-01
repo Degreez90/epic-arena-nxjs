@@ -14,8 +14,8 @@ export default {
         console.log('auth.config.ts / Profile info: ', profile)
         return {
           id: profile.sub,
-          fName: profile.given_name,
-          lName: profile.family_name,
+          firstName: profile.given_name,
+          lastName: profile.family_name,
           email: profile.email,
           image: profile.picture,
         }
