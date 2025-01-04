@@ -41,13 +41,13 @@ export default auth(async function middleware(req) {
 
   //TODO:: Handle the information back from the session (email), and fix routes accordingly.
 
-  // if (session) {
+  // if (session && user) {
   //   {
   //     return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
   //   }
-  //   if (isAuthRoute) {
-  //     return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
-  //   }
+  //   // if (isAuthRoute) {
+  //   //   return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
+  //   // }
   //   return NextResponse.next()
   // }
 

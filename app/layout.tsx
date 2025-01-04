@@ -4,7 +4,7 @@ import './globals.css'
 import { SessionProvider } from 'next-auth/react'
 import { auth } from '@/auth'
 
-import Nav from '@/components/Nav/Nav'
+import Nav from '@/components/nav/Nav'
 //redux
 // import { store } from '@/store'
 // import { Provider } from 'react-redux'
