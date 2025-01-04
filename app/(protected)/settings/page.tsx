@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 const SettingsPage = async () => {
   const user = await currentUser()
+  console.log(`user from: settings/page.tsx: `, user)
 
   return (
     <Container>

@@ -58,7 +58,8 @@ export default {
             if (!user || !user.password) return null
 
             const passwordsMatch = await bcrypt.compare(password, user.password)
-            if (passwordsMatch) return user
+            if (passwordsMatch) console.log('user from credentials: ', user)
+            return user
           }
         }
 

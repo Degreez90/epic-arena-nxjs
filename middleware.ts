@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { NextApiRequest, NextApiResponse } from 'next'
 import {
   ADDITIONAL_INFO,
   DEFAULT_LOGIN_REDIRECT,
@@ -6,12 +7,24 @@ import {
   authRoutes,
   publicRoutes,
 } from '@/routes'
+import authConfig from '@/auth.config'
+import NextAuth from 'next-auth'
 import { getUserInfo } from '@/lib/getUserInfo'
 
-export async function middleware(req: NextRequest) {
-  const { nextUrl } = req
+// Initialize Auth.js with the configuration
+const { auth } = NextAuth(authConfig)
 
-  const { isLoggedIn, user } = await getUserInfo(req)
+export default auth(async function middleware(req) {
+  const session = await auth()
+
+  console.log('middleware.ts, session: ', session)
+
+  const isLoggedIn = !!session
+
+  const { nextUrl } = req
+  console.log('the req from middleware.ts: ', req.auth)
+
+  const { user } = await getUserInfo(req)
 
   const headers = new Headers()
 
@@ -20,55 +33,59 @@ export async function middleware(req: NextRequest) {
   const isAuthRoute = authRoutes.includes(nextUrl.pathname)
   const isAddInfoRoute = ADDITIONAL_INFO.includes(nextUrl.pathname)
 
+  console.log('middleware.ts, session: ', session)
+
   if (isApiAuthRoute) {
     return NextResponse.next()
   }
 
-  if (isLoggedIn && user && user.userName) {
-    if (isAddInfoRoute) {
-      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
-    }
-    if (isAuthRoute) {
-      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
-    }
-    return NextResponse.next()
-  }
+  //TODO:: Handle the information back from the session (email), and fix routes accordingly.
 
-  if (isLoggedIn && user && !user.userName) {
-    if (!isAddInfoRoute) {
-      return NextResponse.redirect(new URL(ADDITIONAL_INFO, nextUrl))
-    }
-  }
+  // if (session) {
+  //   {
+  //     return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
+  //   }
+  //   if (isAuthRoute) {
+  //     return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
+  //   }
+  //   return NextResponse.next()
+  // }
 
-  if (isAuthRoute) {
-    if (isLoggedIn && !user.userName) {
-      return NextResponse.redirect(new URL(ADDITIONAL_INFO, nextUrl), {
-        headers,
-      })
-    }
-    if (isLoggedIn && user.userName) {
-      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl), {
-        headers,
-      })
-    }
-    return NextResponse.next({ headers })
-  }
+  // if (isLoggedIn && session && !session.userName) {
+  //   if (!isAddInfoRoute) {
+  //     return NextResponse.redirect(new URL(ADDITIONAL_INFO, nextUrl))
+  //   }
+  // }
 
-  if (!isLoggedIn && !isPublicRoute) {
-    let callbackUrl = nextUrl.pathname
-    if (nextUrl.search) {
-      callbackUrl += nextUrl.search
-    }
+  // if (isAuthRoute) {
+  //   if (isLoggedIn && !session.userName) {
+  //     return NextResponse.redirect(new URL(ADDITIONAL_INFO, nextUrl), {
+  //       headers,
+  //     })
+  //   }
+  //   if (isLoggedIn && session.userName) {
+  //     return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl), {
+  //       headers,
+  //     })
+  //   }
+  //   return NextResponse.next({ headers })
+  // }
 
-    const encodedCallbackUrl = encodeURIComponent(callbackUrl)
+  // if (!isLoggedIn && !isPublicRoute) {
+  //   let callbackUrl = nextUrl.pathname
+  //   if (nextUrl.search) {
+  //     callbackUrl += nextUrl.search
+  //   }
 
-    return NextResponse.redirect(
-      new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl)
-    )
-  }
+  //   const encodedCallbackUrl = encodeURIComponent(callbackUrl)
+
+  //   return NextResponse.redirect(
+  //     new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl)
+  //   )
+  // }
 
   return NextResponse.next()
-}
+})
 
 // Optionally, don't invoke Middleware on some paths
 export const config = {

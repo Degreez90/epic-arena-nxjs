@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Container from '@/components/Container'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import SideNav from './SideNav'
+import SideNav from '@/components/nav/SideNav'
 import type { ExtendedUser } from '@/next-auth'
 
 const Nav: React.FC = () => {
@@ -26,12 +26,12 @@ const Nav: React.FC = () => {
           {user && (
             <>
               <Avatar className='mx-4'>
-                <AvatarImage src={user.image} alt={user.fName || 'User'} />
+                <AvatarImage src={user.image} alt={user.firstName || 'User'} />
                 <AvatarFallback>
-                  {user.fName ? user.fName[0] : 'U'}
+                  {user.firstName ? user.firstName[0] : 'U'}
                 </AvatarFallback>
               </Avatar>
-              <div className='flex items-center'>{user.fName}</div>
+              <div className='flex items-center'>{user.firstName}</div>
             </>
           )}
           <SideNav />
