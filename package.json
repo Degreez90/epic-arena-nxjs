@@ -14,7 +14,7 @@
     "db:update": "npm run prisma:push && npm run prisma:generate"
   },
   "dependencies": {
-    "@auth/mongodb-adapter": "^3.2.0",
+    "@auth/mongodb-adapter": "^3.7.4",
     "@auth/prisma-adapter": "^2.2.0",
     "@hookform/resolvers": "^3.4.2",
     "@prisma/client": "^5.15.0",
@@ -38,10 +38,10 @@
     "dotenv": "^16.4.7",
     "lucide-react": "^0.334.0",
     "mailgun.js": "^10.2.1",
-    "mongodb": "^6.7.0",
+    "mongodb": "^6.12.0",
     "mongoose": "^8.2.0",
     "next": "14.1.0",
-    "next-auth": "^5.0.0-beta.19",
+    "next-auth": "^5.0.0-beta.25",
     "react": "^18.3.1",
     "react-dom": "^18",
     "react-hook-form": "^7.51.5",

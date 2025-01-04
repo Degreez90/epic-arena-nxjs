@@ -3,7 +3,12 @@
  * These routes do not require authentication.
  * @type {string[]}
  */
-export const publicRoutes = ['/', '/new-verification', '/tournament/new']
+export const publicRoutes: string[] = [
+  '/',
+  '/new-verification',
+  '/tournament/new',
+  '/settings',
+]
 
 /**
  * An array of routes that are used for authentication.
@@ -12,7 +17,7 @@ export const publicRoutes = ['/', '/new-verification', '/tournament/new']
  */
 
 //TODO:: handle additionalinfo approprietly
-export const authRoutes = [
+export const authRoutes: string[] = [
   '/login',
   '/register',
   '/error',
@@ -25,16 +30,16 @@ export const authRoutes = [
  * Routes that starts with this prefix are used for API authentication purposes.
  * @type {string}
  */
-export const apiAuthPrefix = '/api/auth'
+export const apiAuthPrefix: string = '/api/auth'
 
 /**
  * The default redirect path after a successful login.
  * @type {string}
  */
-export const DEFAULT_LOGIN_REDIRECT = '/settings'
+export const DEFAULT_LOGIN_REDIRECT: string = '/settings'
 
 /**
  *The route for collecting a users username
  * @type {string}
  */
-export const ADDITIONAL_INFO = '/additionalinfo'
+export const ADDITIONAL_INFO: string = '/additionalinfo'

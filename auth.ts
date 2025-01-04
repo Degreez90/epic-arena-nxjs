@@ -1,15 +1,15 @@
-import NextAuth, { Session } from 'next-auth'
+import NextAuth, { Account, Session, Users } from 'next-auth'
 import { MongoDBAdapter } from '@auth/mongodb-adapter'
 import { connectDB } from '@/lib/mongodb'
 import authConfig from '@/auth.config'
-import { getUserByEmail, getUserById } from '@/data/user'
+import { getUserById } from '@/data/user'
 import { getAccountByUserId } from '@/data/accounts'
 import { getTwoFactorConfirmationByUserId } from '@/data/two-factor-confirmation'
 
 import { TwoFactorConfirmation } from './models/TwoFactorConfirmation'
 
 import { User } from '@/models/User'
-import clientPromise from '@/lib/mongoclient'
+import client from '@/lib/mongoclient'
 
 import { JWT } from 'next-auth/jwt'
 
@@ -19,7 +19,7 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
-  adapter: MongoDBAdapter(clientPromise),
+  adapter: MongoDBAdapter(client),
   pages: {
     signIn: '/login',
   },
@@ -34,7 +34,7 @@ export const {
     },
   },
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account }: { user: Users; account: Account | null }) {
       //Allow OAuth without email verification
       console.log('auth.ts, user: ', user)
 
@@ -74,6 +74,31 @@ export const {
       return baseUrl
     },
 
+    //:: This is where the token is modified to include the user's data from the database
+    async jwt({ token, user }: { token: JWT; user: Users }) {
+      console.log(`from: auth.ts: `, token, user)
+      if (!token.sub) return token
+
+      const tokenUserId = user?._id
+
+      const existingUser = await getUserById(tokenUserId)
+
+      if (!existingUser) return token
+
+      const existingAccount = await getAccountByUserId(existingUser.id)
+      token.id = existingUser._id.toString()
+      token.isOAuth = !!existingAccount
+      token.firstName = existingUser.firstName
+      token.lastName = existingUser.lastName
+      token.email = existingUser.email
+      token.image = existingUser.image
+      token.role = existingUser.role
+      token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled
+      token.userName = existingUser.userName
+
+      return token
+    },
+
     //:: This is where the session is modified to include the user's data from the token
     async session({ token, session }: { token: JWT; session: Session }) {
       await connectDB() // Ensure the database connection is established
@@ -89,7 +114,7 @@ export const {
 
       if (session.user) {
         session.user.id = token.id as string
-        session.user.firstName = token.fName as string
+        session.user.firstName = token.firstName as string
         session.user.lastName = token.lastName as string
         session.user.email = token.email as string
         session.user.image = token.image as string
@@ -97,33 +122,9 @@ export const {
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean
         session.user.userName = token.userName as string
       }
+      console.log(`session from: auth.ts session: `, session)
 
       return session
-    },
-
-    //:: This is where the token is modified to include the user's data from the database
-    async jwt({ token, user }: { token: JWT; user: any }) {
-      console.log(`from: auth.ts: `, token, user)
-      if (!token.sub) return token
-
-      const tokenUserId = user?._id
-
-      const existingUser = await getUserById(tokenUserId)
-
-      if (!existingUser) return token
-
-      const existingAccount = await getAccountByUserId(existingUser.id)
-      token.id = existingUser._id.toString()
-      token.isOAuth = !!existingAccount
-      token.frstName = existingUser.firstName
-      token.lastName = existingUser.lastName
-      token.email = existingUser.email
-      token.image = existingUser.image
-      token.role = existingUser.role
-      token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled
-      token.userName = existingUser.userName
-
-      return token
     },
   },
   session: { strategy: 'jwt' },

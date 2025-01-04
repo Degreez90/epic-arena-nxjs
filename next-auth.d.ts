@@ -9,9 +9,9 @@ import { JWT } from 'next-auth/jwt'
 
 export type ExtendedUser = DefaultSession['user'] & {
   _id: ObjectId
-  id: string
-  lastName: string
+  id: string // This is the id string assigned by Auth.js to the user.
   firstName: string
+  lastName: string
   email: string
   image?: string
   isTwoFactorEnabled: boolean
@@ -26,7 +26,7 @@ declare module 'next-auth' {
   }
 
   // Add User and AdapterUser overrides too
-  interface User extends NextAuthUser {
+  interface Users extends NextAuthUser {
     _id?: ObjectId
   }
 
