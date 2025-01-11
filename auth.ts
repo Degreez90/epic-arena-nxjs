@@ -1,12 +1,10 @@
 import NextAuth from 'next-auth'
-import { MongoDBAdapter } from '@auth/mongodb-adapter'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { db } from '@/lib/db'
 import authConfig from '@/auth.config'
 import { getUserById } from '@/data/user'
 import { getAccountByUserId } from '@/data/accounts'
 import { getTwoFactorConfirmationByUserId } from '@/data/two-factor-confirmation'
-import { getSession } from 'next-auth/react'
 
 export const {
   handlers: { GET, POST },

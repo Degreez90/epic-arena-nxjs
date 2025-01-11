@@ -8,7 +8,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// prisma/schema.prisma
+//* prisma/schema.prisma
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -16,12 +16,13 @@ datasource db {
   // directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
+//* User Role
 enum UserRole {
   ADMIN
   USER
 }
 
-//User Types
+//* User Types
 model Record {
   id     String @id @default(uuid())
   wins   Int    @default(0)
@@ -30,7 +31,7 @@ model Record {
   Team   Team[]
 }
 
-//Must be Int type because of prisma
+//* Earnings Model
 model Earnings {
   id             String    @id @default(uuid())
   total          Int       @default(0)
@@ -39,7 +40,7 @@ model Earnings {
   User           User[]
 }
 
-//Must be Int type because of prisma
+//* Balance Model
 model Balance {
   id                  String @id @default(uuid())
   promotionalBalance  Int    @default(0)
@@ -49,6 +50,7 @@ model Balance {
   User                User[]
 }
 
+//* User Model
 model User {
   id                    String                 @id @default(uuid())
   admin                 Boolean
@@ -223,14 +225,14 @@ model Tournament {
   participants Participant[]
 }
 
-// The possible results of a duel for a participant.
+//* The possible results of a duel for a participant.
 enum MatchResult {
   WIN
   DRAW
   LOSS
 }
 
-// The results of a participant in a match game.
+//* The results of a participant in a match game.
 model ParticipantMatchGameResult {
   id            Int          @id @default(autoincrement())
   // If `null`, the participant is to be determined.
@@ -252,7 +254,7 @@ model ParticipantMatchGameResult {
   opponent2MatchGame   MatchGame? @relation("opponent2", fields: [opponent2MatchGameId], references: [id])
 }
 
-// Participant Model
+//* Participant Model
 model Participant {
   id Int @id @default(autoincrement())
 
@@ -278,7 +280,7 @@ model Participant {
   @@unique([tournamentId])
 }
 
-// The results of a participant in a match.
+//* The results of a participant in a match.
 model ParticipantMatchResult {
   id            Int          @id @default(autoincrement())
   // If `null`, the participant is to be determined.
@@ -300,7 +302,7 @@ model ParticipantMatchResult {
   opponent2Match   Match? @relation("opponent2", fields: [opponent2MatchId], references: [id])
 }
 
-// A stage, which can be a round-robin stage or a single/double elimination stage.
+//* A stage, which can be a round-robin stage or a single/double elimination stage.
 model Stage {
   id Int @id @default(autoincrement())
 
@@ -332,12 +334,14 @@ model Stage {
   @@unique([id, tournamentId])
 }
 
+//*enums for the type of stage
 enum StageType {
   single_elimination
   double_elimination
   round_robin
 }
 
+//* A group in a stage.
 model Group {
   id Int @id @default(autoincrement())
 
@@ -355,6 +359,7 @@ model Group {
   matches Match[]
 }
 
+//* A round in a group.
 model Round {
   id Int @id @default(autoincrement())
 
@@ -373,6 +378,7 @@ model Round {
   match Match[]
 }
 
+//* The possible statuses of a match.
 enum MatchStatus {
   // The two matches leading to this one are not completed yet.
   LOCKED
@@ -388,6 +394,7 @@ enum MatchStatus {
   ARCHIVED
 }
 
+//* A match in a group.
 model Match {
   id Int @id @default(autoincrement())
 
@@ -421,6 +428,7 @@ model Match {
   games MatchGame[]
 }
 
+//* A match game in a match.
 model MatchGame {
   id     Int         @id @default(autoincrement())
   status MatchStatus
@@ -440,6 +448,7 @@ model MatchGame {
   number Int
 }
 
+//* The settings of a stage.
 model StageSettings {
   id String @id @default(uuid())
 

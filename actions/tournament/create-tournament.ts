@@ -8,18 +8,13 @@ import { Prisma } from '@prisma/client'
 const createTournament = async (data: CreateTournamentType) => {
   const validatedData = CreateTournamentSchema.parse(data)
 
-  const tournament: Prisma.TournamentCreateInput = {
-    name: validatedData.tName,
+  const tournament = {
+    _id: Date.now().toString(),
+    tName: validatedData.tName,
     description: validatedData.description,
-    stages: {
-      create: [
-        {
-          type: validatedData.type,
-          number: 1,
-          name: '',
-        },
-      ],
-    },
+    type: validatedData.type,
+    thirdPlaceMatch: validatedData.thirdPlaceMatch,
+    seedOrdering: validatedData.seedOrdering,
   }
 }
 

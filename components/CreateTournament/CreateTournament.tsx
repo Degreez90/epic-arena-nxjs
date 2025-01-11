@@ -3,34 +3,48 @@
 import { CreateTournamentSchema } from '@/schemas/createTournament'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React, { useState, useTransition } from 'react'
-import { Form, useForm, FormProvider } from 'react-hook-form'
+import { useForm, FormProvider } from 'react-hook-form'
 import * as z from 'zod'
 import { CardWrapper } from '../Auth/Card-Wrapper'
 import {
   FormControl,
   FormField,
+  FormDescription,
   FormItem,
   FormLabel,
   FormMessage,
 } from '../ui/form'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Input } from '../ui/input'
 import { FormError } from '../Form-Error'
 import { FormSuccess } from '../Form-Success'
 import { Button } from '../ui/button'
 import { Checkbox } from '../ui/checkbox'
+import Link from 'next/link'
+import { SeedOrdering, StageType } from '@prisma/client'
 
 const CreateTournament = () => {
   const [error, setError] = useState<string | undefined>('')
   const [success, setSuccess] = useState<string | undefined>('')
   const [isPending, startTransition] = useTransition()
 
+  //TODO:: Particpent placeholder should probably be moved later
+  const participants = ['Player One', 'Player Two']
+
   const form = useForm<z.infer<typeof CreateTournamentSchema>>({
     resolver: zodResolver(CreateTournamentSchema),
     defaultValues: {
       tName: '',
       description: '',
-      type: 'single_elimination',
+      type: StageType.single_elimination,
       thirdPlaceMatch: false,
+      seedOrdering: SeedOrdering.INNER_OUTER,
     },
   })
 
@@ -54,7 +68,7 @@ const CreateTournament = () => {
           headerLabel='Create a Tournament'
           backButtonLabel=''
           backButtonHref='/'
-          title='Create a tournament'
+          title='Create a Tournament'
         >
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
             <div className='space-y-4'>
@@ -63,12 +77,12 @@ const CreateTournament = () => {
                 name='tName'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name</FormLabel>
+                    <FormLabel>Tournament Name</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         disabled={isPending}
-                        placeholder='John Doe'
+                        placeholder='Name of tournament...'
                       />
                     </FormControl>
                     <FormMessage />
@@ -86,9 +100,43 @@ const CreateTournament = () => {
                         {...field}
                         disabled={isPending}
                         placeholder='Enter description here...'
-                        className='form-textarea'
+                        className='resize-none w-full'
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='type'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stage Type</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select a verified email to display' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={StageType.single_elimination}>
+                          Single Elimination
+                        </SelectItem>
+                        <SelectItem value={StageType.double_elimination}>
+                          Double Elimination
+                        </SelectItem>
+                        <SelectItem value={StageType.round_robin}>
+                          Round Robin
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Set the stage for your tournament.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -108,6 +156,40 @@ const CreateTournament = () => {
                         />
                       </FormControl>
                     </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='seedOrdering'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Seed Ordering</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select a verified email to display' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={SeedOrdering.INNER_OUTER}>
+                          Inner Outer
+                        </SelectItem>
+                        <SelectItem value={SeedOrdering.NATURAL}>
+                          Natural
+                        </SelectItem>
+                        <SelectItem value={SeedOrdering.REVERSE}>
+                          Reverse
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Set the Seeding Order for the tournament.{' '}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
