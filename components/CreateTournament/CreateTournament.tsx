@@ -28,6 +28,10 @@ import { Button } from '../ui/button'
 import { Checkbox } from '../ui/checkbox'
 import Link from 'next/link'
 import { SeedOrdering, StageType } from '@prisma/client'
+import { createTournament } from '@/actions/tournament/create-tournament'
+
+import { User } from 'next-auth'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 const CreateTournament = () => {
   const [error, setError] = useState<string | undefined>('')
@@ -35,7 +39,7 @@ const CreateTournament = () => {
   const [isPending, startTransition] = useTransition()
 
   //TODO:: Particpent placeholder should probably be moved later
-  const participants = ['Player One', 'Player Two']
+  const user = useCurrentUser()
 
   const form = useForm<z.infer<typeof CreateTournamentSchema>>({
     resolver: zodResolver(CreateTournamentSchema),
@@ -48,16 +52,19 @@ const CreateTournament = () => {
     },
   })
 
-  const onSubmit = (values: z.infer<typeof CreateTournamentSchema>) => {
+  const onSubmit = (
+    values: z.infer<typeof CreateTournamentSchema>,
+    user: User
+  ) => {
     console.log('submit:', values)
     setError('')
     setSuccess('')
 
     startTransition(() => {
-      // register(values).then((data) => {
-      //   setError(data.error)
-      //   setSuccess(data.success)
-      // })
+      createTournament(values, user).then((data) => {
+        setError(data.error)
+        setSuccess(data.success)
+      })
     })
   }
 
@@ -70,7 +77,12 @@ const CreateTournament = () => {
           backButtonHref='/'
           title='Create a Tournament'
         >
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+          <form
+            onSubmit={form.handleSubmit(
+              (values) => user && onSubmit(values, user)
+            )}
+            className='space-y-6'
+          >
             <div className='space-y-4'>
               <FormField
                 control={form.control}

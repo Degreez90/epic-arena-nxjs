@@ -5,7 +5,7 @@ import { CreateTournamentSchema } from '@/schemas/createTournament'
 import { Prisma } from '@prisma/client'
 
 //TODO:: finish create tounament
-const createTournament = async (data: CreateTournamentType) => {
+export const createTournament = async (data: CreateTournamentType) => {
   const validatedData = CreateTournamentSchema.parse(data)
 
   const tournament = {
@@ -16,6 +16,19 @@ const createTournament = async (data: CreateTournamentType) => {
     thirdPlaceMatch: validatedData.thirdPlaceMatch,
     seedOrdering: validatedData.seedOrdering,
   }
+}
+
+const ParticipantData = {
+  participants: [
+    {
+      name: 'Player 1',
+      seed: 1,
+    },
+    {
+      name: 'Player 2',
+      seed: 2,
+    },
+  ],
 }
 
 export default createTournament

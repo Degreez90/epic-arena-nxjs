@@ -83,6 +83,8 @@ model User {
 
   teamId String? @db.Uuid
   team   Team?   @relation("member", fields: [teamId], references: [id], onDelete: Cascade)
+
+  tournamentCreator Tournament[]
 }
 
 model Account {
@@ -155,7 +157,7 @@ enum RoundRobinMode {
   DOUBLE
 }
 
-// Used to order seeds.
+//* Seed Ordering.
 enum SeedOrdering {
   NATURAL
   REVERSE
@@ -199,6 +201,7 @@ model Game {
   rules     Json?
 }
 
+//* Tournament Status
 enum TournamentStatus {
   ENROLL_OPEN
   ENROLL_CLOSED
@@ -223,6 +226,9 @@ model Tournament {
 
   // The participants of the Tournament
   participants Participant[]
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
 }
 
 //* The possible results of a duel for a participant.
