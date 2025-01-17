@@ -22,7 +22,6 @@ export default auth(async function middleware(req) {
   const isLoggedIn = !!session
 
   const { nextUrl } = req
-  console.log('the req from middleware.ts: ', req.auth)
 
   const { user } = await getUserInfo(req)
 
@@ -32,8 +31,6 @@ export default auth(async function middleware(req) {
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname)
   const isAuthRoute = authRoutes.includes(nextUrl.pathname)
   const isAddInfoRoute = ADDITIONAL_INFO.includes(nextUrl.pathname)
-
-  console.log('middleware.ts, session: ', session)
 
   if (isApiAuthRoute) {
     return NextResponse.next()

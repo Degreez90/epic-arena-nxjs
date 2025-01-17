@@ -24,9 +24,9 @@ export interface IUser {
   tournaments?: string[]
   createdAt?: Date
   updatedAt?: Date
-  // passwordChangedAt?: Date
-  // passwordResetToken?: string
-  // passwordResetExpires?: Date
+  passwordChangedAt?: Date
+  passwordResetToken?: string
+  passwordResetExpires?: Date
 }
 
 interface IUserMethods {
@@ -97,6 +97,9 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
         ref: 'Tournament',
       },
     ],
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   { timestamps: true }
 )

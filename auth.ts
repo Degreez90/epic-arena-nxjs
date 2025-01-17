@@ -25,7 +25,6 @@ export const {
   },
   events: {
     async linkAccount({ user }) {
-      console.log('auth.ts, user: running linkAccount', user)
       await connectDB() // Ensure the database connection is established
       await User.updateOne(
         { email: user.email },
@@ -33,11 +32,10 @@ export const {
       )
     },
   },
+  ...authConfig,
   callbacks: {
     async signIn({ user, account }: { user: Users; account: Account | null }) {
       //Allow OAuth without email verification
-      console.log('auth.ts, user: ', user)
-
       if (account?.provider !== 'credentials') return true
 
       if (!user._id) throw new Error('No user ID found')
@@ -76,7 +74,6 @@ export const {
 
     //:: This is where the token is modified to include the user's data from the database
     async jwt({ token, user }: { token: JWT; user: Users }) {
-      console.log(`from: auth.ts: `, token, user)
       if (!token.sub) return token
 
       const tokenUserId = user?._id
@@ -98,35 +95,6 @@ export const {
 
       return token
     },
-
-    //:: This is where the session is modified to include the user's data from the token
-    async session({ token, session }: { token: JWT; session: Session }) {
-      await connectDB() // Ensure the database connection is established
-
-      console.log(`session from: auth.ts token: `, token)
-      if (token.sub && session.user) {
-        session.user.id = token.sub
-      }
-
-      // if (token.role && session.user) {
-      //   session.user.role = token.role as UserRole
-      // }
-
-      if (session.user) {
-        session.user.id = token.id as string
-        session.user.firstName = token.firstName as string
-        session.user.lastName = token.lastName as string
-        session.user.email = token.email as string
-        session.user.image = token.image as string
-        session.user.isOAuth = token.isOAuth as boolean
-        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean
-        session.user.userName = token.userName as string
-      }
-      console.log(`session from: auth.ts session: `, session)
-
-      return session
-    },
   },
   session: { strategy: 'jwt' },
-  ...authConfig,
 })
