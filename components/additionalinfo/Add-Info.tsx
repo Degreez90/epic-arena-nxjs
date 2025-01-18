@@ -34,6 +34,8 @@ const AddInfo = ({ user }: UserInfoProps) => {
   const [success, setSuccess] = useState<string | undefined>('')
   const [isPending, startTransition] = useTransition()
 
+  console.log('User from add-info:', user)
+
   const router = useRouter()
 
   const form = useForm<z.infer<typeof AdditionInfoSchema>>({

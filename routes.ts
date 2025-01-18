@@ -3,8 +3,7 @@
  * These routes do not require authentication.
  * @type {string[]}
  */
-export const publicRoutes: string[] = [
-  '/',
+export const privateRoutes: string[] = [
   '/new-verification',
   '/tournament/new',
   '/settings',
@@ -33,13 +32,22 @@ export const authRoutes: string[] = [
 export const apiAuthPrefix: string = '/api/auth'
 
 /**
+ *  The route redirect for unauthorized users.
+ * @type {string}
+ * @description This path is used to redirect unauthorized users to the register/login page.
+ */
+export const UNAUTHORIZED_USER: string = '/register'
+
+/**
  * The default redirect path after a successful login.
  * @type {string}
+ * @description This path is used to redirect the user after a successful login.
  */
 export const DEFAULT_LOGIN_REDIRECT: string = '/settings'
 
 /**
  *The route for collecting a users username
  * @type {string}
+ * @description This path is used to collect a users username
  */
 export const ADDITIONAL_INFO: string = '/additionalinfo'
