@@ -34,6 +34,7 @@ export const {
   },
   ...authConfig,
   callbacks: {
+    ...authConfig.callbacks,
     async signIn({ user, account }: { user: Users; account: Account | null }) {
       //Allow OAuth without email verification
       if (account?.provider !== 'credentials') return true
