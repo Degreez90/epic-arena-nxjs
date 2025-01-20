@@ -12,12 +12,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '../ui/form'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Input } from '../ui/input'
 import { FormError } from '../Form-Error'
 import { FormSuccess } from '../Form-Success'
 import { Button } from '../ui/button'
 import { Checkbox } from '../ui/checkbox'
+
+import { tournamentStageType } from '@/models/tournament'
+import { SeedOrdering } from '@/schemas/createTournament'
 
 const CreateTournament = () => {
   const [error, setError] = useState<string | undefined>('')
@@ -27,10 +38,11 @@ const CreateTournament = () => {
   const form = useForm<z.infer<typeof CreateTournamentSchema>>({
     resolver: zodResolver(CreateTournamentSchema),
     defaultValues: {
-      tName: '',
+      tournamentName: '',
       description: '',
-      type: 'single_elimination',
+      type: tournamentStageType.singleElimination,
       thirdPlaceMatch: false,
+      seedOrdering: SeedOrdering.InnerOuter,
     },
   })
 
@@ -60,10 +72,10 @@ const CreateTournament = () => {
             <div className='space-y-4'>
               <FormField
                 control={form.control}
-                name='tName'
+                name='tournamentName'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name</FormLabel>
+                    <FormLabel>Tournament Name</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -86,9 +98,44 @@ const CreateTournament = () => {
                         {...field}
                         disabled={isPending}
                         placeholder='Enter description here...'
-                        className='form-textarea'
+                        className='resize-none w-full h-32'
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='type'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tournament Type</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select a tournament type' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem
+                          value={tournamentStageType.singleElimination}
+                        >
+                          Single Elimination
+                        </SelectItem>
+                        <SelectItem
+                          value={tournamentStageType.doubleElimination}
+                        >
+                          Double Elimenation
+                        </SelectItem>
+                        <SelectItem value={tournamentStageType.roundRobin}>
+                          Round Robin
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -108,6 +155,65 @@ const CreateTournament = () => {
                         />
                       </FormControl>
                     </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='Participants'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Participants{' (User)'}</FormLabel>
+                    <FormControl>
+                      <Input {...field} disabled={isPending} placeholder='' />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='seedOrdering'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Seed Order</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select a Seed Order type' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={SeedOrdering.Natural}>
+                          Natural
+                        </SelectItem>
+                        <SelectItem value={SeedOrdering.Reverse}>
+                          Reverse
+                        </SelectItem>
+                        <SelectItem value={SeedOrdering.HalfShift}>
+                          Half Shift
+                        </SelectItem>
+                        <SelectItem value={SeedOrdering.ReverseHalfShift}>
+                          Reverse Half Shift
+                        </SelectItem>
+                        <SelectItem value={SeedOrdering.PairFlip}>
+                          Pair Flip
+                        </SelectItem>
+                        <SelectItem value={SeedOrdering.InnerOuter}>
+                          Inner Outer
+                        </SelectItem>
+                        <SelectItem value={SeedOrdering.EffortBalanced}>
+                          Effort Balanced
+                        </SelectItem>
+                        <SelectItem value={SeedOrdering.SeedOptimized}>
+                          Seed Optimized
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

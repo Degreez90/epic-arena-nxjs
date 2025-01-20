@@ -33,9 +33,9 @@ export default auth(async function middleware(req) {
 
   const headers = new Headers()
 
-  if (!isLoggedIn && isPrivateRoute) {
-    return NextResponse.redirect(new URL(UNAUTHORIZED_USER, nextUrl))
-  }
+  // if (!isLoggedIn && isPrivateRoute) {
+  //   return NextResponse.redirect(new URL(UNAUTHORIZED_USER, nextUrl))
+  // }
 
   //If is a authentication route and user is logged in with no username send them to additional info.
   // if (isAuthRoute) {

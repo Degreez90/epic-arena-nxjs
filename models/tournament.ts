@@ -76,11 +76,7 @@ type TournamentDocumentOverrides = {
   }>
 }
 
-type TournamentModelType = Model<
-  ITournament,
-  object,
-  TournamentDocumentOverrides
->
+type TournamentModelType = Model<ITournament, {}, TournamentDocumentOverrides>
 
 const TournamentSchema = new Schema<ITournament, TournamentModelType>(
   {
@@ -227,6 +223,6 @@ export const Tournament = model<ITournament, TournamentModelType>(
 
 export type TournamentType = HydratedDocument<
   ITournament,
-  object,
-  TournamentDocumentOverrides
+  TournamentDocumentOverrides,
+  {}
 >
