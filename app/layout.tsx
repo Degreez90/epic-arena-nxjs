@@ -26,9 +26,19 @@ export default async function RootLayout({
   return (
     <SessionProvider session={session}>
       <html lang='en'>
+        <head>
+          <link
+            rel='stylesheet'
+            href='https://cdn.jsdelivr.net/gh/Drarig29/brackets-viewer.js@master/dist/brackets-viewer.min.css'
+          />
+        </head>
         <body className={`${inter.className}`}>
           <Nav />
           {children}
+          <script
+            type='text/javascript'
+            src='https://cdn.jsdelivr.net/gh/Drarig29/brackets-viewer.js@master/dist/brackets-viewer.min.js'
+          ></script>
         </body>
       </html>
     </SessionProvider>
