@@ -3,8 +3,8 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { SessionProvider } from 'next-auth/react'
 import { auth } from '@/auth'
-
-import Nav from '@/components/nav/Nav'
+import Head from 'next/head'
+import Nav from '@/components/Nav/Nav'
 //redux
 // import { store } from '@/store'
 // import { Provider } from 'react-redux'
@@ -26,19 +26,9 @@ export default async function RootLayout({
   return (
     <SessionProvider session={session}>
       <html lang='en'>
-        <head>
-          <link
-            rel='stylesheet'
-            href='https://cdn.jsdelivr.net/gh/Drarig29/brackets-viewer.js@master/dist/brackets-viewer.min.css'
-          />
-        </head>
         <body className={`${inter.className}`}>
           <Nav />
           {children}
-          <script
-            type='text/javascript'
-            src='https://cdn.jsdelivr.net/gh/Drarig29/brackets-viewer.js@master/dist/brackets-viewer.min.js'
-          ></script>
         </body>
       </html>
     </SessionProvider>
