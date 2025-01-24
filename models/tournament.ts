@@ -1,4 +1,10 @@
-import { Schema, model, Model, Types, HydratedDocument } from 'mongoose'
+import mongoose, {
+  Schema,
+  model,
+  Model,
+  Types,
+  HydratedDocument,
+} from 'mongoose'
 import {
   Group,
   Match as M,
@@ -216,10 +222,9 @@ TournamentSchema.virtual('progress').get(function () {
   return (completedMatchLength / matches.length) * 100
 })
 
-export const Tournament = model<ITournament, TournamentModelType>(
-  'tournament',
-  TournamentSchema
-)
+export const Tournament =
+  mongoose.models.Tournament ||
+  model<ITournament, TournamentModelType>('Tournament', TournamentSchema)
 
 export type TournamentType = HydratedDocument<
   ITournament,

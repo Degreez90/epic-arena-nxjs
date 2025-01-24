@@ -30,6 +30,8 @@ import { Checkbox } from '../ui/checkbox'
 import { tournamentStageType } from '@/models/tournament'
 import { SeedOrdering } from '@/schemas/createTournament'
 
+import createTournament from '@/actions/tournament/create-tournament'
+
 const CreateTournament = () => {
   const [error, setError] = useState<string | undefined>('')
   const [success, setSuccess] = useState<string | undefined>('')
@@ -52,10 +54,10 @@ const CreateTournament = () => {
     setSuccess('')
 
     startTransition(() => {
-      // register(values).then((data) => {
-      //   setError(data.error)
-      //   setSuccess(data.success)
-      // })
+      createTournament(values).then((data) => {
+        setError(data.error)
+        setSuccess(data.success)
+      })
     })
   }
 
@@ -222,7 +224,7 @@ const CreateTournament = () => {
             <FormError message={error} />
             <FormSuccess message={success} />
             <Button type='submit' disabled={isPending} className='w-full'>
-              Create an account
+              Create Tournament
             </Button>
           </form>
         </CardWrapper>
