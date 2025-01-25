@@ -1,10 +1,4 @@
-import mongoose, {
-  Schema,
-  Model,
-  Query,
-  HydratedDocument,
-  ObjectId,
-} from 'mongoose'
+import mongoose, { Schema, Model, Types, HydratedDocument } from 'mongoose'
 import validator from 'validator'
 
 export interface IUser {
@@ -21,7 +15,7 @@ export interface IUser {
   image?: string
   role?: 'admin' | 'user'
   accountStatus?: 'active' | 'inactive'
-  tournaments?: string[]
+  tournaments?: Types.ObjectId[]
   createdAt?: Date
   updatedAt?: Date
   passwordChangedAt?: Date
@@ -128,5 +122,4 @@ export const User = (mongoose.models?.User ||
   {},
   IUserMethods
 >
-
 export type UserType = HydratedDocument<IUser, IUserMethods>

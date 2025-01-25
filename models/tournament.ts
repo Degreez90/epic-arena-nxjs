@@ -1,10 +1,5 @@
-import mongoose, {
-  Schema,
-  model,
-  Model,
-  Types,
-  HydratedDocument,
-} from 'mongoose'
+import * as mongoose from 'mongoose'
+import { model, Schema, Model, Types, HydratedDocument } from 'mongoose'
 import {
   Group,
   Match as M,
@@ -15,14 +10,12 @@ import {
   Status,
 } from 'brackets-model'
 
+console.log('Tournament model imported')
+
 export declare type CustomParticipant = Participant & {
   userId?: Types.ObjectId
   invitation?: 'accepted' | 'pending' | 'declined'
 }
-export interface Match extends M {
-  gameId: Types.ObjectId | null
-}
-
 export interface Match extends M {
   gameId: Types.ObjectId | null
 }
@@ -39,11 +32,6 @@ export const tournamentStageType = {
   roundRobin: 'round_robin',
 }
 
-export interface Game {
-  _id: Types.ObjectId
-  gameId: Types.ObjectId
-  count: number
-}
 export enum TournamentStatus {
   pending = 'pending',
   progress = 'progress',
@@ -222,9 +210,15 @@ TournamentSchema.virtual('progress').get(function () {
   return (completedMatchLength / matches.length) * 100
 })
 
+const tournamentSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  date: { type: Date, required: true },
+  // Other fields...
+})
+
+// Check if the model already exists
 export const Tournament =
-  mongoose.models.Tournament ||
-  model<ITournament, TournamentModelType>('Tournament', TournamentSchema)
+  mongoose.models?.Tournament || mongoose.model('Tournament', tournamentSchema)
 
 export type TournamentType = HydratedDocument<
   ITournament,

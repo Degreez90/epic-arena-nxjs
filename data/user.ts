@@ -1,5 +1,5 @@
 import { connectDB } from '@/lib/mongodb'
-import { User } from '@/models/User'
+import { User, UserType } from '@/models/User'
 import mongoose, { ObjectId } from 'mongoose'
 
 export const getUserByEmail = async (email: string) => {

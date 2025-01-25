@@ -13,7 +13,6 @@ export default {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       profile: (profile) => {
-        console.log('auth.config.ts / Profile info: ', profile)
         return {
           id: profile.sub,
           firstName: profile.given_name,
@@ -25,13 +24,6 @@ export default {
     }),
     Credentials({
       async authorize(credentials): Promise<any> {
-        // const validatedFields = LoginSchema.safeParse(credentials)
-
-        // console.log(
-        //   `auth.config.ts: validatedfields: `,
-        //   validatedFields.data?.verificationToken
-        // )
-
         //Login user if they validate their email
         if ('email' in credentials && 'existingToken' in credentials) {
           const validatedFields = LoginTokenSchema.safeParse(credentials)
@@ -71,14 +63,9 @@ export default {
   callbacks: {
     //:: This is where the session is modified to include the user's data from the token
     async session({ token, session }: { token: JWT; session: Session }) {
-      // await connectDB() // Ensure the database connection is established
       if (token.sub && session.user) {
         session.user.id = token.sub
       }
-
-      // if (token.role && session.user) {
-      //   session.user.role = token.role as UserRole
-      // }
 
       if (session.user) {
         session.user.id = token.id as string
@@ -89,6 +76,7 @@ export default {
         session.user.isOAuth = token.isOAuth as boolean
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean
         session.user.userName = token.userName as string
+        session.user.role = token.role as string
       }
       console.log(`session from: auth.ts session: `, session)
 
