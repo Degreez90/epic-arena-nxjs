@@ -3,7 +3,7 @@
 import { CreateTournamentSchema } from '@/schemas/createTournament'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React, { useState, useTransition } from 'react'
-import { Form, useForm, FormProvider } from 'react-hook-form'
+import { useForm, FormProvider } from 'react-hook-form'
 import * as z from 'zod'
 import { CardWrapper } from '../auth/Card-Wrapper'
 import {
@@ -12,7 +12,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from '../ui/form'
 import {
   Select,
@@ -49,7 +48,6 @@ const CreateTournament = () => {
   })
 
   const onSubmit = (values: z.infer<typeof CreateTournamentSchema>) => {
-    console.log('submit:', values)
     setError('')
     setSuccess('')
 

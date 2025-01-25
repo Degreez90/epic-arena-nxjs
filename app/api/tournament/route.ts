@@ -5,7 +5,6 @@ import { Tournament } from '@/models/tournament'
 export async function GET(req: Request) {
   try {
     await connectDB()
-
     const { searchParams } = new URL(req.url)
 
     const tournamentId = Number(searchParams.get('tournamentId'))

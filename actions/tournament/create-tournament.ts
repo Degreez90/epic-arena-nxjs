@@ -1,6 +1,6 @@
 'use server'
-import { db } from '@/lib/db'
-import { Tournament, tournamentStageType } from '@/models/tournament'
+
+import { Tournament } from '@/models/tournament'
 import type { CreateTournamentType } from '@/schemas/createTournament'
 import { CreateTournamentSchema } from '@/schemas/createTournament'
 import { currentUser } from '@/lib/auth'
@@ -8,23 +8,31 @@ import { currentUser } from '@/lib/auth'
 import { MyDB } from '@/lib/MyDB'
 import { BracketsManager } from 'brackets-manager'
 import { InputStage, StageType, SeedOrdering } from 'brackets-model'
+import { connectDB } from '@/lib/mongodb'
 
-//TODO:: finish create tounament
 const createTournament = async (data: CreateTournamentType) => {
+  const validatedData = CreateTournamentSchema.parse(data)
+
+  const user = await currentUser()
+
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  if (user.role !== 'admin') {
+    return { error: 'You do not have permission to create a tournament' }
+  }
+
   try {
-    const validatedData = CreateTournamentSchema.parse(data)
+    console.log('User:', user)
 
-    const user = await currentUser()
-
-    if (!user) {
-      throw new Error('User not found')
-    }
+    await connectDB()
 
     const tournament = new Tournament({
-      _id: Date.now(),
+      _id: Number(Date.now()),
       name: validatedData.tournamentName,
       description: validatedData.description,
-      createdBy: user.id,
+      createdBy: user._id,
     })
 
     await tournament.save()
