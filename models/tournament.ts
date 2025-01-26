@@ -210,15 +210,9 @@ TournamentSchema.virtual('progress').get(function () {
   return (completedMatchLength / matches.length) * 100
 })
 
-const tournamentSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  date: { type: Date, required: true },
-  // Other fields...
-})
-
 // Check if the model already exists
 export const Tournament =
-  mongoose.models?.Tournament || mongoose.model('Tournament', tournamentSchema)
+  mongoose.models?.Tournament || mongoose.model('Tournament', TournamentSchema)
 
 export type TournamentType = HydratedDocument<
   ITournament,

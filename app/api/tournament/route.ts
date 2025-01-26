@@ -10,14 +10,16 @@ export async function GET(req: Request) {
     const tournamentId = Number(searchParams.get('tournamentId'))
     console.log('tournamentId: ', tournamentId)
 
-    if (!tournamentId) {
+    if (!tournamentId || isNaN(tournamentId)) {
       return NextResponse.json(
-        { success: false, error: 'tournamentId is required' },
+        { success: false, error: 'Invalid tournamentId' },
         { status: 400 }
       )
     }
-
+    console.log('Fetching tournament data...')
     const data = await Tournament.findOne({ _id: tournamentId })
+
+    console.log('data: ', data)
 
     if (!data) {
       return NextResponse.json(
