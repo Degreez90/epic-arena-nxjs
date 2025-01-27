@@ -11,7 +11,7 @@ interface BracketData {
   participant: any[]
 }
 
-const Page = () => {
+const TournamentDetails = () => {
   const [bracketData, setData] = useState<BracketData | null>(null)
 
   const [scriptLoaded, setScriptLoaded] = useState(false)
@@ -69,4 +69,4 @@ const Page = () => {
   )
 }
 
-export default Page
+export default TournamentDetails
