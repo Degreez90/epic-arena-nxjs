@@ -1,4 +1,4 @@
-import CreateTournament from '@/components/CreateTournament/CreateTournament'
+import CreateTournament from '@/components/Tournament/CreateTournament'
 import React from 'react'
 
 const CreateTournamentPage = () => {
