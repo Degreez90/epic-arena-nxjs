@@ -10,3 +10,13 @@ export const getAllTournaments = async () => {
 
   return tournaments
 }
+
+export const getTournamentById = async (id: number) => {
+  await connectDB()
+
+  const tournament: TournamentType | null = await Tournament.findOne({
+    _id: id,
+  })
+
+  return tournament
+}

@@ -1,56 +1,43 @@
 'use client'
-
 import React, { useEffect, useState } from 'react'
 import Script from 'next/script'
-import axios from 'axios'
 
-interface BracketData {
-  stage: any[]
-  match: any[]
-  match_game: any[]
-  participant: any[]
+import { TournamentType } from '@/models/tournament'
+import { useRouter } from 'next/router'
+
+interface TournamentDetailsProps {
+  tournament: TournamentType | null
 }
 
-const TournamentDetails = () => {
-  const [bracketData, setData] = useState<BracketData | null>(null)
+export const dynamic = 'force-dynamic' // Force dynamic rendering
 
+const TournamentDetails: React.FC<TournamentDetailsProps> = ({
+  tournament,
+}) => {
   const [scriptLoaded, setScriptLoaded] = useState(false)
 
-  const renderBrackets = async () => {
-    const params = new URLSearchParams({
-      tournamentId: '1737670616240',
-    })
-
-    try {
-      // Fetch tournament data
-      const response = await axios.get(`/api/tournament?${params.toString()}`)
-      const { data } = response.data
-
-      console.log('Data for bracketsViewer:', data)
-
-      if (data) {
-        setData(data)
-      } else {
-        console.error('Data not available')
-      }
-    } catch (error) {
-      console.error('Bracket data wasnt fetched', error)
-    }
-  }
-
   useEffect(() => {
-    if (scriptLoaded && !bracketData) {
-      renderBrackets()
+    if (scriptLoaded && tournament) {
+      console.log('Rendering brackets viewer')
+
+      const container = document.getElementById('brackets-viewer')
+      if (container) {
+        // Clear any existing content
+        container.innerHTML = ''
+
+        window.bracketsViewer.render({
+          stages: tournament.stage,
+          matches: tournament.match,
+          matchGames: tournament.match_game,
+          participants: tournament.participant,
+        })
+      }
     }
-    if (scriptLoaded && bracketData) {
-      window.bracketsViewer.render({
-        stages: bracketData.stage,
-        matches: bracketData.match,
-        matchGames: bracketData.match_game,
-        participants: bracketData.participant,
-      })
-    }
-  }, [scriptLoaded, bracketData])
+  }, [scriptLoaded, tournament])
+
+  if (!tournament) {
+    return <div>Tournament not found</div>
+  }
 
   return (
     <>
