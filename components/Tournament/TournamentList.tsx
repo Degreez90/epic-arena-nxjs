@@ -13,7 +13,9 @@ const TournamentList: React.FC<TournamentListProps> = ({ Tournaments }) => {
       <ul>
         {Tournaments.map((tournament) => (
           <li key={tournament._id}>
-            <Link href={`/tournament/${tournament.id}`}>{tournament.name}</Link>
+            <Link href={`/tournaments/${tournament._id}`}>
+              {tournament.name}
+            </Link>
           </li>
         ))}
       </ul>

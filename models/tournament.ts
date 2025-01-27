@@ -10,8 +10,6 @@ import {
   Status,
 } from 'brackets-model'
 
-console.log('Tournament model imported')
-
 export declare type CustomParticipant = Participant & {
   userId?: Types.ObjectId
   invitation?: 'accepted' | 'pending' | 'declined'
