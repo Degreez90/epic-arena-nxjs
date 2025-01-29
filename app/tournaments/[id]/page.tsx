@@ -1,5 +1,7 @@
 import TournamentDetails from '@/components/Tournament/TournamentDetails'
 import { getTournamentById } from '@/data/Tournaments/tournaments'
+import { addParcticipantNameInMatch } from '@/data/Tournaments/dataProcessors'
+import { categorizeData } from '@/data/Tournaments/dataProcessors'
 
 const TournamentDetailsPage = async ({
   params: { id },
@@ -8,6 +10,9 @@ const TournamentDetailsPage = async ({
 }) => {
   const tournamentId = Number(id)
   const tournament = await getTournamentById(tournamentId)
+
+  //todo:: use this to make brackets ( move into TournamentDetails component)
+  const formatToUIModel = categorizeData(addParcticipantNameInMatch(tournament))
 
   const serializedTournament = JSON.parse(
     JSON.stringify(tournament, (key, value) => {

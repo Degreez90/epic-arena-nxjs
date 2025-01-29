@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import Script from 'next/script'
 
 import { TournamentType } from '@/models/tournament'
-import { useRouter } from 'next/router'
 
 interface TournamentDetailsProps {
   tournament: TournamentType | null
@@ -47,6 +46,7 @@ const TournamentDetails: React.FC<TournamentDetailsProps> = ({
       />
       <div className='brackets-viewer' id='brackets-viewer'></div>
       <Script
+        key={tournament._id}
         src='https://cdn.jsdelivr.net/npm/brackets-viewer@latest/dist/brackets-viewer.min.js'
         strategy='lazyOnload'
         onLoad={() => setScriptLoaded(true)}
