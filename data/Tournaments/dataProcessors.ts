@@ -36,7 +36,7 @@ export const categorizeData = (tournamentData: any) => {
     match.participants = [match.opponent1, match.opponent2]
   })
 
-  // collect matches into group
+  // collect matches into group for each round.
   organizedData.rounds.forEach((round: any) => (round.matches = []))
   for (let round of organizedData.rounds) {
     for (let match of organizedData.matches)
@@ -44,7 +44,7 @@ export const categorizeData = (tournamentData: any) => {
   }
   delete organizedData.matches
 
-  // collect groups into round
+  // collect rounds into groups for each group.
   organizedData.groups.forEach((group: any) => (group.rounds = []))
   for (let group of organizedData.groups) {
     for (let round of organizedData.rounds)
