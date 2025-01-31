@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose'
-import { model, Schema, Model, Types, HydratedDocument } from 'mongoose'
+import { Document, Schema, Model, Types, HydratedDocument } from 'mongoose'
 import {
   Group,
   Match as M,
@@ -68,7 +68,7 @@ type TournamentDocumentOverrides = {
   }>
 }
 
-type TournamentModelType = Model<ITournament, {}, TournamentDocumentOverrides>
+type TournamentModelType = Model<ITournament, HydratedDocument<ITournament>>
 
 const TournamentSchema = new Schema<ITournament, TournamentModelType>(
   {
@@ -210,7 +210,11 @@ TournamentSchema.virtual('progress').get(function () {
 
 // Check if the model already exists
 export const Tournament =
-  mongoose.models?.Tournament || mongoose.model('Tournament', TournamentSchema)
+  mongoose.models?.Tournament ||
+  mongoose.model<ITournament, TournamentModelType>(
+    'Tournament',
+    TournamentSchema
+  )
 
 export type TournamentType = HydratedDocument<
   ITournament,
