@@ -13,9 +13,9 @@ const TournamentDetailsPage = async ({
   const tournament = await getTournamentById(tournamentId)
 
   //todo:: use this to make brackets ( move into TournamentDetails component)
-  const formatToUIModel = categorizeData(addParcticipantNameInMatch(tournament))
+  // const formatToUIModel = categorizeData(addParcticipantNameInMatch(tournament))
 
-  const tournamentDataForUI = formatToUIModel
+  // const tournamentDataForUI = formatToUIModel
 
   // For the current use of brackets-viewer
   const serializedTournament = JSON.parse(
@@ -33,7 +33,7 @@ const TournamentDetailsPage = async ({
         key={serializedTournament._id}
         tournament={serializedTournament}
       />
-      <TournamentBracket tournamentDataforUI={tournamentDataForUI} />
+      {/* <TournamentBracket tournamentDataforUI={tournamentDataForUI} /> */}
     </div>
   )
 }
