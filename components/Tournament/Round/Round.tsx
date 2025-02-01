@@ -1,5 +1,6 @@
 import React from 'react'
 import { BackConnector } from './Connector'
+import { FrontConnector } from './Connector'
 
 interface RoundProps {
   round: any
