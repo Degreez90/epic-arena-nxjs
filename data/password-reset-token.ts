@@ -1,10 +1,10 @@
-import { db } from '@/lib/db'
+import { connectDB } from '@/lib/mongodb'
+import { PasswordResetToken } from '@/models/PasswordResetToken'
 
 export const getPasswordResetTokenByToken = async (token: string) => {
   try {
-    const passwordResetToken = await db.passwordResetToken.findUnique({
-      where: { token },
-    })
+    await connectDB()
+    const passwordResetToken = await PasswordResetToken.findOne({ token })
 
     return passwordResetToken
   } catch {
@@ -14,9 +14,8 @@ export const getPasswordResetTokenByToken = async (token: string) => {
 
 export const getPasswordResetTokenByEmail = async (token: string) => {
   try {
-    const passwordResetToken = await db.passwordResetToken.findFirst({
-      where: { token },
-    })
+    await connectDB()
+    const passwordResetToken = await PasswordResetToken.findOne({ token })
 
     return passwordResetToken
   } catch {

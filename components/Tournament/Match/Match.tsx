@@ -22,6 +22,7 @@ const Match = ({ match }) => {
         match={match}
         disableAction={tournamentStatus !== 'progress'}
       />
+      <Separator />
     </div>
   )
 }
