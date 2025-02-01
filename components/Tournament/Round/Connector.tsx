@@ -1,9 +1,5 @@
 import React from 'react'
 
-const styles = {
-  connectDown: 'absolute bottom-0 left-1',
-}
-
 interface BackConnectorProps {
   roundIndex: any
   gapBetweenRounds: any
@@ -39,7 +35,7 @@ export const BackConnector: React.FC<BackConnectorProps> = ({
 
 interface FrontConnectorProps {
   isLastRound: any
-  roundIndex: any
+  roundIndex: number
   matchIndex: any
   gapBetweenRounds: any
   isLoserGroup: any
@@ -58,6 +54,16 @@ export const FrontConnector: React.FC<FrontConnectorProps> = ({
 
   if (isLastRound | (isLoserGroup && roundIndex % 2 === 0)) return ''
   if (matchIndex % 2 === 0)
-    return <Box sx={{ ...styles.connectDown, width: connectorWidth }} />
-  else return <Box sx={{ ...styles.connectUp, width: connectorWidth }} />
+    //todo:: fix styles returned
+    return (
+      <div
+        className={`absolute bottom-0 left-1 h-1/2 border-t-2 border-r-2 border-teal-800 ${connectorWidth}`}
+      />
+    )
+  else
+    return (
+      <div
+        className={`absolute top-0 left-1 h-1/2 border-b-2 border-r-2 border-teal-800 ${connectorWidth}`}
+      />
+    )
 }
