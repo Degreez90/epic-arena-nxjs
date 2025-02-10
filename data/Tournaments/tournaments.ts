@@ -15,7 +15,7 @@ export const getTournamentById = async (id: number) => {
 
   const tournament = await Tournament.findOne({
     _id: id,
-  })
+  }).lean()
 
   console.log('here: ', tournament)
 

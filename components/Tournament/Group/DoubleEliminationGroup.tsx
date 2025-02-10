@@ -11,7 +11,7 @@ const styleConstants = {
 const stylesGap = `flex sm:gap-${styleConstants.gapBetweenRounds.sm} md:gap-${styleConstants.gapBetweenRounds.md}`
 
 const DoubleEliminationGroup = (
-  group: any,
+  { group }: { group: any },
   isLoserGroup = false,
   isGrandFinalGroup = false
 ) => {

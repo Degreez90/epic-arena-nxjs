@@ -1,11 +1,13 @@
 import { create } from 'zustand'
 
-interface BearState {
-  bears: number
-  increase: (by: number) => void
+interface TournamentStore {
+  tournamentData: any
+  setTournamentData: (data: any) => void
 }
 
-const useTournamentStore = create<BearState>()((set) => ({
-  bears: 0,
-  increase: (by) => set((state) => ({ bears: state.bears + by })),
+const useTournamentStore = create<TournamentStore>()((set) => ({
+  tournamentData: null,
+  setTournamentData: (data) => set({ tournamentData: data }),
 }))
+
+export default useTournamentStore

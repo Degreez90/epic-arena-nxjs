@@ -7,15 +7,24 @@ export const addParcticipantNameInMatch = (tournamentData: any) => {
     return participant.name
   }
 
-  const updatedData = tournamentData
-  updatedData.foreach(updatedData.match, (match: any) => {
-    match.opponent1Name = getParticipantName(match.opponent1)
-    match.opponent2Name = getParticipantName(match.opponent2)
-  })
-  return tournamentData
+  const updatedData = {
+    ...tournamentData,
+    match: tournamentData.match.map((match: any) => ({
+      ...match,
+      opponent1: match.opponent1
+        ? { ...match.opponent1, name: getParticipantName(match.opponent1.id) }
+        : null,
+      opponent2: match.opponent2
+        ? { ...match.opponent2, name: getParticipantName(match.opponent2.id) }
+        : null,
+    })),
+  }
+
+  return updatedData
 }
 
 export const categorizeData = (tournamentData: any) => {
+  console.log('tournamentData: ', tournamentData)
   const organizedData = {
     _id: tournamentData._id,
     name: tournamentData.name,
@@ -30,6 +39,7 @@ export const categorizeData = (tournamentData: any) => {
     status: tournamentData.status,
     player: tournamentData.player,
   }
+  console.log('organizedData: ', organizedData)
 
   // create participants property in matches and add 'opponent1' and 'opponent2'
   organizedData.matches.forEach((match: any) => {
@@ -59,6 +69,8 @@ export const categorizeData = (tournamentData: any) => {
       if (group.stage_id === stage.id) stage.groups.push(group)
   }
   delete organizedData.groups
+
+  console.log('organizedData after: ', organizedData)
 
   return organizedData
 }
