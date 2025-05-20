@@ -23,15 +23,6 @@ const TournamentDetailsPage = async ({
 
   console.log('tournamentDataForUI: ', tournamentDataForUI)
 
-  // For the current use of brackets-viewer
-  const serializedTournament = JSON.parse(
-    JSON.stringify(tournament, (key, value) => {
-      if (value instanceof Date) {
-        return value.toISOString() // Convert Date to string
-      }
-      return value
-    })
-  )
   console.log('tournament: ', tournament)
   return (
     <div>
