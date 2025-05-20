@@ -18,6 +18,33 @@ export const getTournamentById = async (id: number) => {
   }).lean()
 
   console.log('here: ', tournament)
+  if (!tournament) return null
 
-  return tournament
+  return serialize(tournament)
+
+  function serialize(obj: any): any {
+    if (obj == null) return obj
+    if (typeof obj !== 'object') return obj
+
+    // Handle ObjectId
+    if (obj._bsontype === 'ObjectID' || obj._bsontype === 'ObjectId') {
+      return obj.toString()
+    }
+
+    // Handle Date
+    if (obj instanceof Date) {
+      return obj.toISOString()
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(serialize)
+    }
+
+    // Recursively serialize all object properties
+    const result: any = {}
+    for (const key in obj) {
+      result[key] = serialize(obj[key])
+    }
+    return result
+  }
 }

@@ -8,6 +8,7 @@ import {
   Game,
   TournamentStatus,
 } from '@/models/tournament'
+
 import { Group, Round, MatchGame, Stage } from 'brackets-model'
 
 export interface TournamentListProps {
@@ -26,4 +27,21 @@ export interface OrganizedTournamentData {
   games: Game[]
   status: TournamentStatus
   player: any // Assuming player is a property in the original data
+}
+
+export interface SerializedTournament {
+  _id: number | string
+  name: string
+  description: string
+  participant: CustomParticipant[]
+  stage: Stage[]
+  group: Group[]
+  round: Round[]
+  match: Match[]
+  match_game: MatchGame[]
+  game: Game[]
+  participantGameMatrix: { participantId: number; games: Game[] }[]
+  status: TournamentStatus
+  createdBy: string // or Types.ObjectId, but usually string after serialization
+  progress: number
 }
