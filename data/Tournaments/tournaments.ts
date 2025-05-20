@@ -1,6 +1,7 @@
 import { connectDB } from '@/lib/mongodb'
 import { ITournament, TournamentType } from '@/models/tournament'
 import { Tournament } from '@/models/tournament'
+import { Console } from 'console'
 
 export const getAllTournaments = async () => {
   await connectDB()
@@ -20,8 +21,12 @@ export const getTournamentById = async (id: number) => {
   console.log('here: ', tournament)
   if (!tournament) return null
 
+  console.log('SerializedTournament: ', serialize(tournament))
+  // Convert ObjectId to string
+
   return serialize(tournament)
 
+  //* serialize tournament
   function serialize(obj: any): any {
     if (obj == null) return obj
     if (typeof obj !== 'object') return obj

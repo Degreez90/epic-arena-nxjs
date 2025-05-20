@@ -4,8 +4,10 @@ import Script from 'next/script'
 
 import { TournamentType } from '@/models/tournament'
 
+import { SerializedTournament } from '@/types/tournament/tournament'
+
 interface TournamentDetailsProps {
-  tournament: TournamentType | null
+  tournament: SerializedTournament | null
 }
 
 export const dynamic = 'force-dynamic' // Force dynamic rendering
