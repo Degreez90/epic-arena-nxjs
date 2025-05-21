@@ -1,7 +1,16 @@
-export const addParcticipantNameInMatch = (tournamentData: any) => {
+import {
+  CustomParticipantFrontend,
+  MatchFrontend,
+  OrganizedTournamentData,
+  SerializedTournament,
+} from '@/types/tournament/tournament'
+
+export const addParcticipantNameInMatch = (
+  tournamentData: SerializedTournament
+) => {
   const getParticipantName = (Id: number) => {
     const participant = tournamentData.participant.find(
-      (participant: any) => participant.id === Id
+      (participant: CustomParticipantFrontend) => participant.id === Id
     )
     if (!participant) return 'N/A'
     return participant.name
@@ -9,7 +18,7 @@ export const addParcticipantNameInMatch = (tournamentData: any) => {
 
   const updatedData = {
     ...tournamentData,
-    match: tournamentData.match.map((match: any) => ({
+    match: tournamentData.match.map((match: MatchFrontend) => ({
       ...match,
       opponent1: match.opponent1
         ? { ...match.opponent1, name: getParticipantName(match.opponent1.id) }

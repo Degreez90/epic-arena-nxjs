@@ -21,9 +21,7 @@ export const getTournamentById = async (id: number) => {
   console.log('here: ', tournament)
   if (!tournament) return null
 
-  console.log('SerializedTournament: ', serialize(tournament))
   // Convert ObjectId to string
-
   return serialize(tournament)
 
   //* serialize tournament

@@ -2,24 +2,8 @@
 import React, { useEffect } from 'react'
 import DoubleEliminationStage from '@/components/Tournament/Stage/DoubleEliminationStage'
 import useTournamentStore from '@/store/useTournamentStore'
-
-interface TournamentBracketProps {
-  tournamentDataForUI: {
-    _id: any
-    name: any
-    description: any
-    participants: any
-    stages: any
-    groups: any
-    rounds: any
-    matches: any
-    match_games: any
-    games: any
-    status: any
-    player: any
-  }
-  tournament: any
-}
+import { SerializedTournament } from '@/types/tournament/tournament'
+import { TournamentBracketProps } from '@/types/tournament/tournament'
 
 const TournamentBracket: React.FC<TournamentBracketProps> = ({
   tournamentDataForUI,
