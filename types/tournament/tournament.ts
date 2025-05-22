@@ -2,20 +2,43 @@ import { TournamentType } from '@/models/tournament'
 
 export type type = 'Single Elimination' | 'Double Elimination'
 
-import {
-  CustomParticipant,
-  Match,
-  Game,
-  TournamentStatus,
-} from '@/models/tournament'
+import { Game, TournamentStatus } from '@/models/tournament'
 
-import { Group, Round, MatchGame, Stage, Match as M } from 'brackets-model'
+import {
+  Group,
+  Round,
+  MatchGame,
+  Stage,
+  Match as M,
+  Participant,
+  ParticipantResult,
+} from 'brackets-model'
+
+//TODO:: Make a interface for Participant that extends from brackets-model ParticipantResult
+export interface ParticipantWithResult extends ParticipantResult {
+  id: number
+  name?: string
+  userId?: string // string, not ObjectId
+  invitation?: 'accepted' | 'pending' | 'declined'
+}
 
 export interface MatchFrontend extends M {
   gameId?: string | null
-  opponent1: { id: number; name?: string; [key: string]: any } | null
-  opponent2: { id: number; name?: string; [key: string]: any } | null
-  // Add any other frontend-specific fields here
+  opponent1: ParticipantWithResult | null
+  opponent2: ParticipantWithResult | null
+  participants?: ({ id: number; name?: string } | null)[]
+}
+
+export interface RoundFrontend extends Round {
+  matches: MatchFrontend[]
+}
+
+export interface GroupFrontend extends Group {
+  rounds: RoundFrontend[]
+}
+
+export interface StageFrontend extends Stage {
+  groups: GroupFrontend[]
 }
 
 export interface TournamentListProps {
@@ -23,17 +46,15 @@ export interface TournamentListProps {
 }
 
 export interface OrganizedTournamentData {
-  _id: number
+  _id: number | string
   name: string
   description: string
-  participants: CustomParticipant[]
-  stages: (Stage & {
-    groups: (Group & { rounds: (Round & { matches: Match[] })[] })[]
-  })[]
+  participants: CustomParticipantFrontend[]
+  stages: StageFrontend[]
   match_games: MatchGame[]
   games: Game[]
   status: TournamentStatus
-  player: any // Assuming player is a property in the original data
+  player?: any // Assuming player is a property in the original data
 }
 
 export interface CustomParticipantFrontend {
@@ -42,14 +63,15 @@ export interface CustomParticipantFrontend {
   userId?: string // string, not ObjectId
   invitation?: 'accepted' | 'pending' | 'declined'
 }
+
 export interface SerializedTournament {
   _id: number | string
   name: string
   description: string
   participant: CustomParticipantFrontend[]
-  stage: Stage[]
-  group: Group[]
-  round: Round[]
+  stage: StageFrontend[]
+  group: GroupFrontend[]
+  round: RoundFrontend[]
   match: MatchFrontend[]
   match_game: MatchGame[]
   game: Game[]
@@ -57,6 +79,7 @@ export interface SerializedTournament {
   status: TournamentStatus
   createdBy: string // or Types.ObjectId, but usually string after serialization
   progress: number
+  player?: string // or Types.ObjectId, but usually string after serialization
 }
 
 export interface TournamentBracketProps {

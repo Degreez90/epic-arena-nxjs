@@ -1,5 +1,6 @@
 import React from 'react'
 import Round from '../Round/Round'
+import { GroupFrontend, RoundFrontend } from '@/types/tournament/tournament'
 
 const styleConstants = {
   gapBetweenRounds: {
@@ -11,7 +12,7 @@ const styleConstants = {
 const stylesGap = `flex sm:gap-${styleConstants.gapBetweenRounds.sm} md:gap-${styleConstants.gapBetweenRounds.md}`
 
 const DoubleEliminationGroup = (
-  { group }: { group: any },
+  { group }: { group: GroupFrontend },
   isLoserGroup = false,
   isGrandFinalGroup = false
 ) => {
@@ -32,19 +33,21 @@ const DoubleEliminationGroup = (
         <h2>Upper Bracket</h2>
       )}
       <div className={`${stylesGap} flex`}>
-        {rounds.map((round: any, i: any, rounds: any) => {
-          return (
-            <Round
-              key={i}
-              round={round}
-              roundIndex={i}
-              roundLength={rounds.length}
-              gapBetweenRounds={styleConstants.gapBetweenRounds}
-              isLoserGroup={isLoserGroup}
-              isGrandFinalGroup={isGrandFinalGroup}
-            />
-          )
-        })}
+        {rounds.map(
+          (round: RoundFrontend, i: number, rounds: RoundFrontend[]) => {
+            return (
+              <Round
+                key={i}
+                round={round}
+                roundIndex={i}
+                roundLength={rounds.length}
+                gapBetweenRounds={styleConstants.gapBetweenRounds}
+                isLoserGroup={isLoserGroup}
+                isGrandFinalGroup={isGrandFinalGroup}
+              />
+            )
+          }
+        )}
       </div>
     </div>
   )

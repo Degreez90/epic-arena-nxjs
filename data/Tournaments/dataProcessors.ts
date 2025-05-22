@@ -1,9 +1,13 @@
 import {
   CustomParticipantFrontend,
+  GroupFrontend,
   MatchFrontend,
   OrganizedTournamentData,
+  RoundFrontend,
   SerializedTournament,
+  StageFrontend,
 } from '@/types/tournament/tournament'
+import { Round, Group, Stage } from 'brackets-model'
 
 export const addParcticipantNameInMatch = (
   tournamentData: SerializedTournament
@@ -32,54 +36,51 @@ export const addParcticipantNameInMatch = (
   return updatedData
 }
 
-export const categorizeData = (tournamentData: any) => {
-  console.log('tournamentData: ', tournamentData)
-  const organizedData = {
+export const categorizeData = (
+  tournamentData: SerializedTournament
+): OrganizedTournamentData => {
+  // 1. Add participants to matches
+  const matches: MatchFrontend[] = (
+    tournamentData.match as MatchFrontend[]
+  ).map((match) => ({
+    ...match,
+    participants: [match.opponent1, match.opponent2],
+  }))
+
+  // 2. Nest matches into rounds
+  const rounds: RoundFrontend[] = (tournamentData.round as Round[]).map(
+    (round) => ({
+      ...round,
+      matches: matches.filter((match) => match.round_id === round.id),
+    })
+  )
+
+  // 3. Nest rounds into groups
+  const groups: GroupFrontend[] = (tournamentData.group as Group[]).map(
+    (group) => ({
+      ...group,
+      rounds: rounds.filter((round) => round.group_id === group.id),
+    })
+  )
+
+  // 4. Nest groups into stages
+  const stages: StageFrontend[] = (tournamentData.stage as Stage[]).map(
+    (stage) => ({
+      ...stage,
+      groups: groups.filter((group) => group.stage_id === stage.id),
+    })
+  )
+
+  // 5. Return the final object
+  return {
     _id: tournamentData._id,
     name: tournamentData.name,
     description: tournamentData.description,
     participants: tournamentData.participant,
-    stages: tournamentData.stage,
-    groups: tournamentData.group,
-    rounds: tournamentData.round,
-    matches: tournamentData.match,
+    stages,
     match_games: tournamentData.match_game,
     games: tournamentData.game,
     status: tournamentData.status,
     player: tournamentData.player,
   }
-  console.log('organizedData: ', organizedData)
-
-  // create participants property in matches and add 'opponent1' and 'opponent2'
-  organizedData.matches.forEach((match: any) => {
-    match.participants = [match.opponent1, match.opponent2]
-  })
-
-  // collect matches into group for each round.
-  organizedData.rounds.forEach((round: any) => (round.matches = []))
-  for (let round of organizedData.rounds) {
-    for (let match of organizedData.matches)
-      if (match.round_id === round.id) round.matches.push({ ...match })
-  }
-  delete organizedData.matches
-
-  // collect rounds into groups for each group.
-  organizedData.groups.forEach((group: any) => (group.rounds = []))
-  for (let group of organizedData.groups) {
-    for (let round of organizedData.rounds)
-      if (round.group_id === group.id) group.rounds.push(round)
-  }
-  delete organizedData.rounds
-
-  // collect groups into stage
-  organizedData.stages.forEach((stage: any) => (stage.groups = []))
-  for (let stage of organizedData.stages) {
-    for (let group of organizedData.groups)
-      if (group.stage_id === stage.id) stage.groups.push(group)
-  }
-  delete organizedData.groups
-
-  console.log('organizedData after: ', organizedData)
-
-  return organizedData
 }

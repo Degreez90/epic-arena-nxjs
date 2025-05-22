@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose'
-import { Document, Schema, Model, Types, HydratedDocument } from 'mongoose'
+import { Schema, Model, Types, HydratedDocument } from 'mongoose'
 import {
   Group,
   Match as M,
