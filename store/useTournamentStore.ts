@@ -1,7 +1,8 @@
+import { SerializedTournament } from '@/types/tournament/tournament'
 import { create } from 'zustand'
 
 interface TournamentStore {
-  tournamentData: any
+  tournamentData: SerializedTournament | null
   setTournamentData: (data: any) => void
 }
 

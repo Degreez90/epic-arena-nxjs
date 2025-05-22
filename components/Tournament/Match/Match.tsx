@@ -7,6 +7,7 @@ import { EditScoreButton } from './EditScoreButton'
 import { Participant } from './Participant'
 import { useRouter } from 'next/router'
 import useTournamentStore from '@/store/useTournamentStore'
+import { MatchFrontend } from '@/types/tournament/tournament'
 
 const styleConstants = {
   borderRadius: 'rounded-sm',
@@ -26,7 +27,7 @@ interface Match {
 }
 
 interface MatchProps {
-  match: Match
+  match: MatchFrontend
 }
 
 const Match: React.FC<MatchProps> = ({ match }) => {

@@ -2,11 +2,12 @@ import React from 'react'
 import { BackConnector } from './Connector'
 import { FrontConnector } from './Connector'
 import Match from '@/components/Tournament/Match/Match'
+import { MatchFrontend, RoundFrontend } from '@/types/tournament/tournament'
 
 interface RoundProps {
-  round: any
+  round: RoundFrontend
   roundIndex: number
-  gapBetweenRounds: any
+  gapBetweenRounds: { sm: number; md: number }
   isLoserGroup?: boolean
   roundLength: number
   isGrandFinalGroup?: boolean
@@ -22,7 +23,11 @@ const Round: React.FC<RoundProps> = ({
 }) => {
   const isLastRound = roundLength - 1 === roundIndex
 
-  function getRoundName(roundIndex: any, roundLength: any, isLastRound: any) {
+  function getRoundName(
+    roundIndex: number,
+    roundLength: number,
+    isLastRound: boolean
+  ) {
     if (!(isLoserGroup || isGrandFinalGroup)) {
       return getMainRoundName(roundIndex, roundLength, isLastRound)
     }
@@ -31,9 +36,9 @@ const Round: React.FC<RoundProps> = ({
   }
 
   function getMainRoundName(
-    roundIndex: any,
-    roundLength: any,
-    isLastRound: any
+    roundIndex: number,
+    roundLength: number,
+    isLastRound: boolean
   ) {
     if (isLastRound) return 'Final Round'
     if (roundIndex === 0) return 'Round 1'
@@ -42,11 +47,15 @@ const Round: React.FC<RoundProps> = ({
       return `Round ${roundIndex + 1}`
     }
   }
-  function getLoserBracketRoundName(roundIndex: any, isLastRound: any) {
+
+  // Function to get the name of the loser bracket round
+  function getLoserBracketRoundName(roundIndex: number, isLastRound: boolean) {
     if (isLastRound) return 'LB Final Round'
     return `LB Round ${roundIndex + 1}`
   }
-  function getGrandFinalRoundName(isLastRound: any) {
+
+  // Function to get the name of the grand final round
+  function getGrandFinalRoundName(isLastRound: boolean) {
     if (isLastRound || roundLength === 1) return 'Grand Final'
     return `GF Round 1`
   }
@@ -60,7 +69,7 @@ const Round: React.FC<RoundProps> = ({
         {/* Name of the round */}
       </div>
       <div className='flex gap-[15] flex-col flex-1'>
-        {round.matches.map((match: any, matchIndex: any) => (
+        {round.matches.map((match: MatchFrontend, matchIndex: number) => (
           <div key={matchIndex} className='flex flex-1'>
             <div className='relative flex items-center h-full'>
               <BackConnector

@@ -26,7 +26,6 @@ const TournamentDetailsPage = async ({
 
   console.log('tournamentDataForUI: ', tournamentDataForUI)
 
-  console.log('tournament: ', tournament)
   return (
     <div>
       <TournamentDetails key={tournament._id} tournament={tournament} />

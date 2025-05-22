@@ -1,10 +1,8 @@
+import { MatchFrontend } from '@/types/tournament/tournament'
 import { EditScoreButton } from './EditScoreButton'
 
 interface ParticipantProps {
-  match: {
-    status: number
-    participants: { name?: string; result?: string; score?: number }[]
-  }
+  match: MatchFrontend
   position?: string
   disableAction: boolean
 }
@@ -16,7 +14,9 @@ export const Participant: React.FC<ParticipantProps> = ({
 }) => {
   const matchCompleted = match.status === 4 || match.status === 5
   const matchRunning = match.status === 3
-  const participant = match.participants[position === 'top' ? 0 : 1]
+  const participant = (match.participants ?? [null, null])[
+    position === 'top' ? 0 : 1
+  ]
 
   return (
     <div

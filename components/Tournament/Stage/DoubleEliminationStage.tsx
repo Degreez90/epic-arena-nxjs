@@ -1,7 +1,8 @@
 import React from 'react'
 import DoubleEliminationGroup from '@/components/Tournament/Group/DoubleEliminationGroup'
+import { StageFrontend } from '@/types/tournament/tournament'
 
-const DoubleEliminationStage = ({ stage }: { stage: any }) => {
+const DoubleEliminationStage = ({ stage }: { stage: StageFrontend }) => {
   console.log('stage: ', stage)
   const [winnerGroup, loserGroup, grandFinalRound] = stage.groups
 
