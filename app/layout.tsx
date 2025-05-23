@@ -5,9 +5,7 @@ import { SessionProvider } from 'next-auth/react'
 import { auth } from '@/auth'
 import Head from 'next/head'
 import Nav from '@/components/Nav/Nav'
-//redux
-// import { store } from '@/store'
-// import { Provider } from 'react-redux'
+import Hero from '@/components/Hero/Hero'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,7 +26,7 @@ export default async function RootLayout({
       <html lang='en'>
         <body className={`${inter.className}`}>
           <Nav />
-
+          <Hero />
           {children}
         </body>
       </html>

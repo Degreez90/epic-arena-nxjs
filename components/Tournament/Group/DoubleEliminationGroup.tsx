@@ -11,11 +11,18 @@ const styleConstants = {
 
 const stylesGap = `flex sm:gap-${styleConstants.gapBetweenRounds.sm} md:gap-${styleConstants.gapBetweenRounds.md}`
 
-const DoubleEliminationGroup = (
-  { group }: { group: GroupFrontend },
+interface DoubleEliminationGroupProps {
+  group: GroupFrontend
+  isLoserGroup?: boolean
+  isGrandFinalGroup?: boolean
+}
+
+const DoubleEliminationGroup: React.FC<DoubleEliminationGroupProps> = ({
+  group,
   isLoserGroup = false,
-  isGrandFinalGroup = false
-) => {
+  isGrandFinalGroup = false,
+}) => {
+  console.log('group: ', group)
   let rounds = group.rounds
   if (isGrandFinalGroup) {
     const roundOneWinner = rounds[0].matches[0].opponent1
@@ -32,7 +39,7 @@ const DoubleEliminationGroup = (
       ) : (
         <h2>Upper Bracket</h2>
       )}
-      <div className={`${stylesGap} flex`}>
+      <div className={`${stylesGap} flex flex-row gap-16`}>
         {rounds.map(
           (round: RoundFrontend, i: number, rounds: RoundFrontend[]) => {
             return (

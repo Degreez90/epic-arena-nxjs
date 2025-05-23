@@ -4,6 +4,7 @@ import { addParcticipantNameInMatch } from '@/data/Tournaments/dataProcessors'
 import { categorizeData } from '@/data/Tournaments/dataProcessors'
 import TournamentBracket from '@/components/Tournament/TournamentBracket'
 import { SerializedTournament } from '@/types/tournament/tournament'
+import Container from '@/components/Container'
 
 const TournamentDetailsPage = async ({
   params: { id },
@@ -27,13 +28,15 @@ const TournamentDetailsPage = async ({
   console.log('tournamentDataForUI: ', tournamentDataForUI)
 
   return (
-    <div>
-      <TournamentDetails key={tournament._id} tournament={tournament} />
-      <TournamentBracket
-        tournamentDataForUI={tournamentDataForUI}
-        tournament={tournament}
-      />
-    </div>
+    <Container>
+      <div className='flex justify-center'>
+        {/* <TournamentDetails key={tournament._id} tournament={tournament} /> */}
+        <TournamentBracket
+          tournamentDataForUI={tournamentDataForUI}
+          tournament={tournament}
+        />
+      </div>
+    </Container>
   )
 }
 

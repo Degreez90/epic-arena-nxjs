@@ -1,7 +1,7 @@
 import React from 'react'
 import Container from '../Container'
 import tourneydata from '@/utils/games'
-import Gamelist from './Gamelist'
+import Gamelist from '@/components/Games/Gamelist'
 
 const Games = () => {
   return (
