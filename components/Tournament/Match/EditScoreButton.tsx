@@ -1,5 +1,7 @@
+import { MatchFrontend } from '@/types/tournament/tournament'
+
 interface EditScoreButtonProps {
-  match: any
+  match: MatchFrontend
   disableButton: boolean
 }
 

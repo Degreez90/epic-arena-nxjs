@@ -14,21 +14,12 @@ import {
   ParticipantResult,
 } from 'brackets-model'
 
-//TODO:: Make a interface for Participant that extends from brackets-model ParticipantResult
-export interface ParticipantWithResult extends ParticipantResult {
-  id: number
-  name?: string
-  userId?: string // string, not ObjectId
-  invitation?: 'accepted' | 'pending' | 'declined'
-}
-
 export interface MatchFrontend extends M {
   gameId?: string | null
-  opponent1: ParticipantWithResult | null
-  opponent2: ParticipantWithResult | null
-  participants?: ({ id: number; name?: string } | null)[]
+  opponent1: CustomParticipantFrontend | null
+  opponent2: CustomParticipantFrontend | null
+  participants?: (CustomParticipantFrontend | null)[]
 }
-
 export interface RoundFrontend extends Round {
   matches: MatchFrontend[]
 }
@@ -57,7 +48,7 @@ export interface OrganizedTournamentData {
   player?: any // Assuming player is a property in the original data
 }
 
-export interface CustomParticipantFrontend {
+export interface CustomParticipantFrontend extends ParticipantResult {
   id: number
   name: string
   userId?: string // string, not ObjectId
