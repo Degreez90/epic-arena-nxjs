@@ -41,9 +41,9 @@ const Match: React.FC<MatchProps> = ({ match }) => {
   const matchReady = match.status === 2
 
   return (
-    <div className='rounded-sm sm:text-sm md:text-base text-gray-500 '>
+    <div className='rounded-sm sm:text-sm md:text-base text-gray-500 w-full'>
       <div
-        className={`relative ${styleConstants.borderRadius} border-solid border bg-slate-500 hover:border hover:border-solid hover:border-s-lime-600 shadow-md w-max z-10`}
+        className={`relative ${styleConstants.borderRadius} border-solid border bg-slate-500 hover:border hover:border-solid hover:border-s-lime-600 shadow-md w-full z-10`}
       >
         <Participant
           match={match}

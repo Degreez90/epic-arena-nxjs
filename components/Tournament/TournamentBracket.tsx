@@ -20,7 +20,15 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
   const stage = tournamentDataForUI.stages[0]
   return (
     <div>
-      <DoubleEliminationStage stage={stage} />
+      {stage && (
+        <>
+          {stage.type === 'single_elimination' ? (
+            <DoubleEliminationStage stage={stage} />
+          ) : (
+            <div>Stage Unavailable</div>
+          )}
+        </>
+      )}
     </div>
   )
 }

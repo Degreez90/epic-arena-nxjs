@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import React, { useState, useTransition } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import * as z from 'zod'
-import { CardWrapper } from '../auth/Card-Wrapper'
+import { CardWrapper } from '../Auth/Card-Wrapper'
 import {
   FormControl,
   FormField,
