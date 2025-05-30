@@ -7,11 +7,16 @@ import { SerializedTournament } from '@/types/tournament/tournament'
 import Container from '@/components/Container'
 
 const TournamentDetailsPage = async ({
-  params: { id },
+  params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) => {
+  const { id } = await params
   const tournamentId = Number(id)
+
+  if (isNaN(tournamentId)) {
+    return <div>Invalid tournament ID</div>
+  }
   const tournament: SerializedTournament | null = await getTournamentById(
     tournamentId
   )
@@ -31,10 +36,7 @@ const TournamentDetailsPage = async ({
     <Container>
       <div className='flex justify-center'>
         {/* <TournamentDetails key={tournament._id} tournament={tournament} /> */}
-        <TournamentBracket
-          tournamentDataForUI={tournamentDataForUI}
-          tournament={tournament}
-        />
+        <TournamentBracket tournamentDataForUI={tournamentDataForUI} />
       </div>
     </Container>
   )

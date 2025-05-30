@@ -1,25 +1,37 @@
 'use client'
-import React, { useEffect } from 'react'
+import React, { use, useEffect } from 'react'
 import DoubleEliminationStage from '@/components/Tournament/Stage/DoubleEliminationStage'
-import useTournamentStore from '@/store/useTournamentStore'
 import { SerializedTournament } from '@/types/tournament/tournament'
 import { TournamentBracketProps } from '@/types/tournament/tournament'
+import { useTournamentStore } from '@/store/useTournamentStore'
+import MatchScoreAndDetailDialog from './Match/MatchScoreAndDetailDialog'
 
 const TournamentBracket: React.FC<TournamentBracketProps> = ({
   tournamentDataForUI,
-  tournament,
 }) => {
   const { setTournamentData } = useTournamentStore()
+  const dialog = useTournamentStore((state) => state.dialog)
+  const closeDialog = useTournamentStore((state) => state.closeDialog)
+
+  console.log('Current Zustand state:', useTournamentStore.getState())
 
   useEffect(() => {
-    if (tournament) setTournamentData(tournament)
-  }, [tournament, setTournamentData])
+    setTournamentData(tournamentDataForUI)
+  }, [setTournamentData, tournamentDataForUI])
 
   console.log('tournamentDataForUI from bracket: ', tournamentDataForUI)
 
   const stage = tournamentDataForUI.stages[0]
   return (
     <div>
+      {dialog.match && (
+        <MatchScoreAndDetailDialog
+          open={dialog.open}
+          onClose={closeDialog}
+          match={dialog.match}
+          tab={dialog.tab}
+        />
+      )}
       {stage && (
         <>
           {stage.type === 'single_elimination' ? (

@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button'
 import { EditScoreButton } from './EditScoreButton'
 import { Participant } from './Participant'
 import { useRouter } from 'next/router'
-import useTournamentStore from '@/store/useTournamentStore'
+import { useTournamentStore } from '@/store/useTournamentStore'
 import { MatchFrontend } from '@/types/tournament/tournament'
+import { tabs } from '@/components/Tournament/Match/MatchScoreAndDetailDialog'
 
 const styleConstants = {
   borderRadius: 'rounded-sm',
@@ -34,7 +35,7 @@ const Match: React.FC<MatchProps> = ({ match }) => {
   // const router = useRouter()
   // const { id } = router.query
 
-  const { tournamentData } = useTournamentStore()
+  const { tournamentData, openMatchScoreEditDialog } = useTournamentStore()
 
   const tournamentStatus = tournamentData?.status
 
@@ -58,7 +59,7 @@ const Match: React.FC<MatchProps> = ({ match }) => {
         {matchReady && (
           <EditScoreButton
             match={match}
-            disableButton={tournamentStatus !== 'progress'}
+            disableButton={tournamentStatus !== 'pending'}
           />
         )}
       </div>
@@ -69,9 +70,7 @@ const Match: React.FC<MatchProps> = ({ match }) => {
       >
         <div className='w-full h-[0.55rem] bg-bracket-background rounded opacity-90 flex justify-center z-5'>
           <Button
-          // onClick={() =>
-          //   openMatchScoreEditDialog(match, matchEditDialogTabs.matchDetail)
-          // }
+            onClick={() => openMatchScoreEditDialog(match, tabs.matchDetails)}
           >
             <BsFillInfoCircleFill
               className='fill-current text-lightgrey hover:text-primary-light'
