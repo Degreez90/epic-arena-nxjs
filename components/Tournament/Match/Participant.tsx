@@ -22,7 +22,7 @@ export const Participant: React.FC<ParticipantProps> = ({
     <div
       className={`flex items-center ${
         position === 'top' ? 'border-b' : 'border-t'
-      } border-gray-300 p-2`}
+      } border-slate-500 p-2`}
     >
       <span className='flex-1 text-gray-800'>{participant?.name}</span>
       <span

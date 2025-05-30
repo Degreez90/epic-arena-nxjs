@@ -75,5 +75,4 @@ export interface SerializedTournament {
 
 export interface TournamentBracketProps {
   tournamentDataForUI: OrganizedTournamentData
-  tournament: SerializedTournament
 }
