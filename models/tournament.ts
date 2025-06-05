@@ -13,6 +13,7 @@ import {
 export declare type CustomParticipant = Participant & {
   userId?: Types.ObjectId
   invitation?: 'accepted' | 'pending' | 'declined'
+  [key: string]: unknown
 }
 export interface Match extends M {
   gameId: Types.ObjectId | null

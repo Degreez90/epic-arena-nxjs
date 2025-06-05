@@ -62,13 +62,12 @@ const Round: React.FC<RoundProps> = ({
 
   return (
     <div className='flex flex-col pb-4 round'>
-      <div className='mb-5 bg-slate-400 h-10 w-40 flex items-center rounded-md justify-center'>
-        <h2 className='text-xs'>
+      <div className='mb-5 bg-slate-400 h-10 w-52 flex items-center rounded-md justify-center'>
+        <h2 className='text-xs sm:text-sm md:text-base font-bold text-gray-800 tracking-wide'>
           {getRoundName(roundIndex, roundLength, isLastRound)}
-        </h2>{' '}
-        {/* Name of the round */}
+        </h2>
       </div>
-      <div className='flex gap-[15px] flex-col flex-1'>
+      <div className='flex gap-[60px] flex-col flex-1'>
         {round.matches.map((match: MatchFrontend, matchIndex: number) => (
           <div key={matchIndex} className='flex flex-1'>
             <div className='relative flex items-center h-full'>
@@ -78,7 +77,7 @@ const Round: React.FC<RoundProps> = ({
                 isLoserGroup={isLoserGroup || isGrandFinalGroup}
               />
             </div>
-            <div className='flex flex-1 items-center w-full'>
+            <div className='flex items-center w-full'>
               <Match match={match} />
             </div>
             <div className='relative flex items-center h-full'>

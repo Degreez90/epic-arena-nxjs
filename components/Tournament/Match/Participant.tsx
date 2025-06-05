@@ -18,17 +18,29 @@ export const Participant: React.FC<ParticipantProps> = ({
     position === 'top' ? 0 : 1
   ]
 
+  const isWinner = participant?.result === 'win'
+
   return (
     <div
-      className={`flex items-center ${
-        position === 'top' ? 'border-b' : 'border-t'
-      } border-slate-500 p-2`}
+      className={`
+        flex items-center
+        ${position === 'top' ? 'border-b' : 'border-t'}
+        p-2
+        ${
+          isWinner
+            ? 'bg-green-50 border-green-400'
+            : 'bg-slate-100 border-slate-300'
+        }
+        border
+        rounded
+        transition-colors
+      `}
     >
       <span className='flex-1 text-gray-800'>{participant?.name}</span>
       <span
         className={`relative ${
-          !(matchCompleted || matchRunning) ? 'invisible' : ''
-        } ${participant?.result === 'win' ? 'font-bold' : ''}`}
+          isWinner ? 'font-bold text-green-700' : 'text-gray-800'
+        }`}
       >
         {matchRunning && !participant?.score ? (
           <EditScoreButton match={match} disableButton={disableAction} />

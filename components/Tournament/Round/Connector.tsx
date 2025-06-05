@@ -57,7 +57,7 @@ export const FrontConnector: React.FC<FrontConnectorProps> = ({
     //todo:: fix styles returned
     return (
       <div
-        className={`absolute bottom-0 left-1 h-1/2 border-t-2 border-r-2 border-t-teal-200 border-r-teal-200 w-[10px] md:w-[15px]`}
+        className={`absolute bottom-0 left-1 h-1/2 border-t-2 border-r-2 border-t-teal-200 border-r-teal-200 w-[10px] md:w-[15px]`} // connect down
       />
     )
   else

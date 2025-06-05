@@ -1,6 +1,6 @@
 'use server'
 
-import { Tournament } from '@/models/tournament'
+import { CustomParticipant, Tournament } from '@/models/tournament'
 import type { CreateTournamentType } from '@/schemas/createTournament'
 import { CreateTournamentSchema } from '@/schemas/createTournament'
 import { currentUser } from '@/lib/auth'
@@ -40,7 +40,9 @@ const createTournament = async (data: CreateTournamentType) => {
     const myDB = await MyDB.build(tournament._id)
     const manager = new BracketsManager(myDB)
 
-    const participants = [
+    //! Dummy participants for testing
+    // In a real application, you would fetch participants from the database or another source
+    const participants: CustomParticipant[] = [
       { id: 7, name: 'Seed 1', tournament_id: tournament._id },
       { id: 55, name: 'Seed 2', tournament_id: tournament._id },
       { id: 53, name: 'Seed 3', tournament_id: tournament._id },

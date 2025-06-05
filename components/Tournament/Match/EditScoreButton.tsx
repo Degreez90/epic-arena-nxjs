@@ -31,15 +31,18 @@ export const EditScoreButton: React.FC<EditScoreButtonProps> = ({
           <span>
             <Button
               type='button'
+              disabled={disableButton}
               className={`
             absolute
             min-w-[2rem] sm:min-w-[2.5rem]
             h-full
-            bg-slate-500
+            bg-slate-100
+            border-slate-300
+            border-b border-t
             top-0 right-0
             flex items-center justify-center
             p-2
-            rounded-tr-md rounded-br-md
+            rounded-tr-sm rounded-br-sm rounded-l-none
             z-100
             ${disableButton ? 'opacity-50' : ''}
           `}
