@@ -39,38 +39,41 @@ const Match: React.FC<MatchProps> = ({ match }) => {
 
   const tournamentStatus = tournamentData?.status
 
-  const matchReady = match.status === 2
+  const matchReady = match.status === 2 //! Originally match.status === 2
 
   return (
-    <div className='rounded-sm sm:text-sm md:text-base text-gray-500 w-full'>
+    <div className='relative group rounded-sm sm:text-sm md:text-base text-gray-500 w-full'>
       <div
-        className={`relative ${styleConstants.borderRadius} border-solid border bg-slate-500 hover:border hover:border-solid hover:border-s-lime-600 shadow-md w-full z-10`}
+        className={`relative ${styleConstants.borderRadius} border-solid border bg-slate-500 hover:border hover:border-solid hover:border-teal-500 shadow-md w-full z-10`}
       >
         <Participant
           match={match}
-          disableAction={tournamentStatus !== 'progress'}
+          disableAction={tournamentStatus !== 'progress'} //! Originally torunamentStatus !== TournamentStatus.progress
         />
         <Separator />
         <Participant
           match={match}
           position='bottom'
-          disableAction={tournamentStatus !== 'progress'}
+          disableAction={tournamentStatus !== 'progress'} //! Originally torunamentStatus !== TournamentStatus.progress
         />
         {matchReady && (
           <EditScoreButton
             match={match}
-            disableButton={tournamentStatus !== 'pending'}
+            disableButton={tournamentStatus !== 'pending'} //! Originally torunamentStatus !== TournamentStatus.progress
           />
         )}
       </div>
-      {/* show match info button which open match and score edit dialog */}
+      {/* Tooltip button, hidden by default, visible on hover */}
       <div
         id='match_tool_tip'
-        className='absolute top-0 right-[-50] h-[1px] w-14 invisible flex flex-col justify-center items-center'
+        className='absolute top-0 -right-[50px] h-full w-[55px] invisible group-hover:visible flex flex-col justify-center items-center'
       >
-        <div className='w-full h-[0.55rem] bg-bracket-background rounded opacity-90 flex justify-center z-5'>
+        <div className='w-full h-[55%] bg-teal-500 rounded opacity-90 flex justify-center items-center z-[5]'>
           <Button
             onClick={() => openMatchScoreEditDialog(match, tabs.matchDetails)}
+            variant='ghost'
+            size='icon'
+            className='p-0'
           >
             <BsFillInfoCircleFill
               className='fill-current text-lightgrey hover:text-primary-light'

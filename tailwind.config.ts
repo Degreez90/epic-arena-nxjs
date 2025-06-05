@@ -22,6 +22,12 @@ const config = {
     },
     extend: {
       colors: {
+        // ...existing colors...
+        // custom tournament colors
+        'bracket-background': '#1c1c1e',
+        'round-bg': '#cbd5e1', // example: slate-400
+        'round-title': '#1e293b', // example: gray-800
+        // add more as needed
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -62,8 +68,6 @@ const config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
-        //custom tournament colors
-        'bracket-background': '#1c1c1e',
       },
       borderRadius: {
         lg: 'var(--radius)',
