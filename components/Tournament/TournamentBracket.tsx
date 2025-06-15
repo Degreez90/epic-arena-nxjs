@@ -5,6 +5,7 @@ import { SerializedTournament } from '@/types/tournament/tournament'
 import { TournamentBracketProps } from '@/types/tournament/tournament'
 import { useTournamentStore } from '@/store/useTournamentStore'
 import MatchScoreAndDetailDialog from './Match/MatchScoreAndDetailDialog'
+import SingleEliminationStage from './Stage/SingleEliminationStage'
 
 const TournamentBracket: React.FC<TournamentBracketProps> = ({
   tournamentDataForUI,
@@ -32,14 +33,16 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
           tab={dialog.tab}
         />
       )}
-      {stage && (
-        <>
-          {stage.type === 'single_elimination' ? (
-            <DoubleEliminationStage stage={stage} />
-          ) : (
-            <div>Stage Unavailable</div>
-          )}
-        </>
+      {stage ? (
+        stage.type === 'single_elimination' ? (
+          <SingleEliminationStage stage={stage} />
+        ) : stage.type === 'double_elimination' ? (
+          <DoubleEliminationStage stage={stage} />
+        ) : (
+          <div>No supported stage type</div>
+        )
+      ) : (
+        <div>No stage data</div>
       )}
     </div>
   )
