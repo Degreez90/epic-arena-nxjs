@@ -6,7 +6,7 @@ import { Console } from 'console'
 export const getAllTournaments = async () => {
   await connectDB()
 
-  const tournaments: TournamentType[] = await Tournament.find({})
+  const tournaments: ITournament[] = await Tournament.find({})
 
   return tournaments
 }

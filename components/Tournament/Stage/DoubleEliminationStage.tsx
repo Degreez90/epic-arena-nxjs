@@ -10,17 +10,15 @@ const DoubleEliminationStage = ({ stage }: { stage: StageFrontend }) => {
     <div>
       <div>
         <DoubleEliminationGroup group={winnerGroup} />
-        {grandFinalRound && <DoubleEliminationGroup group={grandFinalRound} />}
+
+        {grandFinalRound && (
+          <DoubleEliminationGroup group={grandFinalRound} isGrandFinalGroup />
+        )}
       </div>
 
       {loserGroup && (
         <div>
           <DoubleEliminationGroup group={loserGroup} isLoserGroup />
-        </div>
-      )}
-      {grandFinalRound && (
-        <div>
-          <DoubleEliminationGroup group={grandFinalRound} isGrandFinalGroup />
         </div>
       )}
     </div>

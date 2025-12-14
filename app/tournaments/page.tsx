@@ -1,9 +1,9 @@
 import React from 'react'
 import TournamentList from '@/components/Tournament/TournamentList'
 import { getAllTournaments } from '@/data/Tournaments/tournaments'
-import { TournamentType } from '@/models/tournament'
+import { ITournament, TournamentType } from '@/models/tournament'
 const page = async () => {
-  const tournaments: TournamentType[] = await getAllTournaments()
+  const tournaments: ITournament[] = await getAllTournaments()
 
   if (!tournaments) {
     throw new Error('Error fetching tournaments')

@@ -31,6 +31,7 @@ export class MyDB implements CrudInterface {
     }
     return new MyDB(tournament)
   }
+
   // INSERT
   /**
    * Inserts multiple values in the database.

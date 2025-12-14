@@ -1,4 +1,4 @@
-import { TournamentType } from '@/models/tournament'
+import { ITournament, TournamentType } from '@/models/tournament'
 
 export type type = 'Single Elimination' | 'Double Elimination'
 
@@ -33,7 +33,7 @@ export interface StageFrontend extends Stage {
 }
 
 export interface TournamentListProps {
-  Tournaments: TournamentType[]
+  Tournaments: ITournament[]
 }
 
 export interface OrganizedTournamentData {

@@ -11,9 +11,9 @@ async function createUser() {
     email: 'offitt90@gmail.com',
     password: 'password123',
     vPassword: 'password123', // Assuming this is for password verification
-    fName: 'Test',
-    lName: 'User',
-    admin: false, // Assuming this is a boolean indicating admin status
+    firstName: 'Test',
+    lastName: 'User',
+    admin: true, // Assuming this is a boolean indicating admin status
     phoneNumber: '1234567890',
     isTwoFactorEnabled: false, // Assuming this is a boolean for two-factor authentication
   }
