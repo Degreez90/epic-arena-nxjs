@@ -33,6 +33,9 @@ export const login = async (
   const existingUser = await getUserByEmail(email)
 
   console.log('action/login.ts existingUser: ', existingUser)
+  if (existingUser && existingUser.email) {
+    return { error: 'Email already exists!' }
+  }
 
   if (!existingUser || !existingUser.email || !existingUser.password) {
     return { error: 'Email does not exist!' }

@@ -11,6 +11,7 @@ export default async function Home() {
   }
   return (
     <div>
+      <Hero />
       <TournamentList Tournaments={tournaments} />
       <Games />
     </div>
