@@ -15,7 +15,7 @@ export const getUserByEmail = async (email: string) => {
   }
 }
 
-export const getUserById = async (id?: ObjectId) => {
+export const getUserById = async (id?: string) => {
   try {
     await connectDB() // Ensure the database connection is established
     const user = await User.findById(id)

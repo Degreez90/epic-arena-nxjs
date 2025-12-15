@@ -41,7 +41,7 @@ export const {
       if (account?.provider !== 'credentials') return true
 
       if (!user._id) throw new Error('No user ID found')
-      const existingUser = await getUserById(user._id)
+      const existingUser = await getUserById(user._id.toString())
 
       //Prevent sign in without email verification
       if (!existingUser?.emailVerified) return false
@@ -79,17 +79,19 @@ export const {
 
     //:: This is where the token is modified to include the user's data from the database
     async jwt({ token, user }: { token: JWT; user: Users }) {
+      if (user) {
+        token.id = user._id?.toString()
+      }
+
       if (!token.sub) return token
 
-      const tokenUserId = user?._id
-
-      const existingUser = await getUserById(tokenUserId)
+      const existingUser = await getUserById(token.sub)
 
       if (!existingUser) return token
 
       const existingAccount = await getAccountByUserId(existingUser.id)
       token.id = existingUser._id.toString()
-      token.isOAuth = !!existingAccount
+      token.isOAuth = !existingAccount
       token.firstName = existingUser.firstName
       token.lastName = existingUser.lastName
       token.email = existingUser.email

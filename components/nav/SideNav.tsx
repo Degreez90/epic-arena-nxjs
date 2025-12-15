@@ -1,5 +1,6 @@
 'use client'
 
+import { useSession, signOut } from 'next-auth/react'
 import React, { useEffect, useMemo, useState } from 'react'
 import { TiThMenu } from 'react-icons/ti'
 import {
@@ -14,12 +15,14 @@ import { LoginButton } from '@/components/Auth/buttons/Login-Button'
 import { LogoutButton } from '@/components/Auth/buttons/Logout-Button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '../ui/button'
-
+import type { ExtendedUser } from '@/next-auth'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { usePathname, useSearchParams } from 'next/navigation'
 
 const SideNav: React.FC = () => {
-  const user = useCurrentUser()
+  const { data: session, status } = useSession()
+  const user =
+    status === 'authenticated' ? (session?.user as ExtendedUser) : null
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isOpen, setIsOpen] = useState(false)
@@ -45,6 +48,11 @@ const SideNav: React.FC = () => {
 
   const handleClose = () => {
     setIsOpen(false)
+  }
+
+  const handleLogout = () => {
+    handleClose()
+    signOut({ callbackUrl: '/login' })
   }
 
   useEffect(() => {
@@ -101,7 +109,7 @@ const SideNav: React.FC = () => {
                 <Button
                   className='w-full'
                   variant='secondary'
-                  onClick={handleClose}
+                  onClick={handleLogout}
                 >
                   Logout
                 </Button>
