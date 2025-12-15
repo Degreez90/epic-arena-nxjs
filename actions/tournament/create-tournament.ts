@@ -1,14 +1,12 @@
 'use server'
 
-import { CustomParticipant, Tournament } from '@/models/tournament'
 import type { CreateTournamentType } from '@/schemas/createTournament'
 import { CreateTournamentSchema } from '@/schemas/createTournament'
 import { currentUser } from '@/lib/auth'
-
+import prisma from '@/lib/prisma'
 import { MyDB } from '@/lib/MyDB'
 import { BracketsManager } from 'brackets-manager'
 import { InputStage, StageType, SeedOrdering } from 'brackets-model'
-import { connectDB } from '@/lib/mongodb'
 
 const createTournament = async (data: CreateTournamentType) => {
   const validatedData = CreateTournamentSchema.parse(data)
@@ -26,16 +24,13 @@ const createTournament = async (data: CreateTournamentType) => {
   try {
     console.log('User:', user)
 
-    await connectDB()
-
-    const tournament = new Tournament({
-      _id: Number(Date.now()),
-      name: validatedData.tournamentName,
-      description: validatedData.description,
-      createdBy: user._id,
+    const tournament = await prisma.tournament.create({
+      data: {
+        name: validatedData.tournamentName,
+        description: validatedData.description,
+        createdBy: user.id,
+      },
     })
-
-    await tournament.save()
 
     const myDB = await MyDB.build(tournament._id)
     const manager = new BracketsManager(myDB)

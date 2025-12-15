@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { StatCard } from '@/components/Dashboard/Stat-Card'
-import { PlacementCard } from '@/components/Dashboard/Placement-Card'
-import { TopGamesCard } from '@/components/Dashboard/Top-Game-Card'
-import { RecentTournaments } from '@/components/Dashboard/Recent-Tournaments'
+import { StatCard } from '@/components/dashboard/Stat-Card'
+import { PlacementCard } from '@/components/dashboard/Placement-Card'
+import { TopGamesCard } from '@/components/dashboard/Top-Game-Card'
+import { RecentTournaments } from '@/components/dashboard/Recent-Tournaments'
 import { GameStats, TournamentHistory } from '@/types/users/users'
 import {
   Trophy,

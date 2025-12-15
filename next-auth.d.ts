@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongoose'
 import {
   DefaultSession,
   User as NextAuthUser,
@@ -8,44 +7,49 @@ import {
 import { JWT } from 'next-auth/jwt'
 
 export type ExtendedUser = DefaultSession['user'] & {
-  _id: ObjectId
-  id: string // This is the id string assigned by Auth.js to the user.
-  firstName: string
-  lastName: string
-  email: string
-  image?: string
+  id: string
+  firstName: string | null
+  lastName: string | null
+  email: string | null
+  image?: string | null
   isTwoFactorEnabled: boolean
   isOAuth: boolean
-  userName: string
+  userName: string | null
   role: string
 }
 
 declare module 'next-auth' {
-  // Keep your existing Session user override
   interface Session {
     user: ExtendedUser
   }
 
-  // Add User and AdapterUser overrides too
   interface Users extends NextAuthUser {
-    _id?: ObjectId
+    firstName?: string | null
+    lastName?: string | null
+    isTwoFactorEnabled?: boolean
+    userName?: string | null
+    role?: string
   }
 
   interface AdapterUser extends NextAuthAdapterUser {
-    _id?: ObjectId
+    firstName?: string | null
+    lastName?: string | null
+    isTwoFactorEnabled?: boolean
+    userName?: string | null
+    role?: string
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
     id?: string
-    firstName?: string
-    lastName?: string
-    email?: string
-    image?: string
+    firstName?: string | null
+    lastName?: string | null
+    email?: string | null
+    image?: string | null
     isOAuth?: boolean
     isTwoFactorEnabled?: boolean
-    userName?: string
+    userName?: string | null
     role?: string
   }
 }

@@ -1,9 +1,6 @@
 import React from 'react'
 import axios from 'axios'
 import Link from 'next/link'
-import { GetServerSideProps } from 'next'
-import { TournamentType } from '@/models/tournament'
-import { getAllTournaments } from '@/data/Tournaments/tournaments'
 import { TournamentListProps } from '@/types/tournament/tournament'
 
 const TournamentList: React.FC<TournamentListProps> = ({ Tournaments }) => {

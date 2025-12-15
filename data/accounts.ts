@@ -1,10 +1,10 @@
-import mongoose from 'mongoose'
-import { connectDB } from '@/lib/mongodb'
+import prisma from '@/lib/prisma'
 
 export const getAccountByUserId = async (userId: string) => {
   try {
-    await connectDB()
-    const account = await mongoose.model('Account').findOne({ userId }).exec()
+    const account = await prisma.account.findFirst({
+      where: { userId },
+    })
 
     console.log('data/db: account: ', account)
 

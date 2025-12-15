@@ -1,11 +1,10 @@
-import { connectDB } from '@/lib/mongodb'
-import { TwoFactorToken } from '@/models/TwoFactorToken'
+import prisma from '@/lib/prisma'
 
 export const getTwoFactorTokenByToken = async (token: string) => {
-  await connectDB() // Ensure the database connection is established
-
   try {
-    const twoFactorToken = await TwoFactorToken.findOne({ token })
+    const twoFactorToken = await prisma.twoFactorToken.findUnique({
+      where: { token },
+    })
     return twoFactorToken
   } catch (error) {
     console.error('Error fetching two-factor token by token:', error)
@@ -14,10 +13,10 @@ export const getTwoFactorTokenByToken = async (token: string) => {
 }
 
 export const getTwoFactorTokenByEmail = async (email: string) => {
-  await connectDB() // Ensure the database connection is established
-
   try {
-    const twoFactorToken = await TwoFactorToken.findOne({ email })
+    const twoFactorToken = await prisma.twoFactorToken.findUnique({
+      where: { email },
+    })
     return twoFactorToken
   } catch (error) {
     console.error('Error fetching two-factor token by email:', error)

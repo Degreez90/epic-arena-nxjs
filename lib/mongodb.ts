@@ -1,39 +1,20 @@
 // lib/mongodb.ts
-import mongoose from 'mongoose'
+// Note: This file is now deprecated. Use lib/prisma.ts instead for database access.
+// Migration to Prisma is complete. All database operations should use the Prisma client.
 
-const { MONGODB_URI } = process.env
+import prisma from './prisma'
 
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable')
-}
-
-// Global cache for the Mongoose connection and models
-let cached = (global as any).mongoose
-
-if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null }
-}
-
+// This export is kept for backward compatibility during migration
 export const connectDB = async () => {
-  if (cached.conn) {
-    // Use existing database connection
-    return cached.conn
-  }
-
-  if (!cached.promise) {
-    // Create a new connection promise
-    cached.promise = mongoose.connect(MONGODB_URI).then((mongoose) => {
-      return mongoose
-    })
-  }
-
   try {
-    // Await the connection promise
-    cached.conn = await cached.promise
-    console.log('MongoDB connected successfully')
-    return cached.conn
+    // Test the connection by running a simple query
+    await prisma.$queryRaw`SELECT 1`
+    console.log('Database connected successfully via Prisma')
+    return true
   } catch (error) {
-    console.error('MongoDB connection error:', error)
+    console.error('Database connection error:', error)
     throw error
   }
 }
+
+export { prisma }

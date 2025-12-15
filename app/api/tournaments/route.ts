@@ -1,29 +1,12 @@
 import { NextResponse } from 'next/server'
-import { connectDB } from '@/lib/mongodb'
-import { Tournament } from '@/models/tournament'
-import { getAllTournaments } from '@/data/Tournaments/tournaments'
+import prisma from '@/lib/prisma'
 
 export async function GET() {
   try {
-    await connectDB()
+    const data = await prisma.tournament.findMany({
+      orderBy: { createdAt: 'desc' },
+    })
 
-    const tournaments = await getAllTournaments()
-
-    if (!tournaments) {
-      return NextResponse.json(
-        { success: false, error: 'Error Fetching Tournaments' },
-        { status: 400 }
-      )
-    }
-
-    const data = await Tournament.find({})
-
-    if (!data) {
-      return NextResponse.json(
-        { success: false, error: 'Tournaments not found' },
-        { status: 404 }
-      )
-    }
     return NextResponse.json({ success: true, data })
   } catch (error) {
     return NextResponse.json(

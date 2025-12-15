@@ -1,10 +1,10 @@
-import { connectDB } from '@/lib/mongodb'
-import { PasswordResetToken } from '@/models/PasswordResetToken'
+import prisma from '@/lib/prisma'
 
 export const getPasswordResetTokenByToken = async (token: string) => {
   try {
-    await connectDB()
-    const passwordResetToken = await PasswordResetToken.findOne({ token })
+    const passwordResetToken = await prisma.passwordResetToken.findUnique({
+      where: { token },
+    })
 
     return passwordResetToken
   } catch {
@@ -12,10 +12,11 @@ export const getPasswordResetTokenByToken = async (token: string) => {
   }
 }
 
-export const getPasswordResetTokenByEmail = async (token: string) => {
+export const getPasswordResetTokenByEmail = async (email: string) => {
   try {
-    await connectDB()
-    const passwordResetToken = await PasswordResetToken.findOne({ token })
+    const passwordResetToken = await prisma.passwordResetToken.findFirst({
+      where: { email },
+    })
 
     return passwordResetToken
   } catch {

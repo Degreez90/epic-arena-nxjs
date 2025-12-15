@@ -1,11 +1,11 @@
-import { connectDB } from '@/lib/mongodb'
-import { VerificationToken } from '@/models/VerificationToken'
+import prisma from '@/lib/prisma'
 
 export const getVerificationTokenByToken = async (token: string) => {
   console.log('data/verification-token.ts: ', token)
-  await connectDB() // Ensure the database connection is established
   try {
-    const verificationToken = await VerificationToken.findOne({ token })
+    const verificationToken = await prisma.verificationToken.findUnique({
+      where: { token },
+    })
     console.log('Verification token: ', verificationToken)
     return verificationToken
   } catch (error) {
@@ -15,9 +15,10 @@ export const getVerificationTokenByToken = async (token: string) => {
 }
 
 export const getVerificationTokenByEmail = async (email: string) => {
-  await connectDB() // Ensure the database connection is established
   try {
-    const verificationToken = await VerificationToken.findOne({ email })
+    const verificationToken = await prisma.verificationToken.findFirst({
+      where: { identifier: email },
+    })
     return verificationToken
   } catch (error) {
     console.error('Error fetching verification token:', error)

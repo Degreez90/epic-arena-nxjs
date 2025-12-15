@@ -4,8 +4,8 @@ import './globals.css'
 import { SessionProvider } from 'next-auth/react'
 import { auth } from '@/auth'
 import Head from 'next/head'
-import Nav from '@/components/Nav/Nav'
-import Hero from '@/components/Hero/Hero'
+import Nav from '@/components/nav/Nav'
+import Hero from '@/components/hero/Hero'
 
 const inter = Inter({ subsets: ['latin'] })
 

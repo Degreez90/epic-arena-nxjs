@@ -2,16 +2,13 @@
 
 import * as z from 'zod'
 import bcrypt from 'bcryptjs'
-import { connectDB } from '@/lib/mongodb'
+import prisma from '@/lib/prisma'
 import { RegisterSchema } from '@/schemas'
 import { getUserByEmail } from '@/data/user'
 import { generateVerificationToken } from '@/lib/token'
 import { sendVerificationEmail } from '@/lib/mail'
-import { CreateUserInput, User } from '@/models/User'
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
-  await connectDB()
-
   const validatedFields = RegisterSchema.safeParse(values)
 
   if (!validatedFields.success) {
@@ -52,14 +49,16 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     return { error: 'Email already in use!' }
   }
 
-  await User.create<CreateUserInput>({
-    firstName: firstName,
-    lastName: lastName,
-    email: email.toLowerCase(),
-    admin,
-    phoneNumber,
-    password: hashedPassword,
-    isTwoFactorEnabled,
+  await prisma.user.create({
+    data: {
+      firstName,
+      lastName,
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      phoneNumber,
+      isTwoFactorEnabled,
+      role: admin ? 'admin' : 'user',
+    },
   })
 
   const verificationToken = await generateVerificationToken(email)
@@ -67,4 +66,4 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   await sendVerificationEmail(verificationToken.email, verificationToken.token)
 
   return { success: 'Confirmation email sent!' }
-}
+}}

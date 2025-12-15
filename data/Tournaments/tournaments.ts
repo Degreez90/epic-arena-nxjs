@@ -1,53 +1,29 @@
-import { connectDB } from '@/lib/mongodb'
-import { ITournament, TournamentType } from '@/models/tournament'
-import { Tournament } from '@/models/tournament'
-import { Console } from 'console'
+import prisma from '@/lib/prisma'
+import type { Prisma } from '@prisma/client'
 
-export const getAllTournaments = async () => {
-  await connectDB()
+export type TournamentDTO = Prisma.Tournament & { _id: string }
 
-  const tournaments: ITournament[] = await Tournament.find({})
+const toDTO = (t: Prisma.Tournament): TournamentDTO => ({
+  ...t,
+  _id: t.id,
+})
 
-  return tournaments
+export const getAllTournaments = async (): Promise<TournamentDTO[]> => {
+  const tournaments = await prisma.tournament.findMany({
+    orderBy: { createdAt: 'desc' },
+  })
+
+  return tournaments.map(toDTO)
 }
 
-export const getTournamentById = async (id: number) => {
-  await connectDB()
+export const getTournamentById = async (
+  id: string | number
+): Promise<TournamentDTO | null> => {
+  const tournament = await prisma.tournament.findUnique({
+    where: { id: String(id) },
+  })
 
-  const tournament = await Tournament.findOne({
-    _id: id,
-  }).lean()
-
-  console.log('here: ', tournament)
   if (!tournament) return null
 
-  // Convert ObjectId to string
-  return serialize(tournament)
-
-  //* serialize tournament
-  function serialize(obj: any): any {
-    if (obj == null) return obj
-    if (typeof obj !== 'object') return obj
-
-    // Handle ObjectId
-    if (obj._bsontype === 'ObjectID' || obj._bsontype === 'ObjectId') {
-      return obj.toString()
-    }
-
-    // Handle Date
-    if (obj instanceof Date) {
-      return obj.toISOString()
-    }
-
-    if (Array.isArray(obj)) {
-      return obj.map(serialize)
-    }
-
-    // Recursively serialize all object properties
-    const result: any = {}
-    for (const key in obj) {
-      result[key] = serialize(obj[key])
-    }
-    return result
-  }
+  return toDTO(tournament)
 }

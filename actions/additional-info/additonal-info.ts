@@ -1,11 +1,8 @@
 'use server'
-import mongoose from 'mongoose'
 import { connectDB } from '@/lib/mongodb'
-
 import { AdditionInfoSchema } from '@/schemas'
 import * as z from 'zod'
-
-import { User } from '@/models/User'
+import prisma from '@/lib/prisma'
 import { currentUser } from '@/lib/auth'
 
 const additonalInfo = async (
@@ -13,7 +10,6 @@ const additonalInfo = async (
   values: z.infer<typeof AdditionInfoSchema>
 ) => {
   console.log('userId:', userId, values) // Log the userId
-  await connectDB() // Ensure the database connection is established
 
   const validatedFields = AdditionInfoSchema.safeParse(values)
 
@@ -22,14 +18,14 @@ const additonalInfo = async (
   }
 
   try {
-    const result = await User.updateOne(
-      { _id: new mongoose.Types.ObjectId(userId) },
-      { $set: validatedFields.data }
-    )
+    const result = await prisma.user.update({
+      where: { id: userId },
+      data: validatedFields.data,
+    })
 
     console.log('Update result:', result) // Log the result of the update operation
 
-    if (result.modifiedCount === 0) {
+    if (!result) {
       return {
         error: 'No documents were updated. Please check the userId and data.',
       }
@@ -44,6 +40,6 @@ const additonalInfo = async (
     console.log(error)
   }
   return { success: 'User Name Created!' }
-}
+}}
 
 export default additonalInfo

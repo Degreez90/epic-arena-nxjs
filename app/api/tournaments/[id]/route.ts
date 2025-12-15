@@ -1,25 +1,13 @@
 import { NextResponse } from 'next/server'
-import { connectDB } from '@/lib/mongodb'
-import { Tournament } from '@/models/tournament'
+import prisma from '@/lib/prisma'
 
-export async function GET(req: Request) {
+export async function GET(_req: Request, context: { params: { id: string } }) {
   try {
-    await connectDB()
-    const { searchParams } = new URL(req.url)
+    const tournamentId = context.params.id
 
-    const tournamentId = Number(searchParams.get('tournamentId'))
-    console.log('tournamentId: ', tournamentId)
-
-    if (!tournamentId || isNaN(tournamentId)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid tournamentId' },
-        { status: 400 }
-      )
-    }
-    console.log('Fetching tournament data...')
-    const data = await Tournament.findOne({ _id: tournamentId })
-
-    console.log('data: ', data)
+    const data = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+    })
 
     if (!data) {
       return NextResponse.json(

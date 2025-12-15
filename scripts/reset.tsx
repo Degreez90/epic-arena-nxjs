@@ -1,54 +1,61 @@
-import mongoose from 'mongoose'
+import { PrismaClient } from '@prisma/client'
 import readline from 'readline'
 import dotenv from 'dotenv'
 
 // Load environment variables from .env file
 dotenv.config()
 
-const { MONGODB_URI } = process.env
+const prisma = new PrismaClient()
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 })
 
-// Define a default set of collections
-const defaultCollections = ['users', 'posts', 'comments']
+// Define a default set of tables to clear
+const defaultTables = ['User', 'Game', 'Tournament']
 
-async function reset(collectionNames: string[] = defaultCollections) {
-  for (const collectionName of collectionNames) {
-    const result = await mongoose.connection
-      .collection(collectionName)
-      .deleteMany({})
-    console.log(
-      `${result.deletedCount} records deleted from the ${collectionName} collection.`
-    )
+async function reset(tableNames: string[] = defaultTables) {
+  for (const tableName of tableNames) {
+    try {
+      const result = await (
+        prisma[tableName.toLowerCase() as any] as any
+      ).deleteMany({})
+      console.log(
+        `${result.count || 0} records deleted from the ${tableName} table.`
+      )
+    } catch (error) {
+      console.error(`Error deleting from ${tableName}:`, error)
+    }
   }
 }
 
-mongoose
-  .connect(MONGODB_URI as string)
-  .then(() => {
+async function main() {
+  try {
     rl.question(
-      'Which collections do you want to reset? (comma-separated, or press ENTER for default): ',
+      'Which tables do you want to reset? (comma-separated, or press ENTER for default): ',
       async (input) => {
-        const collectionNames = input
+        const tableNames = input
           ? input.split(',').map((name) => name.trim())
-          : defaultCollections
+          : defaultTables
         try {
-          await reset(collectionNames)
+          await reset(tableNames)
+          console.log('Reset completed successfully!')
         } catch (e) {
           console.error('Error during deletion:', e)
         } finally {
-          await mongoose.disconnect()
+          await prisma.$disconnect()
           rl.close()
         }
       }
     )
-  })
-  .catch((err) => {
-    console.error('Error connecting to MongoDB:', err)
+  } catch (err) {
+    console.error('Error:', err)
+    await prisma.$disconnect()
     rl.close()
-  })
+  }
+}
+
+main()
 
 // Use this command to run the script: npx tsx scripts/reset.tsx

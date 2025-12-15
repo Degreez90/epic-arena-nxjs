@@ -1,15 +1,10 @@
 import NextAuth, { Account, Session, Users } from 'next-auth'
-import { MongoDBAdapter } from '@auth/mongodb-adapter'
-import { connectDB } from '@/lib/mongodb'
+import prisma from './lib/prisma'
+import { PrismaAdapter } from '@auth/prisma-adapter'
 import authConfig from '@/auth.config'
 import { getUserById } from '@/data/user'
 import { getAccountByUserId } from '@/data/accounts'
 import { getTwoFactorConfirmationByUserId } from '@/data/two-factor-confirmation'
-
-import { TwoFactorConfirmation } from './models/TwoFactorConfirmation'
-
-import { User } from '@/models/User'
-import client from '@/lib/mongoclient'
 
 import { JWT } from 'next-auth/jwt'
 
@@ -19,29 +14,29 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
-  adapter: MongoDBAdapter(client),
+  adapter: PrismaAdapter(prisma),
   pages: {
     signIn: '/login',
     signOut: '/login',
   },
   events: {
     async linkAccount({ user }) {
-      await connectDB() // Ensure the database connection is established
-      await User.updateOne(
-        { email: user.email },
-        { $set: { emailVerified: new Date() } }
-      )
+      // Update email verification status when OAuth account is linked
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: new Date() },
+      })
     },
   },
   ...authConfig,
   callbacks: {
     ...authConfig.callbacks,
-    async signIn({ user, account }: { user: Users; account: Account | null }) {
+    async signIn({ user, account }: { user: Users; account?: Account | null }) {
       //Allow OAuth without email verification
       if (account?.provider !== 'credentials') return true
 
-      if (!user._id) throw new Error('No user ID found')
-      const existingUser = await getUserById(user._id.toString())
+      if (!user.id) throw new Error('No user ID found')
+      const existingUser = await getUserById(user.id)
 
       //Prevent sign in without email verification
       if (!existingUser?.emailVerified) return false
@@ -59,12 +54,10 @@ export const {
         if (!twoFactorConfirmation) return false
 
         //Delete the two factor confirmation for next sign in
-        await TwoFactorConfirmation.deleteOne({
-          _id: twoFactorConfirmation.id,
+        await prisma.twoFactorConfirmation.delete({
+          where: { id: twoFactorConfirmation.id },
         })
       }
-
-      user.id = user._id.toString()
 
       return true
     },
@@ -80,7 +73,7 @@ export const {
     //:: This is where the token is modified to include the user's data from the database
     async jwt({ token, user }: { token: JWT; user: Users }) {
       if (user) {
-        token.id = user._id?.toString()
+        token.id = user.id
       }
 
       if (!token.sub) return token
@@ -90,8 +83,8 @@ export const {
       if (!existingUser) return token
 
       const existingAccount = await getAccountByUserId(existingUser.id)
-      token.id = existingUser._id.toString()
-      token.isOAuth = !existingAccount
+      token.id = existingUser.id
+      token.isOAuth = !!existingAccount
       token.firstName = existingUser.firstName
       token.lastName = existingUser.lastName
       token.email = existingUser.email

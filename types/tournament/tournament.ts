@@ -1,8 +1,11 @@
-import { ITournament, TournamentType } from '@/models/tournament'
+import type { Prisma } from '@prisma/client'
+import type { TournamentDTO } from '@/data/Tournaments/tournaments'
 
 export type type = 'Single Elimination' | 'Double Elimination'
 
-import { Game, TournamentStatus } from '@/models/tournament'
+// Minimal shapes for UI usage
+export type Game = Prisma.Tournament['game'] extends object ? any : any
+export type TournamentStatus = string
 
 import {
   Group,
@@ -33,7 +36,7 @@ export interface StageFrontend extends Stage {
 }
 
 export interface TournamentListProps {
-  Tournaments: ITournament[]
+  Tournaments: TournamentDTO[]
 }
 
 export interface OrganizedTournamentData {

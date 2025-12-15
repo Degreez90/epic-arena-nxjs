@@ -1,12 +1,11 @@
-import { connectDB } from '@/lib/mongodb'
-import { User, UserType } from '@/models/User'
-import mongoose, { ObjectId } from 'mongoose'
+import prisma from '@/lib/prisma'
 
 export const getUserByEmail = async (email: string) => {
   try {
-    await connectDB() // Ensure the database connection is established
     console.log('data/user.ts: ', email)
-    const user = await User.findOne({ email })
+    const user = await prisma.user.findUnique({
+      where: { email },
+    })
     console.log('Data/user.ts User: ', user)
     return user
   } catch (error) {
@@ -17,8 +16,10 @@ export const getUserByEmail = async (email: string) => {
 
 export const getUserById = async (id?: string) => {
   try {
-    await connectDB() // Ensure the database connection is established
-    const user = await User.findById(id)
+    if (!id) return null
+    const user = await prisma.user.findUnique({
+      where: { id },
+    })
     return user
   } catch (error) {
     console.error('Error fetching user by ID:', error)

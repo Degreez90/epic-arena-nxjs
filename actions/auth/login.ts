@@ -3,7 +3,7 @@
 import * as z from 'zod'
 import { AuthError } from 'next-auth'
 import bcrypt from 'bcryptjs'
-import { connectDB } from '@/lib/mongodb'
+import prisma from '@/lib/prisma'
 import { signIn } from '@/auth'
 import { LoginSchema } from '@/schemas'
 import { getUserByEmail } from '@/data/user'
@@ -12,9 +12,6 @@ import { sendVerificationEmail, sendTwoFactorTokenEmail } from '@/lib/mail'
 import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
 import { generateVerificationToken, generateTwoFactorToken } from '@/lib/token'
 import { getTwoFactorConfirmationByUserId } from '@/data/two-factor-confirmation'
-
-import { TwoFactorToken } from '@/models/TwoFactorToken'
-import { TwoFactorConfirmation } from '@/models/TwoFactorConfirmation'
 
 export const login = async (
   values: z.infer<typeof LoginSchema>,
@@ -84,18 +81,22 @@ export const login = async (
         return { error: 'Code expired!' }
       }
 
-      await TwoFactorToken.findByIdAndDelete(twoFactorToken.id)
+      await prisma.twoFactorToken.delete({
+        where: { id: twoFactorToken.id },
+      })
 
       const existingConfirmation = await getTwoFactorConfirmationByUserId(
         existingUser.id
       )
 
       if (existingConfirmation) {
-        await TwoFactorConfirmation.findByIdAndDelete(existingConfirmation.id)
+        await prisma.twoFactorConfirmation.delete({
+          where: { id: existingConfirmation.id },
+        })
       }
 
-      await TwoFactorConfirmation.create({
-        data: { userId: existingUser._id },
+      await prisma.twoFactorConfirmation.create({
+        data: { userId: existingUser.id },
       })
     } else {
       const twoFactorToken = await generateTwoFactorToken(existingUser.email)

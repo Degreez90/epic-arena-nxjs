@@ -3,15 +3,10 @@
 import { signIn } from '@/auth'
 import { getUserByEmail } from '@/data/user'
 import { getVerificationTokenByToken } from '@/data/verification-token'
-import { connectDB } from '@/lib/mongodb'
+import prisma from '@/lib/prisma'
 import { AuthError } from 'next-auth'
-import { isRedirectError } from 'next/dist/client/components/redirect'
-import { User } from '@/models/User'
-import { VerificationToken } from '@/models/VerificationToken'
 
 export const newVerification = async (token: string) => {
-  await connectDB() // Ensure the database is connected
-
   const existingToken = await getVerificationTokenByToken(token)
 
   console.log('actions/auth/new-verification.ts: ', existingToken)
@@ -26,22 +21,20 @@ export const newVerification = async (token: string) => {
     return { error: 'Token expired!' }
   }
 
-  const existingUser = await getUserByEmail(existingToken.email)
+  const existingUser = await getUserByEmail(existingToken.identifier)
   console.log('actions/auth/new-verification.ts: ', existingUser)
 
   if (!existingUser) {
     return { error: 'Email does not exist!' }
   }
 
-  await User.updateOne(
-    { _id: existingUser._id },
-    {
-      $set: {
-        emailVerified: new Date(),
-        email: existingToken.email,
-      },
-    }
-  )
+  await prisma.user.update({
+    where: { id: existingUser.id },
+    data: {
+      emailVerified: new Date(),
+      email: existingToken.identifier,
+    },
+  })
 
   try {
     await signIn('credentials', {
@@ -50,9 +43,6 @@ export const newVerification = async (token: string) => {
       redirect: false,
     })
   } catch (error) {
-    if (isRedirectError(error)) {
-      throw error
-    }
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
@@ -64,7 +54,9 @@ export const newVerification = async (token: string) => {
     throw error
   }
 
-  await VerificationToken.deleteOne({ _id: existingToken.id })
+  await prisma.verificationToken.delete({
+    where: { token },
+  })
 
   return { success: 'Email verified!' }
 }

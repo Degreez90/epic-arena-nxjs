@@ -1,13 +1,12 @@
-import { connectDB } from '@/lib/mongodb'
-import { TwoFactorConfirmation } from '@/models/TwoFactorConfirmation'
+import prisma from '@/lib/prisma'
 
 export const getTwoFactorConfirmationByUserId = async (userId: string) => {
   try {
-    await connectDB() // Ensure the database connection is established
-
-    const twoFactorConfirmation = await TwoFactorConfirmation.findOne({
-      userId,
-    })
+    const twoFactorConfirmation = await prisma.twoFactorConfirmation.findUnique(
+      {
+        where: { userId },
+      }
+    )
 
     return twoFactorConfirmation
   } catch (error) {
