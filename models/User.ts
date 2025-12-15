@@ -1,10 +1,4 @@
-import mongoose, {
-  Schema,
-  Model,
-  Query,
-  HydratedDocument,
-  ObjectId,
-} from 'mongoose'
+import mongoose, { Schema, Model, Types, HydratedDocument } from 'mongoose'
 import validator from 'validator'
 
 export interface IUser {
@@ -18,15 +12,15 @@ export interface IUser {
   admin?: boolean
   phoneNumber?: string
   isTwoFactorEnabled: boolean
-  image?: string[]
+  image?: string
   role?: 'admin' | 'user'
   accountStatus?: 'active' | 'inactive'
-  tournaments?: string[]
+  tournaments?: Types.ObjectId[]
   createdAt?: Date
   updatedAt?: Date
-  // passwordChangedAt?: Date
-  // passwordResetToken?: string
-  // passwordResetExpires?: Date
+  passwordChangedAt?: Date
+  passwordResetToken?: string
+  passwordResetExpires?: Date
 }
 
 interface IUserMethods {
@@ -80,7 +74,7 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
       type: Boolean,
       default: false,
     },
-    image: [String],
+    image: String,
     role: {
       type: String,
       enum: ['admin', 'user'],
@@ -97,6 +91,9 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
         ref: 'Tournament',
       },
     ],
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   { timestamps: true }
 )
@@ -125,5 +122,4 @@ export const User = (mongoose.models?.User ||
   {},
   IUserMethods
 >
-
 export type UserType = HydratedDocument<IUser, IUserMethods>

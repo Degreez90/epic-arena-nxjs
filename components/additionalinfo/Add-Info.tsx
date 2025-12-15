@@ -1,5 +1,5 @@
 import * as z from 'zod'
-import { CardWrapper } from '@/components/auth/Card-Wrapper'
+import { CardWrapper } from '@/components/Auth/Card-Wrapper'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -33,6 +33,8 @@ const AddInfo = ({ user }: UserInfoProps) => {
   const [error, setError] = useState<string | undefined>('')
   const [success, setSuccess] = useState<string | undefined>('')
   const [isPending, startTransition] = useTransition()
+
+  console.log('User from add-info:', user)
 
   const router = useRouter()
 

@@ -22,8 +22,8 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     email,
     password,
     vPassword,
-    fName,
-    lName,
+    firstName,
+    lastName,
     admin,
     phoneNumber,
     isTwoFactorEnabled,
@@ -34,8 +34,8 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     email,
     password,
     vPassword,
-    fName,
-    lName,
+    firstName,
+    lastName,
     admin,
     phoneNumber,
     isTwoFactorEnabled,
@@ -53,8 +53,8 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   }
 
   await User.create<CreateUserInput>({
-    firstName: fName,
-    lastName: lName,
+    firstName: firstName,
+    lastName: lastName,
     email: email.toLowerCase(),
     admin,
     phoneNumber,

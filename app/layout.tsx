@@ -3,11 +3,9 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { SessionProvider } from 'next-auth/react'
 import { auth } from '@/auth'
-
+import Head from 'next/head'
 import Nav from '@/components/Nav/Nav'
-//redux
-// import { store } from '@/store'
-// import { Provider } from 'react-redux'
+import Hero from '@/components/Hero/Hero'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,13 +22,13 @@ export default async function RootLayout({
   const session = await auth()
 
   return (
-    <SessionProvider session={session}>
-      <html lang='en'>
-        <body className={`${inter.className}`}>
+    <html lang='en'>
+      <body className={`${inter.className}`}>
+        <SessionProvider session={session}>
           <Nav />
           {children}
-        </body>
-      </html>
-    </SessionProvider>
+        </SessionProvider>
+      </body>
+    </html>
   )
 }

@@ -1,15 +1,17 @@
-import NextAuth from 'next-auth'
+import NextAuth, { Account, Session, Users } from 'next-auth'
 import { MongoDBAdapter } from '@auth/mongodb-adapter'
 import { connectDB } from '@/lib/mongodb'
 import authConfig from '@/auth.config'
-import { getUserByEmail, getUserById } from '@/data/user'
+import { getUserById } from '@/data/user'
 import { getAccountByUserId } from '@/data/accounts'
 import { getTwoFactorConfirmationByUserId } from '@/data/two-factor-confirmation'
 
 import { TwoFactorConfirmation } from './models/TwoFactorConfirmation'
 
 import { User } from '@/models/User'
-import clientPromise from '@/lib/mongoclient'
+import client from '@/lib/mongoclient'
+
+import { JWT } from 'next-auth/jwt'
 
 export const {
   handlers: { GET, POST },
@@ -17,13 +19,13 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
-  adapter: MongoDBAdapter(clientPromise),
+  adapter: MongoDBAdapter(client),
   pages: {
     signIn: '/login',
+    signOut: '/login',
   },
   events: {
     async linkAccount({ user }) {
-      console.log('auth.ts, user: running linkAccount', user)
       await connectDB() // Ensure the database connection is established
       await User.updateOne(
         { email: user.email },
@@ -31,15 +33,15 @@ export const {
       )
     },
   },
+  ...authConfig,
   callbacks: {
-    async signIn({ user, account }) {
+    ...authConfig.callbacks,
+    async signIn({ user, account }: { user: Users; account: Account | null }) {
       //Allow OAuth without email verification
-      console.log('auth.ts, user: ', user)
-
       if (account?.provider !== 'credentials') return true
 
       if (!user._id) throw new Error('No user ID found')
-      const existingUser = await getUserById(user._id)
+      const existingUser = await getUserById(user._id.toString())
 
       //Prevent sign in without email verification
       if (!existingUser?.emailVerified) return false
@@ -68,54 +70,30 @@ export const {
     },
 
     async redirect({ url, baseUrl }) {
-      // Add custom redirect logic here
+      // Allow only internal redirects for security
+      if (url.startsWith(baseUrl)) return url
+      // Optionally, allow relative URLs
+      if (url.startsWith('/')) return `${baseUrl}${url}`
       return baseUrl
     },
 
-    //:: This is where the session is modified to include the user's data from the token
-    async session({ token, session }) {
-      await connectDB() // Ensure the database connection is established
-
-      console.log(`session from: auth.ts token: `, token)
-      if (token.sub && session.user) {
-        session.user.id = token.sub
-      }
-
-      // if (token.role && session.user) {
-      //   session.user.role = token.role as UserRole
-      // }
-
-      if (session.user) {
-        session.user.id = token.id as string
-        session.user.fName = token.fName as string
-        session.user.lName = token.lName as string
-        session.user.email = token.email as string
-        session.user.image = token.image as string
-        session.user.isOAuth = token.isOAuth as boolean
-        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean
-        session.user.userName = token.userName as string
-      }
-
-      return session
-    },
-
     //:: This is where the token is modified to include the user's data from the database
-    async jwt({ token, user }) {
-      await connectDB() // Ensure the database connection is established
-      console.log(`from: auth.ts: `, token, user)
+    async jwt({ token, user }: { token: JWT; user: Users }) {
+      if (user) {
+        token.id = user._id?.toString()
+      }
+
       if (!token.sub) return token
 
-      const tokenUserId = user?._id
-
-      const existingUser = await getUserById(tokenUserId)
+      const existingUser = await getUserById(token.sub)
 
       if (!existingUser) return token
 
       const existingAccount = await getAccountByUserId(existingUser.id)
-      token.id = existingUser._id
-      token.isOAuth = !!existingAccount
-      token.fName = existingUser.firstName
-      token.lName = existingUser.lastName
+      token.id = existingUser._id.toString()
+      token.isOAuth = !existingAccount
+      token.firstName = existingUser.firstName
+      token.lastName = existingUser.lastName
       token.email = existingUser.email
       token.image = existingUser.image
       token.role = existingUser.role
@@ -126,5 +104,4 @@ export const {
     },
   },
   session: { strategy: 'jwt' },
-  ...authConfig,
 })

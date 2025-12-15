@@ -1,5 +1,5 @@
 import { connectDB } from '@/lib/mongodb'
-import { User } from '@/models/User'
+import { User, UserType } from '@/models/User'
 import mongoose, { ObjectId } from 'mongoose'
 
 export const getUserByEmail = async (email: string) => {
@@ -15,7 +15,7 @@ export const getUserByEmail = async (email: string) => {
   }
 }
 
-export const getUserById = async (id?: ObjectId) => {
+export const getUserById = async (id?: string) => {
   try {
     await connectDB() // Ensure the database connection is established
     const user = await User.findById(id)

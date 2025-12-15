@@ -16,7 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { CardWrapper } from '@/components/auth/Card-Wrapper'
+import { CardWrapper } from '@/components/Auth/Card-Wrapper'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { FormError } from '@/components/Form-Error'
@@ -71,9 +71,18 @@ export const LoginForm = () => {
   }
 
   return (
-    <div className='my-20'>
+    <div className='mt-10'>
       <CardWrapper
-        headerLabel='Welcome back'
+        headerLabel={
+          <div>
+            <h1 className='text-2xl sm:text-3xl font-bold text-slate-900 mb-1'>
+              Welcome Back
+            </h1>
+            <p className='text-sm text-slate-500'>
+              Sign in to continue to Epic Arena
+            </p>
+          </div>
+        }
         backButtonLabel="Don't have an account?"
         backButtonHref='/register'
         showSocial
@@ -114,6 +123,7 @@ export const LoginForm = () => {
                             disabled={isPending}
                             placeholder='john.doe@example.com'
                             type='email'
+                            className='bg-white/80'
                           />
                         </FormControl>
                         <FormMessage />
@@ -132,16 +142,19 @@ export const LoginForm = () => {
                             disabled={isPending}
                             placeholder='********'
                             type='password'
+                            className='bg-white/80'
                           />
                         </FormControl>
-                        <Button
-                          size='sm'
-                          variant='link'
-                          asChild
-                          className='px-0 font-normal flex justify-end'
-                        >
-                          <Link href='/auth/reset'>Forgot password?</Link>
-                        </Button>
+                        <div className='flex justify-end mt-2'>
+                          <Button
+                            size='sm'
+                            variant='link'
+                            asChild
+                            className='px-0 font-normal text-sm text-sky-600 hover:underline'
+                          >
+                            <Link href='/auth/reset'>Forgot password?</Link>
+                          </Button>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -149,9 +162,15 @@ export const LoginForm = () => {
                 </>
               )}
             </div>
-            <FormError message={error || errorUrl} />
-            <FormSuccess message={success} />
-            <Button type='submit' disabled={isPending} className='w-full'>
+            <div className='pt-1'>
+              <FormError message={error || errorUrl} />
+              <FormSuccess message={success} />
+            </div>
+            <Button
+              type='submit'
+              disabled={isPending}
+              className='w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 rounded-lg shadow-sm'
+            >
               {showTwoFactor ? 'Confirm' : 'Login'}
             </Button>
           </form>

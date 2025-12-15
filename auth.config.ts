@@ -1,9 +1,11 @@
-import type { NextAuthConfig } from 'next-auth'
+import type { NextAuthConfig, Session } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import Google from 'next-auth/providers/google'
 import bcrypt from 'bcryptjs'
 import { LoginSchema, LoginTokenSchema } from '@/schemas'
 import { getUserByEmail } from '@/data/user'
+
+import { JWT } from 'next-auth/jwt'
 
 export default {
   providers: [
@@ -11,11 +13,10 @@ export default {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       profile: (profile) => {
-        console.log('auth.config.ts / Profile info: ', profile)
         return {
           id: profile.sub,
-          fName: profile.given_name,
-          lName: profile.family_name,
+          firstName: profile.given_name,
+          lastName: profile.family_name,
           email: profile.email,
           image: profile.picture,
         }
@@ -23,14 +24,6 @@ export default {
     }),
     Credentials({
       async authorize(credentials): Promise<any> {
-        console.log(`auth.config.ts: credentials: `, credentials)
-        // const validatedFields = LoginSchema.safeParse(credentials)
-
-        // console.log(
-        //   `auth.config.ts: validatedfields: `,
-        //   validatedFields.data?.verificationToken
-        // )
-
         //Login user if they validate their email
         if ('email' in credentials && 'existingToken' in credentials) {
           const validatedFields = LoginTokenSchema.safeParse(credentials)
@@ -58,7 +51,8 @@ export default {
             if (!user || !user.password) return null
 
             const passwordsMatch = await bcrypt.compare(password, user.password)
-            if (passwordsMatch) return user
+            if (passwordsMatch) console.log('user from credentials: ', user)
+            return user
           }
         }
 
@@ -66,4 +60,27 @@ export default {
       },
     }),
   ],
+  callbacks: {
+    //:: This is where the session is modified to include the user's data from the token
+    async session({ token, session }: { token: JWT; session: Session }) {
+      if (token.sub && session.user) {
+        session.user.id = token.sub
+      }
+
+      if (session.user) {
+        session.user.id = token.id as string
+        session.user.firstName = token.firstName as string
+        session.user.lastName = token.lastName as string
+        session.user.email = token.email as string
+        session.user.image = token.image as string
+        session.user.isOAuth = token.isOAuth as boolean
+        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean
+        session.user.userName = token.userName as string
+        session.user.role = token.role as string
+      }
+      console.log(`session from: auth.ts session: `, session)
+
+      return session
+    },
+  },
 } satisfies NextAuthConfig

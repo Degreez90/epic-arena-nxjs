@@ -1,4 +1,5 @@
-import { Schema, model, Model, Types, HydratedDocument } from 'mongoose'
+import * as mongoose from 'mongoose'
+import { Schema, Model, Types, HydratedDocument } from 'mongoose'
 import {
   Group,
   Match as M,
@@ -12,11 +13,8 @@ import {
 export declare type CustomParticipant = Participant & {
   userId?: Types.ObjectId
   invitation?: 'accepted' | 'pending' | 'declined'
+  [key: string]: unknown
 }
-export interface Match extends M {
-  gameId: Types.ObjectId | null
-}
-
 export interface Match extends M {
   gameId: Types.ObjectId | null
 }
@@ -33,11 +31,6 @@ export const tournamentStageType = {
   roundRobin: 'round_robin',
 }
 
-export interface Game {
-  _id: Types.ObjectId
-  gameId: Types.ObjectId
-  count: number
-}
 export enum TournamentStatus {
   pending = 'pending',
   progress = 'progress',
@@ -76,11 +69,7 @@ type TournamentDocumentOverrides = {
   }>
 }
 
-type TournamentModelType = Model<
-  ITournament,
-  object,
-  TournamentDocumentOverrides
->
+type TournamentModelType = Model<ITournament, HydratedDocument<ITournament>>
 
 const TournamentSchema = new Schema<ITournament, TournamentModelType>(
   {
@@ -220,13 +209,16 @@ TournamentSchema.virtual('progress').get(function () {
   return (completedMatchLength / matches.length) * 100
 })
 
-export const Tournament = model<ITournament, TournamentModelType>(
-  'tournament',
-  TournamentSchema
-)
+// Check if the model already exists
+export const Tournament =
+  mongoose.models?.Tournament ||
+  mongoose.model<ITournament, TournamentModelType>(
+    'Tournament',
+    TournamentSchema
+  )
 
 export type TournamentType = HydratedDocument<
   ITournament,
-  object,
-  TournamentDocumentOverrides
+  TournamentDocumentOverrides,
+  {}
 >

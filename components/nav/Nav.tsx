@@ -5,11 +5,13 @@ import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Container from '@/components/Container'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import SideNav from './SideNav'
+import SideNav from '@/components/Nav/SideNav'
 import type { ExtendedUser } from '@/next-auth'
+import { useSession } from 'next-auth/react'
 
 const Nav: React.FC = () => {
-  const user: ExtendedUser | null = useCurrentUser() ?? null
+  const { data: session, status } = useSession()
+  const user = session?.user as ExtendedUser | undefined
 
   return (
     <Container>
@@ -23,15 +25,15 @@ const Nav: React.FC = () => {
           </Link>
         </div>
         <div className='flex space-x-5'>
-          {user && (
+          {status === 'authenticated' && user && (
             <>
               <Avatar className='mx-4'>
-                <AvatarImage src={user.image} alt={user.fName || 'User'} />
+                <AvatarImage src={user.image} alt={user.firstName || 'User'} />
                 <AvatarFallback>
-                  {user.fName ? user.fName[0] : 'U'}
+                  {user.firstName ? user.firstName[0] : ''}
                 </AvatarFallback>
               </Avatar>
-              <div className='flex items-center'>{user.fName}</div>
+              <div className='flex items-center'>{user.firstName}</div>
             </>
           )}
           <SideNav />

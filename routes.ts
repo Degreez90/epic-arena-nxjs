@@ -3,7 +3,11 @@
  * These routes do not require authentication.
  * @type {string[]}
  */
-export const publicRoutes = ['/', '/new-verification', '/tournament/new']
+export const privateRoutes: string[] = [
+  '/new-verification',
+  '/tournament/new',
+  '/settings',
+]
 
 /**
  * An array of routes that are used for authentication.
@@ -12,7 +16,7 @@ export const publicRoutes = ['/', '/new-verification', '/tournament/new']
  */
 
 //TODO:: handle additionalinfo approprietly
-export const authRoutes = [
+export const authRoutes: string[] = [
   '/login',
   '/register',
   '/error',
@@ -25,16 +29,25 @@ export const authRoutes = [
  * Routes that starts with this prefix are used for API authentication purposes.
  * @type {string}
  */
-export const apiAuthPrefix = '/api/auth'
+export const apiAuthPrefix: string = '/api/auth'
+
+/**
+ *  The route redirect for unauthorized users.
+ * @type {string}
+ * @description This path is used to redirect unauthorized users to the register/login page.
+ */
+export const UNAUTHORIZED_USER: string = '/register'
 
 /**
  * The default redirect path after a successful login.
  * @type {string}
+ * @description This path is used to redirect the user after a successful login.
  */
-export const DEFAULT_LOGIN_REDIRECT = '/settings'
+export const DEFAULT_LOGIN_REDIRECT: string = '/dashboard'
 
 /**
  *The route for collecting a users username
  * @type {string}
+ * @description This path is used to collect a users username
  */
-export const ADDITIONAL_INFO = '/additionalinfo'
+export const ADDITIONAL_INFO: string = '/additionalinfo'
