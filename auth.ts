@@ -22,6 +22,7 @@ export const {
   adapter: MongoDBAdapter(client),
   pages: {
     signIn: '/login',
+    signOut: '/login',
   },
   events: {
     async linkAccount({ user }) {
@@ -69,7 +70,10 @@ export const {
     },
 
     async redirect({ url, baseUrl }) {
-      // Add custom redirect logic here
+      // Allow only internal redirects for security
+      if (url.startsWith(baseUrl)) return url
+      // Optionally, allow relative URLs
+      if (url.startsWith('/')) return `${baseUrl}${url}`
       return baseUrl
     },
 

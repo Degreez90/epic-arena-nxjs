@@ -43,7 +43,7 @@ export const UNAUTHORIZED_USER: string = '/register'
  * @type {string}
  * @description This path is used to redirect the user after a successful login.
  */
-export const DEFAULT_LOGIN_REDIRECT: string = '/settings'
+export const DEFAULT_LOGIN_REDIRECT: string = '/dashboard'
 
 /**
  *The route for collecting a users username
