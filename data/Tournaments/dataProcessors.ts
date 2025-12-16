@@ -20,6 +20,10 @@ export const addParcticipantNameInMatch = (
     return participant.name
   }
 
+  if (!tournamentData.match || !Array.isArray(tournamentData.match)) {
+    return tournamentData
+  }
+
   const updatedData = {
     ...tournamentData,
     match: tournamentData.match.map((match: MatchFrontend) => ({
@@ -39,6 +43,26 @@ export const addParcticipantNameInMatch = (
 export const categorizeData = (
   tournamentData: SerializedTournament
 ): OrganizedTournamentData => {
+  // Handle tournaments without bracket data
+  if (
+    !tournamentData.match ||
+    !tournamentData.round ||
+    !tournamentData.group ||
+    !tournamentData.stage
+  ) {
+    return {
+      _id: tournamentData._id,
+      name: tournamentData.name,
+      description: tournamentData.description,
+      participants: tournamentData.participant || [],
+      stages: [],
+      match_games: tournamentData.match_games || [],
+      games: tournamentData.games || [],
+      status: tournamentData.status,
+      player: tournamentData.player,
+    }
+  }
+
   // 1. Add participants to matches
   const matches: MatchFrontend[] = (
     tournamentData.match as MatchFrontend[]

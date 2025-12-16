@@ -12,21 +12,39 @@ const TournamentDetailsPage = async ({
   params: Promise<{ id: string }>
 }) => {
   const { id } = await params
-  const tournamentId = Number(id)
-
-  if (isNaN(tournamentId)) {
+  
+  if (!id || id.trim() === '') {
     return <div>Invalid tournament ID</div>
   }
-  const tournament: SerializedTournament | null = await getTournamentById(
-    tournamentId
-  )
+  
+  const tournament: SerializedTournament | null = await getTournamentById(id)
 
   if (!tournament) {
     return <div>Tournament not found</div>
   }
 
+  // Check if tournament has bracket data
+  if (
+    !tournament.match ||
+    !tournament.round ||
+    !tournament.group ||
+    !tournament.stage
+  ) {
+    return (
+      <Container>
+        <div className='text-center py-12'>
+          <h1 className='text-2xl font-bold mb-4'>{tournament.name}</h1>
+          <p className='text-muted-foreground mb-6'>
+            This tournament bracket is not yet set up. Please check back later or
+            contact the tournament organizer.
+          </p>
+        </div>
+      </Container>
+    )
+  }
+
   //todo:: use this to make brackets ( move into TournamentDetails component)
-  const formatToUIModel = categorizeData(addParcticipantNameInMatch(tournament))
+  const formatToUIModel = categorizeData(addParcticipantNameInMatch(tournament as any))
 
   const tournamentDataForUI = formatToUIModel
 

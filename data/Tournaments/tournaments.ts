@@ -49,6 +49,10 @@ export const getTournamentById = async (
 ): Promise<TournamentDTO | null> => {
   const tournament = await prisma.tournament.findUnique({
     where: { id: String(id) },
+    include: {
+      game: true,
+      participants: true,
+    },
   })
   if (!tournament) return null
   return toDTO(tournament)

@@ -35,10 +35,6 @@ export interface StageFrontend extends Stage {
   groups: GroupFrontend[]
 }
 
-export interface TournamentListProps {
-  Tournaments: TournamentDTO[]
-}
-
 export interface OrganizedTournamentData {
   _id: number | string
   name: string
