@@ -7,7 +7,7 @@ import {
   MatchGame,
   Participant,
 } from 'brackets-model'
-import { Tournament, TournamentType } from '@/models/tournament'
+import prisma from '@/lib/prisma'
 import { deepMerge, filterArrayOfObjects } from '@/utils/crudUtils'
 
 interface DataTypes {
@@ -20,16 +20,64 @@ interface DataTypes {
 }
 
 export class MyDB implements CrudInterface {
-  private tournament: TournamentType
-  constructor(tournament: any) {
-    this.tournament = tournament
+  private tournamentId: string
+  private tournamentData: {
+    stage: Stage[]
+    group: Group[]
+    round: Round[]
+    match: Match[]
+    match_game: MatchGame[]
+    participant: Participant[]
   }
-  static async build(tournamentId: number) {
-    const tournament = await Tournament.findById(Number(tournamentId))
+
+  constructor(tournamentId: string, data: any) {
+    this.tournamentId = tournamentId
+    this.tournamentData = {
+      stage: data.stage || [],
+      group: data.group || [],
+      round: data.round || [],
+      match: data.match || [],
+      match_game: data.match_game || [],
+      participant: data.participant || [],
+    }
+  }
+
+  static async build(tournamentId: string) {
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+    })
+
     if (!tournament) {
       throw new Error('Invalid Tournament Id')
     }
-    return new MyDB(tournament)
+
+    return new MyDB(tournamentId, {
+      stage: tournament.stage || [],
+      group: tournament.group || [],
+      round: tournament.round || [],
+      match: tournament.match || [],
+      match_game: tournament.match_game || [],
+      participant: tournament.participant || [],
+    })
+  }
+
+  private async saveTournament() {
+    try {
+      await prisma.tournament.update({
+        where: { id: this.tournamentId },
+        data: {
+          stage: this.tournamentData.stage,
+          group: this.tournamentData.group,
+          round: this.tournamentData.round,
+          match: this.tournamentData.match,
+          match_game: this.tournamentData.match_game,
+          participant: this.tournamentData.participant,
+        },
+      })
+    } catch (error) {
+      console.error('Error saving tournament data:', error)
+      throw error
+    }
   }
 
   // INSERT
@@ -64,12 +112,10 @@ export class MyDB implements CrudInterface {
     table: T,
     arg: OmitId<DataTypes[T]> | OmitId<DataTypes[T]>[]
   ): Promise<number | boolean> {
-    // console.log("running INSERT ====>")
-    // console.log(table, arg)
+    try {
+      let lastIndex = (this.tournamentData[table] as any[]).length - 1
 
-    let lastIndex = this.tournament[table].length - 1
-    if (!Array.isArray(arg)) {
-      try {
+      if (!Array.isArray(arg)) {
         // add the data to the database
         const id = lastIndex + 1
         const newValue = {
@@ -77,27 +123,21 @@ export class MyDB implements CrudInterface {
           id,
         } as DataTypes[T]
 
-        const arr = this.tournament[table].toObject()
-        arr.push(newValue)
-        this.tournament[table] = arr
-        await this.tournament.save()
+        this.tournamentData[table].push(newValue)
+        await this.saveTournament()
         return id
-      } catch (error) {
-        return -1
       }
-    }
-    try {
+
       // add the array to the database
       const newValues = arg.map(
         (el) => ({ ...el, id: ++lastIndex } as DataTypes[T])
       )
-      const arr = this.tournament[table].toObject()
-      arr.push(...newValues)
-      this.tournament[table] = arr
-      await this.tournament.save()
+      this.tournamentData[table].push(...newValues)
+      await this.saveTournament()
       return true
     } catch (error) {
-      return false
+      console.error(`Error inserting into ${table}:`, error)
+      return Array.isArray(arg) ? false : -1
     }
   }
 
@@ -139,30 +179,30 @@ export class MyDB implements CrudInterface {
     table: T,
     arg?: number | Partial<DataTypes[T]>
   ): Promise<DataTypes[T] | Array<DataTypes[T]> | null> {
-    // console.log("running SELECT ====>")
-    // console.log(table, arg)
     try {
       if (arg === undefined) {
-        const res = this.tournament[table]
+        const res = this.tournamentData[table] as DataTypes[T][]
         if (res.length === 0) return null
-        return res.toObject() as Array<DataTypes[T]>
+        return res
       }
+
       if (typeof arg === 'number') {
         // return the specific data
-        const index = this.tournament[table]
-          .toObject()
-          .findIndex((value: any) => value.id == arg)
-        if (index == -1) return null
-        return this.tournament[table].toObject()[index] as DataTypes[T]
+        const data = (this.tournamentData[table] as DataTypes[T][]).find(
+          (value) => value.id === arg
+        )
+        return data || null
       }
+
       // there is a filter, and use the filter to select the data
       const filteredArr = filterArrayOfObjects(
-        this.tournament[table].toObject(),
-        arg
+        this.tournamentData[table] as any[],
+        arg as any
       )
       if (filteredArr.length === 0) return null
-      return filteredArr
+      return filteredArr as DataTypes[T][]
     } catch (error) {
+      console.error(`Error selecting from ${table}:`, error)
       return null
     }
   }
@@ -205,39 +245,38 @@ export class MyDB implements CrudInterface {
     arg: number | Partial<DataTypes[T]>,
     value: DataTypes[T] | Partial<DataTypes[T]>
   ): Promise<boolean> {
-    // console.log("running UPDATE ====>")
-    // console.log(table, arg, value)
-    if (typeof arg === 'number') {
-      try {
-        // update the value and return true or false based on the succeess
-        const index = this.tournament[table]
-          .toObject()
-          .findIndex((val: any) => val.id === arg)
-        if (index === -1) return false
-        this.tournament[table].set(index, value as any)
-        await this.tournament.save()
-        return true
-      } catch (error) {
-        console.log('Error--> ', error)
-        return false
-      }
-    }
-    // use this place to update the data using the filter
     try {
-      this.tournament[table].toObject().forEach((el: any, index: any) => {
-        const update = Object.entries(arg).every(
-          ([key, value]) => el[key] === value
+      if (typeof arg === 'number') {
+        // update the value and return true or false based on the success
+        const index = (this.tournamentData[table] as DataTypes[T][]).findIndex(
+          (val) => val.id === arg
         )
-        if (update) {
-          const merged = deepMerge(JSON.parse(JSON.stringify(el)), value)
-          this.tournament[table].set(index, merged)
+        if (index === -1) return false
+
+        this.tournamentData[table][index] = {
+          ...this.tournamentData[table][index],
+          ...value,
+        } as any
+        await this.saveTournament()
+        return true
+      }
+
+      // use this place to update the data using the filter
+      const tableData = this.tournamentData[table] as any[]
+      tableData.forEach((el, index) => {
+        const isMatch = Object.entries(arg).every(
+          ([key, filterValue]) => el[key] === filterValue
+        )
+        if (isMatch) {
+          const merged = deepMerge(el, value)
+          this.tournamentData[table][index] = merged
         }
       })
 
-      await this.tournament.save()
-
+      await this.saveTournament()
       return true
     } catch (error) {
+      console.error(`Error updating ${table}:`, error)
       return false
     }
   }
@@ -267,23 +306,33 @@ export class MyDB implements CrudInterface {
    * @param filter An object to filter data or undefined to empty the table.
    */
   public async delete<T extends Table>(
-    table: Table,
+    table: T,
     filter?: Partial<DataTypes[T]>
   ): Promise<boolean> {
-    console.log('running DELETE ====>')
-    // console.log(table, filter)
+    try {
+      if (!filter) {
+        // delete all the data
+        this.tournamentData[table] = [] as any
+        await this.saveTournament()
+        return true
+      }
 
-    if (!filter) {
-      // delete all the data
-      this.tournament[table] = [] as any[T]
-      await this.tournament.save()
+      // delete data using the filter provided
+      const initialLength = (this.tournamentData[table] as any[]).length
+      this.tournamentData[table] = (this.tournamentData[table] as any[]).filter(
+        (val) =>
+          Object.entries(filter).some(([key, value]) => val[key] !== value)
+      ) as any
+
+      const deletedAny =
+        (this.tournamentData[table] as any[]).length < initialLength
+      if (deletedAny) {
+        await this.saveTournament()
+      }
       return true
+    } catch (error) {
+      console.error(`Error deleting from ${table}:`, error)
+      return false
     }
-    // use this place to delete data using the filter provided
-    // this.tournament[table] = this.tournament[table].filter((val) =>
-    //   Object.entries(filter).some(([key, value]) => val[key] !== value),
-    // )
-    this.tournament.save()
-    return true
   }
 }

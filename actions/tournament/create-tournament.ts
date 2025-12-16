@@ -3,18 +3,35 @@
 import type { CreateTournamentType } from '@/schemas/createTournament'
 import { CreateTournamentSchema } from '@/schemas/createTournament'
 import { currentUser } from '@/lib/auth'
-import prisma from '@/lib/prisma'
-import { MyDB } from '@/lib/MyDB'
+import {
+  createTournament as createTournamentService,
+  getTournamentManager,
+  addTournamentParticipants,
+  updateTournament as updateTournamentService,
+} from '@/data/Tournaments/tournaments'
 import { BracketsManager } from 'brackets-manager'
-import { InputStage, StageType, SeedOrdering } from 'brackets-model'
+import {
+  InputStage,
+  StageType,
+  SeedOrdering,
+  Participant,
+} from 'brackets-model'
 
-const createTournament = async (data: CreateTournamentType) => {
+export interface TournamentResponse {
+  success?: string
+  error?: string
+  tournamentId?: string
+}
+
+const createTournament = async (
+  data: CreateTournamentType
+): Promise<TournamentResponse> => {
   const validatedData = CreateTournamentSchema.parse(data)
 
   const user = await currentUser()
 
   if (!user) {
-    throw new Error('User not found')
+    return { error: 'User not found' }
   }
 
   if (user.role !== 'admin') {
@@ -22,37 +39,39 @@ const createTournament = async (data: CreateTournamentType) => {
   }
 
   try {
-    console.log('User:', user)
-
-    const tournament = await prisma.tournament.create({
-      data: {
-        name: validatedData.tournamentName,
-        description: validatedData.description,
-        createdBy: user.id,
-      },
+    // Create tournament in database
+    const tournament = await createTournamentService({
+      name: validatedData.tournamentName,
+      description: validatedData.description,
+      user: { connect: { id: user.id } },
+      status: 'pending',
     })
 
-    const myDB = await MyDB.build(tournament._id)
-    const manager = new BracketsManager(myDB)
+    // Initialize bracket data
+    const manager = await getTournamentManager(tournament.id)
 
-    //! Dummy participants for testing
-    // In a real application, you would fetch participants from the database or another source
-    const participants: CustomParticipant[] = [
-      { id: 7, name: 'Seed 1', tournament_id: tournament._id },
-      { id: 55, name: 'Seed 2', tournament_id: tournament._id },
-      { id: 53, name: 'Seed 3', tournament_id: tournament._id },
-      { id: 523, name: 'Seed 4', tournament_id: tournament._id },
-      { id: 123, name: 'Seed 5', tournament_id: tournament._id },
-      { id: 353, name: 'Seed 6', tournament_id: tournament._id },
-      { id: 354, name: 'Seed 7', tournament_id: tournament._id },
-      { id: 355, name: 'Seed 8', tournament_id: tournament._id },
+    // Create dummy participants for testing
+    // In a real application, these would come from user input or API
+    const participants: Omit<Participant, 'id'>[] = [
+      { name: 'Seed 1', tournament_id: tournament.id },
+      { name: 'Seed 2', tournament_id: tournament.id },
+      { name: 'Seed 3', tournament_id: tournament.id },
+      { name: 'Seed 4', tournament_id: tournament.id },
+      { name: 'Seed 5', tournament_id: tournament.id },
+      { name: 'Seed 6', tournament_id: tournament.id },
+      { name: 'Seed 7', tournament_id: tournament.id },
+      { name: 'Seed 8', tournament_id: tournament.id },
     ]
 
+    // Add participants to tournament
+    await addTournamentParticipants(tournament.id, participants)
+
+    // Create the tournament stage
     const inputStage: InputStage = {
-      tournamentId: Number(tournament._id),
+      tournamentId: Number(tournament.id),
       name: tournament.name,
       type: validatedData.type as StageType,
-      seeding: participants,
+      seeding: participants.map((p, i) => ({ ...p, id: i + 1 })),
       settings: {
         seedOrdering: [validatedData.seedOrdering as SeedOrdering],
       },
@@ -67,7 +86,14 @@ const createTournament = async (data: CreateTournamentType) => {
     }
 
     await manager.create.stage(inputStage)
-    return { success: 'Tournament Created' }
+
+    // Update tournament status
+    await updateTournamentService(tournament.id, { status: 'progress' })
+
+    return {
+      success: 'Tournament Created Successfully',
+      tournamentId: tournament.id,
+    }
   } catch (error) {
     console.error('Error creating tournament:', error)
     return { error: (error as Error).message }

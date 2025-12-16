@@ -1,5 +1,1 @@
-# I need you implement crud functions for the tournments using prisma.
-
-You will have to use the "brackets-manager" package, brackets-prisma-db package, and models from "brackets-model"
-
-# When you have that, please implement them for use in the tournaments app folder.
+make this a dashboard where I can create, update, and delete tournaments. Id also like to be able to view all tournaments based on
