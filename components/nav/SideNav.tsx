@@ -11,8 +11,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { LoginButton } from '@/components/Auth/buttons/Login-Button'
-import { LogoutButton } from '@/components/Auth/buttons/Logout-Button'
+import { LoginButton } from '@/components/auth/buttons/Login-Button'
+import { LogoutButton } from '@/components/auth/buttons/Logout-Button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '../ui/button'
 import type { ExtendedUser } from '@/next-auth'
