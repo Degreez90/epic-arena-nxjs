@@ -38,7 +38,7 @@ export interface StageFrontend extends Stage {
 export interface OrganizedTournamentData {
   _id: number | string
   name: string
-  description: string
+  description: string | null
   participants: CustomParticipantFrontend[]
   stages: StageFrontend[]
   match_games: MatchGame[]
@@ -57,19 +57,23 @@ export interface CustomParticipantFrontend extends ParticipantResult {
 export interface SerializedTournament {
   _id: number | string
   name: string
-  description: string
-  participant: CustomParticipantFrontend[]
-  stage: StageFrontend[]
-  group: GroupFrontend[]
-  round: RoundFrontend[]
-  match: MatchFrontend[]
-  match_game: MatchGame[]
-  game: Game[]
-  participantGameMatrix: { participantId: number; games: Game[] }[]
+  description: string | null
+  participant: CustomParticipantFrontend[] | null | any
+  stage: StageFrontend[] | null | any
+  group: GroupFrontend[] | null | any
+  round: RoundFrontend[] | null | any
+  match: MatchFrontend[] | null | any
+  match_game: MatchGame[] | null | any
+  game?: Game[] | null | any
+  participantGameMatrix?:
+    | { participantId: number; games: Game[] }[]
+    | null
+    | any
   status: TournamentStatus
   createdBy: string // or Types.ObjectId, but usually string after serialization
   progress: number
   player?: string // or Types.ObjectId, but usually string after serialization
+  participants?: any // Optional as TournamentDTO may not include it
 }
 
 export interface TournamentBracketProps {

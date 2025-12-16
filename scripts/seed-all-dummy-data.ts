@@ -13,6 +13,9 @@
 
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { getTournamentManager } from '@/data/Tournaments/tournaments'
+import { InputStage, SeedOrdering } from 'brackets-model'
+import type { StageType, Participant } from 'brackets-model'
 
 const DUMMY_DATA = {
   users: [
@@ -353,7 +356,7 @@ const DUMMY_DATA = {
       seedingOrder: 'half_shift',
       hasThirdPlaceMatch: false,
       gameIndex: 0,
-      participantIndices: [2, 6, 7, 12, 13],
+      participantIndices: [2, 6, 7, 12, 13, 14, 15, 16], // 8 participants for round-robin
     },
     // MOBA tournaments
     {
@@ -364,7 +367,7 @@ const DUMMY_DATA = {
       seedingOrder: 'natural',
       hasThirdPlaceMatch: true,
       gameIndex: 2,
-      participantIndices: [2, 8, 9, 10, 14, 15, 16, 17],
+      participantIndices: [2, 8, 9, 10, 14, 15, 16, 17], // 8 participants (power of 2)
     },
     {
       name: 'Dota 2 International',
@@ -374,7 +377,7 @@ const DUMMY_DATA = {
       seedingOrder: 'reverse',
       hasThirdPlaceMatch: true,
       gameIndex: 3,
-      participantIndices: [3, 5, 11, 18, 19, 20],
+      participantIndices: [3, 5, 11, 18, 19, 20, 21, 22], // 8 participants (power of 2)
     },
     {
       name: 'MOBA Masters Series',
@@ -384,7 +387,7 @@ const DUMMY_DATA = {
       seedingOrder: 'natural',
       hasThirdPlaceMatch: false,
       gameIndex: 2,
-      participantIndices: [4, 12, 13, 14, 21, 22],
+      participantIndices: [4, 12, 13, 14, 23, 24, 25, 26], // 8 participants for round-robin
     },
     {
       name: 'Regional Qualifier - South',
@@ -394,7 +397,7 @@ const DUMMY_DATA = {
       seedingOrder: 'half_shift',
       hasThirdPlaceMatch: true,
       gameIndex: 3,
-      participantIndices: [6, 15, 16, 23, 24],
+      participantIndices: [6, 15, 16, 23, 24, 25, 26, 27], // 8 participants (power of 2)
     },
     {
       name: 'Grand Finals 2024',
@@ -404,7 +407,7 @@ const DUMMY_DATA = {
       seedingOrder: 'reverse',
       hasThirdPlaceMatch: true,
       gameIndex: 2,
-      participantIndices: [7, 8, 9, 17, 18, 19, 20, 25, 26, 27, 28, 29],
+      participantIndices: [7, 8, 9, 17, 18, 19, 20, 25], // 8 participants (power of 2)
     },
   ],
 }
@@ -530,6 +533,120 @@ async function seedAllDummyData() {
           })
           console.log(`  ✓ Added ${participant.userName} to ${tournament.name}`)
         }
+      }
+    }
+
+    // Step 5: Initialize tournament brackets
+    console.log('\n🔧 Step 5: Initializing tournament brackets...')
+
+    // Helper function to check if number is power of two
+    const isPowerOfTwo = (n: number) => n > 0 && (n & (n - 1)) === 0
+
+    for (let i = 0; i < createdTournaments.length; i++) {
+      const tournament = createdTournaments[i]
+      const tournamentData = DUMMY_DATA.tournaments[i]
+
+      // Only initialize brackets for tournaments without existing bracket data
+      if (tournament.stage || tournament.match) {
+        console.log(
+          `  ℹ️  ${tournament.name} already has bracket data, skipping`
+        )
+        continue
+      }
+
+      try {
+        const participants = await prisma.tournamentParticipant.findMany({
+          where: { tournamentId: tournament.id },
+          include: { user: true },
+        })
+
+        if (participants.length === 0) {
+          console.warn(`  ⚠️  No participants for ${tournament.name}, skipping`)
+          continue
+        }
+
+        // Initialize bracket manager
+        const manager = await getTournamentManager(tournament.id)
+
+        // Map participants
+        const seedParticipants: Omit<Participant, 'id'>[] = participants.map(
+          (p) => ({
+            name: p.user?.userName || `Participant`,
+            tournament_id: 1,
+          })
+        )
+
+        // Create the stage
+        const stageType = (tournament.type || 'single_elimination') as StageType
+
+        // Handle power-of-two constraint for elimination tournaments
+        let finalSeeding = seedParticipants
+        if (
+          (stageType === 'single_elimination' ||
+            stageType === 'double_elimination') &&
+          !isPowerOfTwo(participants.length)
+        ) {
+          // Round up to nearest power of two by padding with byes
+          let powerOfTwo = 1
+          while (powerOfTwo < participants.length) {
+            powerOfTwo *= 2
+          }
+          // Add bye participants to fill the bracket
+          const byesNeeded = powerOfTwo - participants.length
+          for (let j = 0; j < byesNeeded; j++) {
+            finalSeeding.push({
+              name: `[BYE ${j + 1}]`,
+              tournament_id: 1,
+            })
+          }
+          console.log(
+            `  ℹ️  Added ${byesNeeded} byes to make power-of-two for ${tournament.name}`
+          )
+        }
+
+        const inputStage: InputStage = {
+          tournamentId: 1,
+          name: tournament.name,
+          type: stageType,
+          seeding: finalSeeding,
+          settings: {
+            seedOrdering:
+              stageType === 'round_robin'
+                ? ['groups.bracket_optimized']
+                : [(tournament.seedingOrder || 'natural') as SeedOrdering],
+          },
+        }
+
+        // Add type-specific settings
+        if (stageType === 'double_elimination') {
+          inputStage.settings = inputStage.settings || {}
+          ;(inputStage.settings as any).grandFinal = 'double'
+        } else if (
+          stageType === 'single_elimination' &&
+          participants.length > 2
+        ) {
+          inputStage.settings = inputStage.settings || {}
+          ;(inputStage.settings as any).consolationFinal =
+            tournament.hasThirdPlaceMatch ?? true
+        } else if (stageType === 'round_robin') {
+          // Round-robin requires groupCount
+          inputStage.settings = inputStage.settings || {}
+          ;(inputStage.settings as any).groupCount = Math.max(
+            2,
+            Math.ceil(participants.length / 4)
+          )
+        }
+
+        await manager.create.stage(inputStage)
+        console.log(
+          `  ✓ Initialized ${stageType} bracket for ${tournament.name} (${participants.length} participants)`
+        )
+      } catch (error) {
+        console.error(
+          `  ❌ Error initializing bracket for ${tournament.name}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        )
       }
     }
 
