@@ -70,6 +70,7 @@ model User {
   sessions               Session[]
   tournaments            Tournament[]
   games                  Game[]
+  tournamentParticipants TournamentParticipant[] @relation("TournamentParticipants")
   passwordResetTokens    PasswordResetToken[]
   twoFactorTokens        TwoFactorToken[]
   twoFactorConfirmations TwoFactorConfirmation[]
@@ -92,40 +93,64 @@ model VerificationToken {
 // --- Custom Application Models ---
 
 model Game {
-  id          String   @id @default(cuid())
-  name        String   @db.Text
-  description String?  @db.Text
-  genre       String?
-  images      String[] @default([])
-  rules       Json?
-  createdBy   String
-  user        User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String                  @id @default(cuid())
+  name         String                  @db.Text
+  description  String?                 @db.Text
+  genre        String?
+  images       String[]                @default([])
+  rules        Json?
+  createdBy    String
+  user         User                    @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  tournaments  Tournament[]
+  participants TournamentParticipant[]
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
 
   @@map("games")
 }
 
 model Tournament {
-  id                    String   @id @default(cuid())
+  id                    String                  @id @default(cuid())
   name                  String
-  description           String?  @db.Text
-  status                String   @default("pending") // 'pending' | 'progress' | 'completed' | 'archived'
+  description           String?                 @db.Text
+  status                String                  @default("pending") // 'pending' | 'progress' | 'completed' | 'archived'
+  type                  String                  @default("single_elimination") // 'single_elimination' | 'double_elimination' | 'round_robin'
+  seedingOrder          String                  @default("natural") // 'natural' | 'reverse' | 'half_shift' | 'reverse_half_shift' | 'no_seeding'
+  hasThirdPlaceMatch    Boolean                 @default(false)
   createdBy             String
-  user                  User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  progress              Int      @default(0)
+  user                  User                    @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  gameId                String?
+  game                  Game?                   @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  progress              Int                     @default(0)
   participant           Json? // Store bracket manager participant data
   stage                 Json? // Store bracket manager stage data
   group                 Json? // Store bracket manager group data
   round                 Json? // Store bracket manager round data
   match                 Json? // Store bracket manager match data
   match_game            Json? // Store bracket manager match_game data
-  game                  Json? // Store game selection data
   participantGameMatrix Json? // Store participant game matrix data
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  participants          TournamentParticipant[]
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
 
   @@map("tournaments")
+}
+
+model TournamentParticipant {
+  id           String     @id @default(cuid())
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  userId       String?
+  user         User?      @relation("TournamentParticipants", fields: [userId], references: [id], onDelete: SetNull)
+  gameId       String?
+  game         Game?      @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  status       String     @default("registered") // 'registered' | 'active' | 'eliminated' | 'withdrew'
+  bracketId    Int? // ID in brackets-manager
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([tournamentId, userId])
+  @@map("tournament_participants")
 }
 
 model PasswordResetToken {

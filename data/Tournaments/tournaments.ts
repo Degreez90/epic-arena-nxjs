@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma'
-import type { Prisma } from '@prisma/client'
+import type { Prisma, Tournament } from '@prisma/client'
 import { BracketsManager } from 'brackets-manager'
 import { MyDB } from '@/lib/MyDB'
 import {
@@ -9,9 +9,9 @@ import {
   Participant as BracketsParticipant,
 } from 'brackets-model'
 
-export type TournamentDTO = Prisma.Tournament & { _id: string }
+export type TournamentDTO = Tournament & { _id: string }
 
-const toDTO = (t: Prisma.Tournament): TournamentDTO => ({
+const toDTO = (t: Tournament): TournamentDTO => ({
   ...t,
   _id: t.id,
 })

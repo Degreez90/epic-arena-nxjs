@@ -11,7 +11,7 @@ export type ExtendedUser = DefaultSession['user'] & {
   firstName: string | null
   lastName: string | null
   email: string | null
-  image?: string | null
+  image?: string
   isTwoFactorEnabled: boolean
   isOAuth: boolean
   userName: string | null
