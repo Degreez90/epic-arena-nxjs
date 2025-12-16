@@ -1,5 +1,10 @@
 import prisma from '@/lib/prisma'
-import type { Prisma, Tournament } from '@prisma/client'
+import type {
+  Prisma,
+  Tournament,
+  Game,
+  TournamentParticipant,
+} from '@prisma/client'
 import { BracketsManager } from 'brackets-manager'
 import { MyDB } from '@/lib/MyDB'
 import {
@@ -9,9 +14,15 @@ import {
   Participant as BracketsParticipant,
 } from 'brackets-model'
 
-export type TournamentDTO = Tournament & { _id: string }
+export type TournamentDTO = Tournament & {
+  _id: string
+  game?: Game | null
+  participants?: TournamentParticipant[]
+}
 
-const toDTO = (t: Tournament): TournamentDTO => ({
+const toDTO = (
+  t: Tournament & { game?: Game | null; participants?: TournamentParticipant[] }
+): TournamentDTO => ({
   ...t,
   _id: t.id,
 })
@@ -21,6 +32,10 @@ const toDTO = (t: Tournament): TournamentDTO => ({
  */
 export const getAllTournaments = async (): Promise<TournamentDTO[]> => {
   const tournaments = await prisma.tournament.findMany({
+    include: {
+      game: true,
+      participants: true,
+    },
     orderBy: { createdAt: 'desc' },
   })
   return tournaments.map(toDTO)

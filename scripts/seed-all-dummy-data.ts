@@ -294,20 +294,32 @@ const DUMMY_DATA = {
       name: 'Street Fighter 6',
       description: 'Classic fighting game with modern mechanics',
       genre: 'Fighting',
+      images: [
+        'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&h=600&fit=crop',
+      ],
     },
     {
       name: 'Tekken 8',
       description: '3D fighting game with deep combat system',
+      images: [
+        'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=800&h=600&fit=crop',
+      ],
       genre: 'Fighting',
     },
     {
       name: 'League of Legends',
       description: 'Popular MOBA esports title',
       genre: 'MOBA',
+      images: [
+        'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=600&fit=crop',
+      ],
     },
     {
       name: 'Dota 2',
       description: 'Complex strategy-based MOBA game',
+      images: [
+        'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=800&h=600&fit=crop',
+      ],
       genre: 'MOBA',
     },
   ],
