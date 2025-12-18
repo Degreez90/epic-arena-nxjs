@@ -63,14 +63,17 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
   // Geometry constants tuned to the MatchCard layout
   const cardHeight = 102 // header + opponents + divider
-  const connectorOffset = 70 // vertical offset to the divider inside the card
+  const connectorOffset = 68 // vertical offset to the divider inside the card (matches h-px bg-slate-600)
   const labelHeight = 44 // round label height + margin bottom
   const baseGap = 28 // minimum gap between matches in the same round
 
-  // Calculate vertical spacing based on round progression
+  // Calculate vertical spacing based on round progression with tapering
   const spacingMultiplier = Math.pow(2, roundIndex)
   const gap = Math.max(baseGap, cardHeight * (spacingMultiplier - 1))
   const matchBlock = cardHeight + gap
+  
+  // Adjust vertical position for tapering effect: each subsequent round is shifted down
+  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 20 : 0
 
   return (
     <div className='flex flex-col relative'>
@@ -82,7 +85,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
       </div>
 
       {/* Matches with Connectors */}
-      <div className='flex flex-col' style={{ gap: `${gap}px` }}>
+      <div className='flex flex-col' style={{ gap: `${gap}px`, marginTop: `${roundVerticalOffset}px` }}>
         {round.matches.map((match: MatchFrontend, idx: number) => (
           <div key={idx} className='relative'>
             <div className='w-48'>
@@ -114,9 +117,9 @@ const BracketRound: React.FC<BracketRoundProps> = ({
             if (idx % 2 === 0 && idx + 1 < matchCount) {
               // Align connectors to the divider inside each MatchCard
               const match1Anchor =
-                labelHeight + idx * matchBlock + connectorOffset
+                labelHeight + idx * matchBlock + connectorOffset + roundVerticalOffset
               const match2Anchor =
-                labelHeight + (idx + 1) * matchBlock + connectorOffset
+                labelHeight + (idx + 1) * matchBlock + connectorOffset + roundVerticalOffset
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (
