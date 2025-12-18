@@ -61,7 +61,10 @@ const Round: React.FC<RoundProps> = ({
   }
 
   return (
-    <div className={`flex flex-col pb-4 round ${roundIndex > 0 ? `mt-[${80 + roundIndex * 20}px]` : ''}`}>
+    <div 
+      className={`flex flex-col pb-4 round`}
+      style={roundIndex > 0 ? { marginTop: `${80 + roundIndex * 20}px` } : {}}
+    >
       <div className='mb-5 bg-slate-400 h-10 w-52 flex items-center rounded-md justify-center'>
         <h2 className='text-xs sm:text-sm md:text-base font-bold text-gray-800 tracking-wide'>
           {getRoundName(roundIndex, roundLength, isLastRound)}
