@@ -93,18 +93,18 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
   // Geometry constants tuned to the MatchCard layout
   const cardHeight = 102
-  const connectorOffset = 70 // This aligns with the h-px bg-slate-600 divider in MatchCard
+  const connectorOffset = 64 // This aligns with the h-px bg-slate-600 divider in MatchCard (64px from top)
   const labelHeight = 44
-  const baseGap = 36 // Increased for more space between rounds
+  const baseGap = 40 // Increased for more space between rounds
 
   // Use same spacing calculation for both winner and loser brackets
   // Linear increase for gap to prevent excessive spacing
-  const gap = baseGap + roundIndex * 120 // Adjusted to give more space while maintaining proper alignment
+  const gap = baseGap + roundIndex * 130 // Adjusted to give more space while maintaining proper alignment
   const matchBlock = cardHeight + gap
 
   // Adjust vertical position for tapering effect
   // Increase offset for later rounds to create a downward taper
-  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 72 : 0
+  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 80 : 0
 
   // Determine if this is a loser major round for connector logic
   const isLoserMajorRound = bracketType === 'loser' && roundIndex % 2 === 0
