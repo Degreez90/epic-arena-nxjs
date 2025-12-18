@@ -62,7 +62,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
   const matchCount = round.matches.length
 
   // Geometry constants tuned to the MatchCard layout
-  const cardHeight = 102 // header + opponents + divider
+  const cardHeight = 104 // header + opponents + divider - adjusted to better match actual rendered height
   const connectorOffset = 64 // vertical offset to the divider inside the card (matches h-px bg-slate-600) - 64px from top
   const labelHeight = 44 // round label height + margin bottom
   const baseGap = 32 // minimum gap between matches in the same round
@@ -116,10 +116,12 @@ const BracketRound: React.FC<BracketRoundProps> = ({
           {round.matches.map((_: any, idx: number) => {
             if (idx % 2 === 0 && idx + 1 < matchCount) {
               // Align connectors to the divider inside each MatchCard
+              // Add a small correction to fix alignment issues
+              const correction = idx * 1 // Adjust per match to fix progressive error
               const match1Anchor =
-                labelHeight + idx * matchBlock + connectorOffset + roundVerticalOffset
+                labelHeight + idx * matchBlock + connectorOffset + roundVerticalOffset + correction
               const match2Anchor =
-                labelHeight + (idx + 1) * matchBlock + connectorOffset + roundVerticalOffset
+                labelHeight + (idx + 1) * matchBlock + connectorOffset + roundVerticalOffset + (idx + 1) * 1
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (
