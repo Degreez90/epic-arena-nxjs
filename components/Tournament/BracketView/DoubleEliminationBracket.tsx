@@ -97,20 +97,13 @@ const BracketRound: React.FC<BracketRoundProps> = ({
   const labelHeight = 44
   const baseGap = 28
 
-  // Losers bracket has alternating patterns
-  const isLoserMajorRound = bracketType === 'loser' && roundIndex % 2 === 0
-  const spacingMultiplier =
-    bracketType === 'winner'
-      ? Math.pow(2, roundIndex)
-      : isLoserMajorRound
-      ? Math.pow(2, Math.floor(roundIndex / 2))
-      : Math.pow(2, Math.floor(roundIndex / 2))
-
-  const gap = Math.max(baseGap, cardHeight * (spacingMultiplier - 1))
+  // Use same spacing calculation for both winner and loser brackets
+  // Linear increase for gap to prevent excessive spacing
+  const gap = baseGap + roundIndex * 40
   const matchBlock = cardHeight + gap
   
   // Adjust vertical position for tapering effect
-  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 80 : 0
+  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 120 : 0
 
   return (
     <div className='flex flex-col relative'>
