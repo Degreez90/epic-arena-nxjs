@@ -17,7 +17,7 @@ const TournamentDetailsPage = async ({
     return <div>Invalid tournament ID</div>
   }
 
-  const tournament = await getTournamentById(id)
+  const tournament: SerializedTournament | null = await getTournamentById(id)
 
   if (!tournament) {
     return <div>Tournament not found</div>
@@ -54,8 +54,7 @@ const TournamentDetailsPage = async ({
 
   return (
     <Container>
-      <div className='flex justify-center'>
-        {/* <TournamentDetails key={tournament._id} tournament={tournament} /> */}
+      <div className='w-full max-w-7xl mx-auto'>
         <TournamentBracket tournamentDataForUI={tournamentDataForUI} />
       </div>
     </Container>

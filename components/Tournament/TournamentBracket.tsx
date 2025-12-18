@@ -1,11 +1,9 @@
 'use client'
-import React, { use, useEffect } from 'react'
-import DoubleEliminationStage from '@/components/Tournament/Stage/DoubleEliminationStage'
-import { SerializedTournament } from '@/types/tournament/tournament'
+import React, { useEffect } from 'react'
 import { TournamentBracketProps } from '@/types/tournament/tournament'
 import { useTournamentStore } from '@/store/useTournamentStore'
 import MatchScoreAndDetailDialog from './Match/MatchScoreAndDetailDialog'
-import SingleEliminationStage from './Stage/SingleEliminationStage'
+import BracketContainer from './BracketView/BracketContainer'
 
 const TournamentBracket: React.FC<TournamentBracketProps> = ({
   tournamentDataForUI,
@@ -14,17 +12,18 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
   const dialog = useTournamentStore((state) => state.dialog)
   const closeDialog = useTournamentStore((state) => state.closeDialog)
 
-  console.log('Current Zustand state:', useTournamentStore.getState())
-
   useEffect(() => {
     setTournamentData(tournamentDataForUI)
   }, [setTournamentData, tournamentDataForUI])
 
-  console.log('tournamentDataForUI from bracket: ', tournamentDataForUI)
-
   const stage = tournamentDataForUI.stages[0]
+
+  if (!stage) {
+    return <div>No stage data available</div>
+  }
+
   return (
-    <div>
+    <div className='w-full'>
       {dialog.match && (
         <MatchScoreAndDetailDialog
           open={dialog.open}
@@ -33,17 +32,10 @@ const TournamentBracket: React.FC<TournamentBracketProps> = ({
           tab={dialog.tab}
         />
       )}
-      {stage ? (
-        stage.type === 'single_elimination' ? (
-          <SingleEliminationStage stage={stage} />
-        ) : stage.type === 'double_elimination' ? (
-          <DoubleEliminationStage stage={stage} />
-        ) : (
-          <div>No supported stage type</div>
-        )
-      ) : (
-        <div>No stage data</div>
-      )}
+      <BracketContainer
+        stage={stage}
+        tournamentName={tournamentDataForUI.name}
+      />
     </div>
   )
 }

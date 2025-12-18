@@ -16,7 +16,6 @@ import { LogoutButton } from '@/components/auth/buttons/Logout-Button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '../ui/button'
 import type { ExtendedUser } from '@/next-auth'
-import { useCurrentUser } from '@/hooks/use-current-user'
 import { usePathname, useSearchParams } from 'next/navigation'
 
 const SideNav: React.FC = () => {
@@ -42,10 +41,6 @@ const SideNav: React.FC = () => {
       .toUpperCase()
   }, [user?.email, user?.name, user?.userName])
 
-  const handleToggle = () => {
-    setIsOpen(!isOpen)
-  }
-
   const handleClose = () => {
     setIsOpen(false)
   }
@@ -67,7 +62,6 @@ const SideNav: React.FC = () => {
           size='icon'
           className='rounded-full border border-border/60 shadow-sm'
           aria-label='Open navigation'
-          onClick={handleToggle}
         >
           <TiThMenu size={22} />
           <span className='sr-only'>Open navigation</span>
