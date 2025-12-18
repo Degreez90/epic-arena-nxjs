@@ -21,10 +21,10 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
         {/* Winners Bracket */}
         {winnersGroup && (
           <div>
-            <h3 className='text-lg md:text-xl font-semibold mb-6'>
+            <h3 className='text-lg md:text-xl font-semibold mb-8'>
               Winners Bracket
             </h3>
-            <div className='flex gap-12 md:gap-16'>
+            <div className='flex gap-16 md:gap-20'>
               {winnersGroup.rounds.map((round, roundIdx) => (
                 <BracketRound
                   key={roundIdx}
@@ -93,17 +93,18 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
   // Geometry constants tuned to the MatchCard layout
   const cardHeight = 102
-  const connectorOffset = 70 // Adjusted to align with h-px bg-slate-600 in MatchCard
+  const connectorOffset = 70 // This aligns with the h-px bg-slate-600 divider in MatchCard
   const labelHeight = 44
-  const baseGap = 32 // Increased for more space between rounds
+  const baseGap = 36 // Increased for more space between rounds
 
   // Use same spacing calculation for both winner and loser brackets
   // Linear increase for gap to prevent excessive spacing
-  const gap = baseGap + roundIndex * 140 // Increased to give more space
+  const gap = baseGap + roundIndex * 120 // Adjusted to give more space while maintaining proper alignment
   const matchBlock = cardHeight + gap
 
-  // Adjust vertical position for tapering effect - increased for better tapering
-  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 80 : 0
+  // Adjust vertical position for tapering effect
+  // Increase offset for later rounds to create a downward taper
+  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 72 : 0
 
   // Determine if this is a loser major round for connector logic
   const isLoserMajorRound = bracketType === 'loser' && roundIndex % 2 === 0
