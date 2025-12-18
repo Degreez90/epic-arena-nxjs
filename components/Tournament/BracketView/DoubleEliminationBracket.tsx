@@ -146,7 +146,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
           className='absolute top-0 pointer-events-none'
           style={{
             left: 'calc(100% + 1.5rem)',
-            width: '1.5rem',
+            width: 'calc(4rem - 1.5rem)', // Adjust to span across the gap (gap-16 is 4rem)
             height: '100%',
           }}
         >
@@ -157,9 +157,12 @@ const BracketRound: React.FC<BracketRoundProps> = ({
             if (shouldConnect && idx % 2 === 0 && idx + 1 < matchCount) {
               // Align connectors to the divider inside each MatchCard
               // Adjusted to align with the h-px bg-slate-600 element
-              // Add a small correction to fix alignment issues
-              const baseCorrection = 1 // Bring first line down 1px
-              const progressiveCorrection = idx * 5 // Fix progressive error (10px for idx=2)
+              // Add corrections to ensure horizontal lines connect properly
+              // For the first pair, midPoint should be around 183.5
+              const baseCorrection = 0.5 // Adjust to get 183.5
+              const progressiveCorrection = idx * 0 // We'll handle differently
+              // Adjust match2 to come down
+              const match2VerticalAdjustment = idx === 0 ? 10 : idx * 10
               const match1Anchor =
                 labelHeight +
                 idx * matchBlock +
@@ -173,7 +176,8 @@ const BracketRound: React.FC<BracketRoundProps> = ({
                 connectorOffset +
                 roundVerticalOffset +
                 baseCorrection +
-                (idx + 1) * 5
+                progressiveCorrection +
+                match2VerticalAdjustment
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (
