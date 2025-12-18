@@ -63,7 +63,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
   // Geometry constants tuned to the MatchCard layout
   const cardHeight = 104 // header + opponents + divider - adjusted to better match actual rendered height
-  const connectorOffset = 64 // vertical offset to the divider inside the card (matches h-px bg-slate-600) - 64px from top
+  const connectorOffset = 80 // vertical offset to the divider inside the card (matches h-px bg-slate-600) - adjusted from 64px to 80px
   const labelHeight = 44 // round label height + margin bottom
   const baseGap = 32 // minimum gap between matches in the same round
 
