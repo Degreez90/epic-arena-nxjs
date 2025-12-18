@@ -165,7 +165,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
               const baseCorrection = 3.5
               // Additional adjustment for the bottom of the vertical line to meet right connector
               // For matches 3-4 (idx=2), 5-6 (idx=4), etc.
-              const bottomAdjustment = idx * 2 // Progressive adjustment
+              const bottomAdjustment = idx * 4 // Progressive adjustment
               const match1Anchor =
                 labelHeight +
                 idx * matchBlock +
