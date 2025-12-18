@@ -120,10 +120,14 @@ const BracketRound: React.FC<BracketRoundProps> = ({
               // The bottom of the vertical line needs to connect with the 2nd and 4th right connector
               // Add base correction to align horizontal line at 183.5
               const baseCorrection = 7.5
+              // Additional adjustment for the bottom of the vertical line to meet right connector
+              // For matches 3-4 (idx=2), 5-6 (idx=4), etc.
+              const bottomAdjustment = idx * 2 // Progressive adjustment
               const match1Anchor =
                 labelHeight + idx * matchBlock + connectorOffset + roundVerticalOffset + baseCorrection
               const match2Anchor =
-                labelHeight + (idx + 1) * matchBlock + connectorOffset + roundVerticalOffset + baseCorrection
+                labelHeight + (idx + 1) * matchBlock + connectorOffset + roundVerticalOffset + baseCorrection +
+                bottomAdjustment
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (
