@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useLayoutEffect, useMemo, useState } from 'react'
 import { StageFrontend, MatchFrontend } from '@/types/tournament/tournament'
 import MatchCard from './MatchCard'
 
@@ -91,6 +91,13 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 }) => {
   const matchCount = round.matches.length
 
+  // Measure actual match block positions so vertical connectors line up with the right connectors
+  const matchRefs = useMemo(
+    () => round.matches.map(() => React.createRef<HTMLDivElement>()),
+    [round.matches.length]
+  )
+  const [anchorYs, setAnchorYs] = useState<number[]>([])
+
   // Geometry constants tuned to the MatchCard layout
   const cardHeight = 104 // Adjusted to better match actual rendered height
   const connectorOffset = 64 // This aligns with the h-px bg-slate-600 divider in MatchCard (64px from top)
@@ -109,6 +116,15 @@ const BracketRound: React.FC<BracketRoundProps> = ({
   // Determine if this is a loser major round for connector logic
   const isLoserMajorRound = bracketType === 'loser' && roundIndex % 2 === 0
 
+  useLayoutEffect(() => {
+    const ys = matchRefs.map((ref) => {
+      if (!ref.current) return undefined
+      // OffsetTop is relative to the round container; add connectorOffset to reach the right connector anchor
+      return ref.current.offsetTop + connectorOffset
+    })
+    setAnchorYs(ys as number[])
+  }, [matchRefs, connectorOffset])
+
   return (
     <div className='flex flex-col relative'>
       {/* Round Label */}
@@ -124,7 +140,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
         style={{ gap: `${gap}px`, marginTop: `${roundVerticalOffset}px` }}
       >
         {round.matches.map((match: MatchFrontend, idx: number) => (
-          <div key={idx} className='relative'>
+          <div key={idx} className='relative' ref={matchRefs[idx]}>
             <div className='w-48'>
               <MatchCard match={match} />
             </div>
@@ -160,16 +176,19 @@ const BracketRound: React.FC<BracketRoundProps> = ({
             if (shouldConnect && idx % 2 === 0 && idx + 1 < matchCount) {
               // The top of the vertical line should connect with the end of the right connector of match idx
               // The bottom of the vertical line should connect with the end of the right connector of match idx+1
-              const match1Anchor =
+              const fallbackMatch1Anchor =
                 labelHeight +
                 idx * matchBlock +
                 roundVerticalOffset +
                 connectorOffset
-              const match2Anchor =
+              const fallbackMatch2Anchor =
                 labelHeight +
                 (idx + 1) * matchBlock +
                 roundVerticalOffset +
                 connectorOffset
+
+              const match1Anchor = anchorYs[idx] ?? fallbackMatch1Anchor
+              const match2Anchor = anchorYs[idx + 1] ?? fallbackMatch2Anchor
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (
