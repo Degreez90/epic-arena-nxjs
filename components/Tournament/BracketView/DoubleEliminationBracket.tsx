@@ -105,6 +105,9 @@ const BracketRound: React.FC<BracketRoundProps> = ({
   // Adjust vertical position for tapering effect
   const roundVerticalOffset = roundIndex > 0 ? roundIndex * 120 : 0
 
+  // Determine if this is a loser major round for connector logic
+  const isLoserMajorRound = bracketType === 'loser' && roundIndex % 2 === 0
+
   return (
     <div className='flex flex-col relative'>
       {/* Round Label */}
