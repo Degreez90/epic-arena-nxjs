@@ -24,7 +24,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
             <h3 className='text-lg md:text-xl font-semibold mb-8'>
               Winners Bracket
             </h3>
-            <div className='flex gap-16 md:gap-20'>
+            <div className='flex gap-16 md:gap-20 [--round-gap:4rem] md:[--round-gap:5rem] [--connector-inline:calc(var(--round-gap)_/_2)]'>
               {winnersGroup.rounds.map((round, roundIdx) => (
                 <BracketRound
                   key={roundIdx}
@@ -44,7 +44,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
             <h3 className='text-lg md:text-xl font-semibold mb-8'>
               Losers Bracket
             </h3>
-            <div className='flex gap-16 md:gap-20'>
+            <div className='flex gap-16 md:gap-20 [--round-gap:4rem] md:[--round-gap:5rem] [--connector-inline:calc(var(--round-gap)_/_2)]'>
               {losersGroup.rounds.map((round, roundIdx) => (
                 <BracketRound
                   key={roundIdx}
@@ -133,7 +133,10 @@ const BracketRound: React.FC<BracketRoundProps> = ({
             {roundIndex < totalRounds - 1 && (
               <div
                 className='absolute left-full h-px border-t-2 border-dotted border-border'
-                style={{ width: '1.5rem', top: `${connectorOffset}px` }}
+                style={{
+                  width: 'var(--connector-inline, 1.5rem)',
+                  top: `${connectorOffset}px`,
+                }}
               />
             )}
           </div>
@@ -145,8 +148,9 @@ const BracketRound: React.FC<BracketRoundProps> = ({
         <svg
           className='absolute top-0 pointer-events-none'
           style={{
-            left: 'calc(100% + 1.5rem)',
-            width: 'calc(4rem - 1.5rem)', // Adjust to span across the gap (gap-16 is 4rem)
+            left: 'calc(100% + var(--connector-inline, 1.5rem))',
+            width:
+              'calc(var(--round-gap, 4rem) - var(--connector-inline, 1.5rem))',
             height: '100%',
           }}
         >
@@ -155,29 +159,17 @@ const BracketRound: React.FC<BracketRoundProps> = ({
             const shouldConnect = bracketType === 'winner' || isLoserMajorRound
 
             if (shouldConnect && idx % 2 === 0 && idx + 1 < matchCount) {
-              // Align connectors to the divider inside each MatchCard
-              // Adjusted to align with the h-px bg-slate-600 element
-              // Add corrections to ensure horizontal lines connect properly
-              // For the first pair, midPoint should be around 183.5
-              const baseCorrection = 0.5 // Adjust to get 183.5
-              const progressiveCorrection = idx * 0 // We'll handle differently
-              // Adjust match2 to come down
-              const match2VerticalAdjustment = idx === 0 ? 10 : idx * 10
+              // Align connectors to the divider inside each MatchCard without drift
               const match1Anchor =
                 labelHeight +
                 idx * matchBlock +
                 connectorOffset +
-                roundVerticalOffset +
-                baseCorrection +
-                progressiveCorrection
+                roundVerticalOffset
               const match2Anchor =
                 labelHeight +
                 (idx + 1) * matchBlock +
                 connectorOffset +
-                roundVerticalOffset +
-                baseCorrection +
-                progressiveCorrection +
-                match2VerticalAdjustment
+                roundVerticalOffset
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (
