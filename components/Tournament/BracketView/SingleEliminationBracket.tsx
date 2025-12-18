@@ -73,7 +73,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
   const matchBlock = cardHeight + gap
   
   // Adjust vertical position for tapering effect: each subsequent round is shifted down
-  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 20 : 0
+  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 40 : 0
 
   return (
     <div className='flex flex-col relative'>
