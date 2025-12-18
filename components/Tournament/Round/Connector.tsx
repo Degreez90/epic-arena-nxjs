@@ -27,7 +27,7 @@ export const BackConnector: React.FC<BackConnectorProps> = ({
   if (!(roundIndex == 0))
     return (
       <div
-        className={`absolute right-1 border-t-2 border-t-teal-200 w-[28px] md:w-[40px]" `} //connect behind
+        className={`absolute right-1 top-1/2 transform -translate-y-1/2 border-t-2 border-t-teal-200 w-[28px] md:w-[40px]" `} //connect behind
       />
     )
   else return ''
@@ -57,13 +57,15 @@ export const FrontConnector: React.FC<FrontConnectorProps> = ({
     //todo:: fix styles returned
     return (
       <div
-        className={`absolute bottom-0 left-1 h-1/2 border-t-2 border-r-2 border-t-teal-200 border-r-teal-200 w-[10px] md:w-[15px]`} // connect down
+        className={`absolute top-1/2 left-1 transform -translate-y-1/2 border-t-2 border-r-2 border-t-teal-200 border-r-teal-200 w-[10px] md:w-[15px]`} // connect down
+        style={{ height: 'calc(50% + 1px)' }}
       />
     )
   else
     return (
       <div
-        className={`absolute top-0 left-1 h-1/2 border-b-2 border-r-2 border-b-teal-200 border-r-teal-200 w-[10px] md:w-[15px]`}
+        className={`absolute top-1/2 left-1 transform -translate-y-1/2 border-b-2 border-r-2 border-b-teal-200 border-r-teal-200 w-[10px] md:w-[15px]`}
+        style={{ height: 'calc(50% + 1px)' }}
       />
     )
 }
