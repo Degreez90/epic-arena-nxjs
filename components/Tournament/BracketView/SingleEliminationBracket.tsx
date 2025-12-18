@@ -73,8 +73,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
   const matchBlock = cardHeight + gap
   
   // Adjust vertical position for tapering effect: each subsequent round is shifted down
-  // Adjusted to align horizontal line at 183.5 for round 2 match 1
-  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 125.5 : 0
+  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 130 : 0
 
   return (
     <div className='flex flex-col relative'>
@@ -116,18 +115,12 @@ const BracketRound: React.FC<BracketRoundProps> = ({
         >
           {round.matches.map((_: any, idx: number) => {
             if (idx % 2 === 0 && idx + 1 < matchCount) {
-              // Align connectors to the divider inside each MatchCard
-              // The bottom of the vertical line needs to connect with the 2nd and 4th right connector
-              // Add base correction to align horizontal line at 183.5
-              const baseCorrection = 7.5
-              // Additional adjustment for the bottom of the vertical line to meet right connector
-              // For matches 3-4 (idx=2), 5-6 (idx=4), etc.
-              const bottomAdjustment = idx * 2 // Progressive adjustment
+              // The top of the vertical line should connect with the end of the right connector of match idx
+              // The bottom of the vertical line should connect with the end of the right connector of match idx+1
               const match1Anchor =
-                labelHeight + idx * matchBlock + connectorOffset + roundVerticalOffset + baseCorrection
+                labelHeight + idx * matchBlock + roundVerticalOffset + connectorOffset
               const match2Anchor =
-                labelHeight + (idx + 1) * matchBlock + connectorOffset + roundVerticalOffset + baseCorrection +
-                bottomAdjustment
+                labelHeight + (idx + 1) * matchBlock + roundVerticalOffset + connectorOffset
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (

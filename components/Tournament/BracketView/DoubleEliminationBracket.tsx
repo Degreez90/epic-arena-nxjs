@@ -104,8 +104,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
   // Adjust vertical position for tapering effect
   // Increase offset for later rounds to create a downward taper
-  // Adjusted to align horizontal line at 183.5 for round 2 match 1
-  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 75.5 : 0
+  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 80 : 0
 
   // Determine if this is a loser major round for connector logic
   const isLoserMajorRound = bracketType === 'loser' && roundIndex % 2 === 0
@@ -159,26 +158,18 @@ const BracketRound: React.FC<BracketRoundProps> = ({
             const shouldConnect = bracketType === 'winner' || isLoserMajorRound
 
             if (shouldConnect && idx % 2 === 0 && idx + 1 < matchCount) {
-              // Align connectors to the divider inside each MatchCard without drift
-              // The bottom of the vertical line needs to connect with the 2nd and 4th right connector
-              // Add base correction to align horizontal line at 183.5
-              const baseCorrection = 3.5
-              // Additional adjustment for the bottom of the vertical line to meet right connector
-              // For matches 3-4 (idx=2), 5-6 (idx=4), etc.
-              const bottomAdjustment = idx * 4 // Progressive adjustment
+              // The top of the vertical line should connect with the end of the right connector of match idx
+              // The bottom of the vertical line should connect with the end of the right connector of match idx+1
               const match1Anchor =
                 labelHeight +
                 idx * matchBlock +
-                connectorOffset +
                 roundVerticalOffset +
-                baseCorrection
+                connectorOffset
               const match2Anchor =
                 labelHeight +
                 (idx + 1) * matchBlock +
-                connectorOffset +
                 roundVerticalOffset +
-                baseCorrection +
-                bottomAdjustment
+                connectorOffset
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (
