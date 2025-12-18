@@ -150,7 +150,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
           style={{
             left: 'calc(100% + var(--connector-inline, 1.5rem))',
             width:
-              'calc(var(--round-gap, 4rem) - var(--connector-inline, 1.5rem))',
+              'calc(var(--round-gap, 4rem) + 0.5rem)',
             height: '100%',
           }}
         >
@@ -160,16 +160,21 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
             if (shouldConnect && idx % 2 === 0 && idx + 1 < matchCount) {
               // Align connectors to the divider inside each MatchCard without drift
+              // Add progressive correction to fix vertical line alignment for matches 3-4, 5-6, etc.
+              // The line is up too high, so add positive correction to bring it down
+              const progressiveCorrection = idx * 3 // Positive to bring line down (increase y)
               const match1Anchor =
                 labelHeight +
                 idx * matchBlock +
                 connectorOffset +
-                roundVerticalOffset
+                roundVerticalOffset +
+                progressiveCorrection
               const match2Anchor =
                 labelHeight +
                 (idx + 1) * matchBlock +
                 connectorOffset +
-                roundVerticalOffset
+                roundVerticalOffset +
+                progressiveCorrection
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (
