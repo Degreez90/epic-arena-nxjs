@@ -104,7 +104,8 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
   // Adjust vertical position for tapering effect
   // Increase offset for later rounds to create a downward taper
-  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 80 : 0
+  // Adjusted to align horizontal line at 183.5 for round 2 match 1
+  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 75.5 : 0
 
   // Determine if this is a loser major round for connector logic
   const isLoserMajorRound = bracketType === 'loser' && roundIndex % 2 === 0
@@ -134,7 +135,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
               <div
                 className='absolute left-full h-px border-t-2 border-dotted border-border'
                 style={{
-                  width: 'var(--connector-inline, 1.5rem)',
+                  width: 'calc(var(--round-gap, 4rem) / 2)',
                   top: `${connectorOffset}px`,
                 }}
               />
@@ -148,9 +149,8 @@ const BracketRound: React.FC<BracketRoundProps> = ({
         <svg
           className='absolute top-0 pointer-events-none'
           style={{
-            left: 'calc(100% + var(--connector-inline, 1.5rem))',
-            width:
-              'calc(var(--round-gap, 4rem) + 0.5rem)',
+            left: 'calc(100% + calc(var(--round-gap, 4rem) / 2))',
+            width: 'calc(var(--round-gap, 4rem) / 2)',
             height: '100%',
           }}
         >

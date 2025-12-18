@@ -73,7 +73,8 @@ const BracketRound: React.FC<BracketRoundProps> = ({
   const matchBlock = cardHeight + gap
   
   // Adjust vertical position for tapering effect: each subsequent round is shifted down
-  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 130 : 0
+  // Adjusted to align horizontal line at 183.5 for round 2 match 1
+  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 125.5 : 0
 
   return (
     <div className='flex flex-col relative'>
@@ -109,7 +110,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
           className='absolute top-0 pointer-events-none'
           style={{
             left: 'calc(100% + 1.5rem)',
-            width: 'calc(3rem + 0.5rem)', // Extend further to connect to next round's match
+            width: '1.5rem', // Balanced with right connector width
             height: '100%',
           }}
         >
@@ -120,7 +121,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
               // For the first pair, midPoint should be around 183.5
               // The vertical line is up too high for matches 3-4, 5-6, etc.
               // Add progressive correction to bring it down
-              const baseCorrection = 0.5 // Adjust to get 183.5
+              const baseCorrection = 2.5 // Adjust to get 183.5
               const progressiveCorrection = idx * 3 // Positive to bring line down (increase y)
               // Adjust match2 to come down
               const match2VerticalAdjustment = idx === 0 ? 10 : idx * 10
