@@ -76,6 +76,8 @@ const Match: React.FC<MatchProps> = ({ match }) => {
         id='match_tool_tip'
         className='absolute top-1/2 -right-[50px] -translate-y-1/2 h-[55%] w-[55px] invisible group-hover:visible flex flex-col justify-center items-center'
       >
+        {/* Connecting line */}
+        <div className='absolute left-0 top-1/2 -translate-y-1/2 w-[20px] h-px bg-slate-600 z-[4]'></div>
         <div className='w-full h-full bg-teal-500 rounded opacity-90 flex justify-center items-center z-[5]'>
           <Button
             onClick={() => openMatchScoreEditDialog(match, tabs.matchDetails)}
