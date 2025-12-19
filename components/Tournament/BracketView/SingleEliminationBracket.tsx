@@ -67,8 +67,8 @@ const BracketRound: React.FC<BracketRoundProps> = ({
   const labelHeight = 44 // round label height + margin bottom
   const baseGap = 64 // consistent gap between matches in all rounds
 
-  // Use a consistent gap for all rounds to ensure proper alignment
-  const gap = baseGap
+  // Gap doubles each round: round 1: 64px, round 2: 108px, round 3: 216px, etc.
+  const gap = roundIndex === 0 ? baseGap : 108 * Math.pow(2, roundIndex - 1)
   const matchBlock = cardHeight + gap
   
   // No vertical offset needed
@@ -89,10 +89,8 @@ const BracketRound: React.FC<BracketRoundProps> = ({
           // Calculate margin for first match starting from round 2
           let marginTop = 0
           if (idx === 0 && roundIndex >= 1) {
-            // For round 2 (index 1): 108px
-            // For round 3 (index 2): 216px (108 * 2)
-            // For round 4 (index 3): 432px (108 * 4)
-            marginTop = 108 * Math.pow(2, roundIndex - 1)
+            // Use the gap value which doubles each round
+            marginTop = gap
           }
           
           return (
@@ -135,7 +133,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
                 let top = index * matchBlock
                 // Add margin for first match starting from round 2
                 if (index === 0 && roundIndex >= 1) {
-                  top += 108 * Math.pow(2, roundIndex - 1)
+                  top += gap
                 }
                 return top
               }
