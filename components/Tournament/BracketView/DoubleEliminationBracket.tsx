@@ -180,8 +180,12 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
             if (shouldConnect && idx % 2 === 0 && idx + 1 < matchCount) {
               // Simple calculation without complex margins
-              const match1Anchor = labelHeight + idx * (cardHeight + gap) + connectorOffset
-              const match2Anchor = labelHeight + (idx + 1) * (cardHeight + gap) + connectorOffset
+              const fallbackMatch1Anchor = labelHeight + idx * (cardHeight + gap) + connectorOffset
+              const fallbackMatch2Anchor = labelHeight + (idx + 1) * (cardHeight + gap) + connectorOffset
+              const fallbackMidPoint = (fallbackMatch1Anchor + fallbackMatch2Anchor) / 2
+
+              const match1Anchor = anchorYs[idx] ?? fallbackMatch1Anchor
+              const match2Anchor = anchorYs[idx + 1] ?? fallbackMatch2Anchor
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (
