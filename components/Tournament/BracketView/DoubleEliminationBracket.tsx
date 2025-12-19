@@ -118,9 +118,9 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
   // Compute Y position for match at index
   const getMatchTopPosition = (idx: number) => {
-    if (idx === 0) return firstMatchOffset
+    if (idx === 0) return 0
     // Each subsequent match is spaced by (cardHeight + gap)
-    return firstMatchOffset + idx * (cardHeight + gap)
+    return idx * (cardHeight + gap)
   }
 
   // For vertical connector anchors
@@ -157,7 +157,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
             className='relative'
             ref={matchRefs[idx]}
             style={{
-              marginTop: idx === 0 ? `${firstMatchOffset}px` : `${gap}px`,
+              marginTop: idx === 0 ? '0px' : `${gap}px`,
             }}
           >
             <div className='w-48'>

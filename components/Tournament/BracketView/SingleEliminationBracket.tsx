@@ -85,9 +85,13 @@ const BracketRound: React.FC<BracketRoundProps> = ({
       </div>
 
       {/* Matches with Connectors */}
-      <div className='flex flex-col' style={{ gap: `${gap}px`, marginTop: `${roundVerticalOffset}px` }}>
+      <div className='flex flex-col' style={{ gap: `${gap}px` }}>
         {round.matches.map((match: MatchFrontend, idx: number) => (
-          <div key={idx} className='relative'>
+          <div 
+            key={idx} 
+            className='relative'
+            style={{ marginTop: idx === 0 ? '0px' : `${gap}px` }}
+          >
             <div className='w-48'>
               <MatchCard match={match} />
             </div>
@@ -117,10 +121,10 @@ const BracketRound: React.FC<BracketRoundProps> = ({
             if (idx % 2 === 0 && idx + 1 < matchCount) {
               // The top of the vertical line should connect with the end of the right connector of match idx
               // The bottom of the vertical line should connect with the end of the right connector of match idx+1
-              const match1Anchor =
-                labelHeight + idx * matchBlock + roundVerticalOffset + connectorOffset
-              const match2Anchor =
-                labelHeight + (idx + 1) * matchBlock + roundVerticalOffset + connectorOffset
+              // Since first match has margin-top 0, and others have margin-top gap
+              // The position of match idx is idx * (cardHeight + gap)
+              const match1Anchor = labelHeight + idx * matchBlock + connectorOffset
+              const match2Anchor = labelHeight + (idx + 1) * matchBlock + connectorOffset
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (
