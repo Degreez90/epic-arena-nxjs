@@ -63,7 +63,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
   // Geometry constants - made more compact
   const cardHeight = 88 // Reduced from 104px
-  const connectorOffset = 44 // Center of the divider (header: 26px + opponent1: 30px + 0.5px)
+  const connectorOffset = 70 // Center of the divider (header: 26px + opponent1: 30px + 0.5px)
   const labelHeight = 36 // Reduced from 44px
   const baseGap = 20 // Reduced from 64px
 
@@ -116,10 +116,10 @@ const BracketRound: React.FC<BracketRoundProps> = ({
               // Plus connectorOffset from the top of the match card
               const match1Top = labelHeight + idx * matchBlock
               const match2Top = labelHeight + (idx + 1) * matchBlock
-              
+
               const match1Anchor = match1Top + connectorOffset
               const match2Anchor = match2Top + connectorOffset
-              
+
               // The vertical line should connect these two points
               // The horizontal line should start at the midpoint
               const midPoint = (match1Anchor + match2Anchor) / 2
