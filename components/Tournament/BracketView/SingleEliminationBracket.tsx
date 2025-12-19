@@ -111,9 +111,17 @@ const BracketRound: React.FC<BracketRoundProps> = ({
         >
           {round.matches.map((_: any, idx: number) => {
             if (idx % 2 === 0 && idx + 1 < matchCount) {
-              // Simple calculation without margins
-              const match1Anchor = labelHeight + idx * matchBlock + connectorOffset
-              const match2Anchor = labelHeight + (idx + 1) * matchBlock + connectorOffset
+              // Calculate the exact position of each match's right connector
+              // Position of match idx: labelHeight + idx * matchBlock
+              // Plus connectorOffset from the top of the match card
+              const match1Top = labelHeight + idx * matchBlock
+              const match2Top = labelHeight + (idx + 1) * matchBlock
+              
+              const match1Anchor = match1Top + connectorOffset
+              const match2Anchor = match2Top + connectorOffset
+              
+              // The vertical line should connect these two points
+              // The horizontal line should start at the midpoint
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (

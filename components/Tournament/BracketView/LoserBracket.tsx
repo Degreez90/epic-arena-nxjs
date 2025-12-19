@@ -96,9 +96,13 @@ const LoserBracket: React.FC<LoserBracketProps> = ({
             const shouldConnect = isLoserMajorRound
 
             if (shouldConnect && idx % 2 === 0 && idx + 1 < matchCount) {
-              // Simple calculation with consistent gap
-              const fallbackMatch1Anchor = labelHeight + idx * (cardHeight + gap) + connectorOffset
-              const fallbackMatch2Anchor = labelHeight + (idx + 1) * (cardHeight + gap) + connectorOffset
+              // Calculate the exact position of each match's right connector
+              const matchBlock = cardHeight + gap
+              const match1Top = labelHeight + idx * matchBlock
+              const match2Top = labelHeight + (idx + 1) * matchBlock
+              
+              const fallbackMatch1Anchor = match1Top + connectorOffset
+              const fallbackMatch2Anchor = match2Top + connectorOffset
               const fallbackMidPoint = (fallbackMatch1Anchor + fallbackMatch2Anchor) / 2
 
               const match1Anchor = anchorYs[idx] ?? fallbackMatch1Anchor

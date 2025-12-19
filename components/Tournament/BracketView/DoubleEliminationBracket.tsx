@@ -90,7 +90,7 @@ const WinnerBracketRound: React.FC<WinnerBracketRoundProps> = ({
 
   // Geometry constants - made consistent with SingleEliminationBracket
   const cardHeight = 88 // Reduced from 104px
-  const connectorOffset = 70 // Center of the divider
+  const connectorOffset = 44 // Center of the divider (matches SingleEliminationBracket)
   const labelHeight = 36 // Reduced from 44px
   const baseGap = 20 // Reduced from 64px
 
@@ -135,17 +135,19 @@ const WinnerBracketRound: React.FC<WinnerBracketRoundProps> = ({
           style={{
             left: 'calc(100% + calc(var(--round-gap, 4rem) / 2))',
             width: 'calc(var(--round-gap, 4rem) / 2)',
-            height: '%',
+            height: '100%',
           }}
         >
           {round.matches.map((_: any, idx: number) => {
             // For winners bracket, always connect pairs
             if (idx % 2 === 0 && idx + 1 < matchCount) {
-              // Simple calculation
-              const match1Anchor =
-                labelHeight + idx * (cardHeight + gap) + connectorOffset
-              const match2Anchor =
-                labelHeight + (idx + 1) * (cardHeight + gap) + connectorOffset
+              // Calculate the exact position of each match's right connector
+              const matchBlock = cardHeight + gap
+              const match1Top = labelHeight + idx * matchBlock
+              const match2Top = labelHeight + (idx + 1) * matchBlock
+              
+              const match1Anchor = match1Top + connectorOffset
+              const match2Anchor = match2Top + connectorOffset
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (
