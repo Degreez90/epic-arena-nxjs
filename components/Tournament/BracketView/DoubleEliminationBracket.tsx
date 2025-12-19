@@ -105,7 +105,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
   const baseGap = 64 // Consistent gap between matches in all rounds
 
   // Gap doubles each round: round 1: 64px, round 2: 108px, round 3: 216px, etc.
-  const gap = roundIndex === 0 ? baseGap : 86 * Math.pow(2, roundIndex - 1)
+  const gap = roundIndex === 0 ? baseGap : 108 * Math.pow(2, roundIndex - 1)
 
   // No offset needed
   const firstMatchOffset = 0
