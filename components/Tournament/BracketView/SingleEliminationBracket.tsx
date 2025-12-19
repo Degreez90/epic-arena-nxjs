@@ -85,21 +85,36 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
       {/* Matches with Connectors */}
       <div className='flex flex-col' style={{ gap: `${gap}px` }}>
-        {round.matches.map((match: MatchFrontend, idx: number) => (
-          <div key={idx} className='relative'>
-            <div className='w-48'>
-              <MatchCard match={match} />
-            </div>
+        {round.matches.map((match: MatchFrontend, idx: number) => {
+          // Calculate margin for first match starting from round 2
+          let marginTop = 0
+          if (idx === 0 && roundIndex >= 1) {
+            // For round 2 (index 1): 140px
+            // For round 3 (index 2): 280px (140 * 2)
+            // For round 4 (index 3): 560px (140 * 4)
+            marginTop = 140 * Math.pow(2, roundIndex - 1)
+          }
+          
+          return (
+            <div 
+              key={idx} 
+              className='relative'
+              style={{ marginTop: `${marginTop}px` }}
+            >
+              <div className='w-48'>
+                <MatchCard match={match} />
+              </div>
 
-            {/* Right Connector - horizontal dotted line to next round */}
-            {roundIndex < totalRounds - 1 && (
-              <div
-                className='absolute left-full h-px border-t-2 border-dotted border-border'
-                style={{ width: '1.5rem', top: `${connectorOffset}px` }}
-              />
-            )}
-          </div>
-        ))}
+              {/* Right Connector - horizontal dotted line to next round */}
+              {roundIndex < totalRounds - 1 && (
+                <div
+                  className='absolute left-full h-px border-t-2 border-dotted border-border'
+                  style={{ width: '1.5rem', top: `${connectorOffset}px` }}
+                />
+              )}
+            </div>
+          )
+        })}
       </div>
 
       {/* Vertical Connectors between match pairs */}
@@ -114,12 +129,19 @@ const BracketRound: React.FC<BracketRoundProps> = ({
         >
           {round.matches.map((_: any, idx: number) => {
             if (idx % 2 === 0 && idx + 1 < matchCount) {
-              // The top of the vertical line should connect with the end of the right connector of match idx
-              // The bottom of the vertical line should connect with the end of the right connector of match idx+1
-              // Since first match has margin-top 0, and others have margin-top gap
-              // The position of match idx is idx * (cardHeight + gap)
-              const match1Anchor = labelHeight + idx * matchBlock + connectorOffset
-              const match2Anchor = labelHeight + (idx + 1) * matchBlock + connectorOffset
+              // Calculate positions with margins
+              const getMatchTop = (index: number) => {
+                // Base position
+                let top = index * matchBlock
+                // Add margin for first match starting from round 2
+                if (index === 0 && roundIndex >= 1) {
+                  top += 140 * Math.pow(2, roundIndex - 1)
+                }
+                return top
+              }
+              
+              const match1Anchor = labelHeight + getMatchTop(idx) + connectorOffset
+              const match2Anchor = labelHeight + getMatchTop(idx + 1) + connectorOffset
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (

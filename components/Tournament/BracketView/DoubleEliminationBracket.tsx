@@ -112,9 +112,15 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
   // Compute Y position for match at index
   const getMatchTopPosition = (idx: number) => {
-    if (idx === 0) return 0
-    // Each subsequent match is spaced by (cardHeight + gap)
-    return idx * (cardHeight + gap)
+    let top = 0
+    if (idx > 0) {
+      top = idx * (cardHeight + gap)
+    }
+    // Add margin for first match starting from round 2
+    if (idx === 0 && roundIndex >= 1) {
+      top += 140 * Math.pow(2, roundIndex - 1)
+    }
+    return top
   }
 
   // For vertical connector anchors
@@ -145,28 +151,40 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
       {/* Matches with Connectors */}
       <div className='flex flex-col relative' style={{ gap: `${gap}px` }}>
-        {round.matches.map((match: MatchFrontend, idx: number) => (
-          <div
-            key={idx}
-            className='relative'
-            ref={matchRefs[idx]}
-          >
-            <div className='w-48'>
-              <MatchCard match={match} />
-            </div>
+        {round.matches.map((match: MatchFrontend, idx: number) => {
+          // Calculate margin for first match starting from round 2
+          let marginTop = 0
+          if (idx === 0 && roundIndex >= 1) {
+            // For round 2 (index 1): 140px
+            // For round 3 (index 2): 280px (140 * 2)
+            // For round 4 (index 3): 560px (140 * 4)
+            marginTop = 140 * Math.pow(2, roundIndex - 1)
+          }
+          
+          return (
+            <div
+              key={idx}
+              className='relative'
+              ref={matchRefs[idx]}
+              style={{ marginTop: `${marginTop}px` }}
+            >
+              <div className='w-48'>
+                <MatchCard match={match} />
+              </div>
 
-            {/* Right Connector - horizontal dotted line */}
-            {roundIndex < totalRounds - 1 && (
-              <div
-                className='absolute left-full h-px border-t-2 border-dotted border-border'
-                style={{
-                  width: 'calc(var(--round-gap, 4rem) / 2)',
-                  top: `${connectorOffset}px`,
-                }}
-              />
-            )}
-          </div>
-        ))}
+              {/* Right Connector - horizontal dotted line */}
+              {roundIndex < totalRounds - 1 && (
+                <div
+                  className='absolute left-full h-px border-t-2 border-dotted border-border'
+                  style={{
+                    width: 'calc(var(--round-gap, 4rem) / 2)',
+                    top: `${connectorOffset}px`,
+                  }}
+                />
+              )}
+            </div>
+          )
+        })}
       </div>
 
       {/* Vertical Connectors */}
@@ -184,12 +202,21 @@ const BracketRound: React.FC<BracketRoundProps> = ({
             const shouldConnect = bracketType === 'winner' || isLoserMajorRound
 
             if (shouldConnect && idx % 2 === 0 && idx + 1 < matchCount) {
-              // The top of the vertical line should connect with the end of the right connector of match idx
-              // The bottom of the vertical line should connect with the end of the right connector of match idx+1
-              const fallbackMatch1Anchor =
-                computeOffsetForIndex(idx) + connectorOffset
-              const fallbackMatch2Anchor =
-                computeOffsetForIndex(idx + 1) + connectorOffset
+              // Calculate fallback positions with margins
+              const getFallbackTop = (index: number) => {
+                let top = 0
+                if (index > 0) {
+                  top = index * (cardHeight + gap)
+                }
+                // Add margin for first match starting from round 2
+                if (index === 0 && roundIndex >= 1) {
+                  top += 140 * Math.pow(2, roundIndex - 1)
+                }
+                return labelHeight + top + connectorOffset
+              }
+              
+              const fallbackMatch1Anchor = getFallbackTop(idx)
+              const fallbackMatch2Anchor = getFallbackTop(idx + 1)
 
               const match1Anchor = anchorYs[idx] ?? fallbackMatch1Anchor
               const match2Anchor = anchorYs[idx + 1] ?? fallbackMatch2Anchor
