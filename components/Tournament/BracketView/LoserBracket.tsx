@@ -1,5 +1,5 @@
 'use client'
-import React, { useLayoutEffect, useMemo, useState } from 'react'
+import React from 'react'
 import { MatchFrontend } from '@/types/tournament/tournament'
 import MatchCard from './MatchCard'
 
@@ -16,53 +16,28 @@ const LoserBracket: React.FC<LoserBracketProps> = ({
 }) => {
   const matchCount = round.matches.length
 
-  // Measure actual match block positions so vertical connectors line up with the right connectors
-  const matchRefs = useMemo(
-    () => round.matches.map(() => React.createRef<HTMLDivElement>()),
-    [round.matches.length]
-  )
-  const [anchorYs, setAnchorYs] = useState<number[]>([])
-
-  // Geometry constants - consistent gap of 20px for all rounds
-  const cardHeight = 88
-  const connectorOffset = 44
-  const labelHeight = 36
-  const gap = 20 // Always 20px for loser bracket
-
-  // Simple position calculation
-  const getMatchTopPosition = (idx: number) => {
-    return idx * (cardHeight + gap)
-  }
+  // Fixed gaps - no complex calculations
+  const gapBetweenMatches = 20 // Fixed gap between match cards in the same round
+  const gapBetweenRounds = 16 // Fixed gap between rounds
+  const cardHeight = 88 // Height of match card
+  const connectorOffset = 44 // Center point of the match card for connectors
 
   // Determine if this is a loser major round for connector logic
   const isLoserMajorRound = roundIndex % 2 === 0
 
-  useLayoutEffect(() => {
-    const ys = matchRefs.map((ref: React.RefObject<HTMLDivElement>) => {
-      if (!ref.current) return undefined
-      // OffsetTop is relative to the round container; add connectorOffset to reach the right connector anchor
-      return ref.current.offsetTop + connectorOffset
-    })
-    setAnchorYs(ys as number[])
-  }, [matchRefs, connectorOffset])
-
   return (
-    <div className='flex flex-col relative'>
+    <div className='flex flex-col relative' style={{ marginRight: `${gapBetweenRounds}px` }}>
       {/* Round Label */}
-      <div className='mb-6 text-center'>
+      <div className='mb-4 text-center'>
         <h4 className='text-sm font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap'>
           Round {roundIndex + 1}
         </h4>
       </div>
 
       {/* Matches with Connectors */}
-      <div className='flex flex-col relative' style={{ gap: `${gap}px` }}>
+      <div className='flex flex-col' style={{ gap: `${gapBetweenMatches}px` }}>
         {round.matches.map((match: MatchFrontend, idx: number) => (
-          <div
-            key={idx}
-            className='relative'
-            ref={matchRefs[idx]}
-          >
+          <div key={idx} className='relative'>
             <div className='w-48'>
               <MatchCard match={match} />
             </div>
@@ -96,17 +71,12 @@ const LoserBracket: React.FC<LoserBracketProps> = ({
             const shouldConnect = isLoserMajorRound
 
             if (shouldConnect && idx % 2 === 0 && idx + 1 < matchCount) {
-              // Calculate the exact position of each match's right connector
-              const matchBlock = cardHeight + gap
-              const match1Top = labelHeight + idx * matchBlock
-              const match2Top = labelHeight + (idx + 1) * matchBlock
+              // Simple calculation: each match is spaced by (cardHeight + gapBetweenMatches)
+              const match1Top = idx * (cardHeight + gapBetweenMatches)
+              const match2Top = (idx + 1) * (cardHeight + gapBetweenMatches)
               
-              const fallbackMatch1Anchor = match1Top + connectorOffset
-              const fallbackMatch2Anchor = match2Top + connectorOffset
-              const fallbackMidPoint = (fallbackMatch1Anchor + fallbackMatch2Anchor) / 2
-
-              const match1Anchor = anchorYs[idx] ?? fallbackMatch1Anchor
-              const match2Anchor = anchorYs[idx + 1] ?? fallbackMatch2Anchor
+              const match1Anchor = match1Top + connectorOffset
+              const match2Anchor = match2Top + connectorOffset
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (

@@ -88,26 +88,23 @@ const WinnerBracketRound: React.FC<WinnerBracketRoundProps> = ({
 }) => {
   const matchCount = round.matches.length
 
-  // Geometry constants - made consistent with SingleEliminationBracket
-  const cardHeight = 88 // Reduced from 104px
-  const connectorOffset = 70 // Center of the divider (matches SingleEliminationBracket)
-  const labelHeight = 36 // Reduced from 44px
-  const baseGap = 20 // Reduced from 64px
-
-  // Gap increases with each round, matching SingleEliminationBracket
-  const gap = baseGap * Math.pow(1.5, roundIndex)
+  // Fixed gaps - no complex calculations
+  const gapBetweenMatches = 20 // Fixed gap between match cards in the same round
+  const gapBetweenRounds = 16 // Fixed gap between rounds
+  const cardHeight = 88 // Height of match card
+  const connectorOffset = 44 // Center point of the match card for connectors
 
   return (
-    <div className='flex flex-col relative'>
+    <div className='flex flex-col relative' style={{ marginRight: `${gapBetweenRounds}px` }}>
       {/* Round Label */}
-      <div className='mb-6 text-center'>
+      <div className='mb-4 text-center'>
         <h4 className='text-sm font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap'>
           Round {roundIndex + 1}
         </h4>
       </div>
 
       {/* Matches with Connectors */}
-      <div className='flex flex-col relative' style={{ gap: `${gap}px` }}>
+      <div className='flex flex-col' style={{ gap: `${gapBetweenMatches}px` }}>
         {round.matches.map((match: any, idx: number) => (
           <div key={idx} className='relative'>
             <div className='w-48'>
@@ -141,11 +138,10 @@ const WinnerBracketRound: React.FC<WinnerBracketRoundProps> = ({
           {round.matches.map((_: any, idx: number) => {
             // For winners bracket, always connect pairs
             if (idx % 2 === 0 && idx + 1 < matchCount) {
-              // Calculate the exact position of each match's right connector
-              const matchBlock = cardHeight + gap
-              const match1Top = labelHeight + idx * matchBlock
-              const match2Top = labelHeight + (idx + 1) * matchBlock
-
+              // Simple calculation: each match is spaced by (cardHeight + gapBetweenMatches)
+              const match1Top = idx * (cardHeight + gapBetweenMatches)
+              const match2Top = (idx + 1) * (cardHeight + gapBetweenMatches)
+              
               const match1Anchor = match1Top + connectorOffset
               const match2Anchor = match2Top + connectorOffset
               const midPoint = (match1Anchor + match2Anchor) / 2
