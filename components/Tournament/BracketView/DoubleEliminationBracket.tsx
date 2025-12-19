@@ -102,19 +102,13 @@ const BracketRound: React.FC<BracketRoundProps> = ({
   const cardHeight = 104 // Adjusted to better match actual rendered height
   const connectorOffset = 70 // Aligns to the divider inside MatchCard
   const labelHeight = 44
-  const baseGap = 40 // Base vertical gap between matches in round 1
+  const baseGap = 64 // Consistent gap between matches in all rounds
 
-  // Standard tournament bracket tapering:
-  // - Round 1: uniform spacing
-  // - Round 2+: each match centers between its 2 parent matches from previous round
-  // Gap doubles each round to maintain centering
-  const gap = baseGap * Math.pow(2, roundIndex)
+  // Use a consistent gap for all rounds
+  const gap = baseGap
   
-  // Top offset for the first match increases each round to center it
-  // Formula: half of (cardHeight + gap) to center between first pair
-  const firstMatchOffset = roundIndex === 0 
-    ? 0 
-    : (cardHeight + gap) / 2 - cardHeight / 2
+  // No offset needed
+  const firstMatchOffset = 0
 
   // Compute Y position for match at index
   const getMatchTopPosition = (idx: number) => {
@@ -150,15 +144,12 @@ const BracketRound: React.FC<BracketRoundProps> = ({
       </div>
 
       {/* Matches with Connectors */}
-      <div className='flex flex-col relative'>
+      <div className='flex flex-col relative' style={{ gap: `${gap}px` }}>
         {round.matches.map((match: MatchFrontend, idx: number) => (
           <div
             key={idx}
             className='relative'
             ref={matchRefs[idx]}
-            style={{
-              marginTop: idx === 0 ? '0px' : `${gap}px`,
-            }}
           >
             <div className='w-48'>
               <MatchCard match={match} />

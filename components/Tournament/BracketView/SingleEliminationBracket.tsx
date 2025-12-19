@@ -65,15 +65,14 @@ const BracketRound: React.FC<BracketRoundProps> = ({
   const cardHeight = 104 // header + opponents + divider - adjusted to better match actual rendered height
   const connectorOffset = 56 // vertical offset to the divider inside the card (matches h-px bg-slate-600) - adjusted from 80px to 56px
   const labelHeight = 44 // round label height + margin bottom
-  const baseGap = 32 // minimum gap between matches in the same round
+  const baseGap = 64 // consistent gap between matches in all rounds
 
-  // Calculate vertical spacing based on round progression with tapering
-  // Use linear increase for gap to prevent excessive spacing
-  const gap = baseGap + roundIndex * 45
+  // Use a consistent gap for all rounds to ensure proper alignment
+  const gap = baseGap
   const matchBlock = cardHeight + gap
   
-  // Adjust vertical position for tapering effect: each subsequent round is shifted down
-  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 130 : 0
+  // No vertical offset needed
+  const roundVerticalOffset = 0
 
   return (
     <div className='flex flex-col relative'>
@@ -87,11 +86,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
       {/* Matches with Connectors */}
       <div className='flex flex-col' style={{ gap: `${gap}px` }}>
         {round.matches.map((match: MatchFrontend, idx: number) => (
-          <div 
-            key={idx} 
-            className='relative'
-            style={{ marginTop: idx === 0 ? '0px' : `${gap}px` }}
-          >
+          <div key={idx} className='relative'>
             <div className='w-48'>
               <MatchCard match={match} />
             </div>
