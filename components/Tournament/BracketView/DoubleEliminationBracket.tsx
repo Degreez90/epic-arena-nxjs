@@ -106,7 +106,7 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
   // Use a consistent gap for all rounds
   const gap = baseGap
-  
+
   // No offset needed
   const firstMatchOffset = 0
 
@@ -158,9 +158,9 @@ const BracketRound: React.FC<BracketRoundProps> = ({
             // For round 2 (index 1): 108px
             // For round 3 (index 2): 216px (108 * 2)
             // For round 4 (index 3): 432px (108 * 4)
-            marginTop = 108 * Math.pow(2, roundIndex - 1)
+            marginTop = 86 * Math.pow(2, roundIndex - 1)
           }
-          
+
           return (
             <div
               key={idx}
