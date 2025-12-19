@@ -98,32 +98,18 @@ const BracketRound: React.FC<BracketRoundProps> = ({
   )
   const [anchorYs, setAnchorYs] = useState<number[]>([])
 
-  // Geometry constants tuned to the MatchCard layout
-  const cardHeight = 104 // Adjusted to better match actual rendered height
-  const connectorOffset = 70 // Aligns to the divider inside MatchCard
-  const labelHeight = 44
-  const baseGap = 64 // Consistent gap between matches in all rounds
+  // Geometry constants - made consistent with SingleEliminationBracket
+  const cardHeight = 88 // Reduced from 104px
+  const connectorOffset = 44 // Center of the divider
+  const labelHeight = 36 // Reduced from 44px
+  const baseGap = 20 // Reduced from 64px
 
-  // Gap doubles each round: round 1: 64px, round 2: 108px, round 3: 216px, etc.
-  const gap = roundIndex === 0 ? baseGap : 240 * Math.pow(2, roundIndex - 1)
+  // Gap increases with each round, matching SingleEliminationBracket
+  const gap = baseGap * Math.pow(1.5, roundIndex)
 
-  // No offset needed
-  const firstMatchOffset = 0
-
-  // Compute Y position for match at index
+  // Simple position calculation
   const getMatchTopPosition = (idx: number) => {
-    let top = 0
-    if (idx > 0) {
-      top = idx * (cardHeight + gap)
-    }
-    // Add margin for first match starting from round 2
-    if (idx === 0 && roundIndex >= 1) {
-      // Calculate margin using quadratic formula: 97*r² - 313*r + 314
-      // where r = roundIndex + 1 (round numbers start from 2 for roundIndex=1)
-      const r = roundIndex + 1
-      top += 97 * r * r - 313 * r + 314
-    }
-    return top
+    return idx * (cardHeight + gap)
   }
 
   // For vertical connector anchors
@@ -154,40 +140,28 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
       {/* Matches with Connectors */}
       <div className='flex flex-col relative' style={{ gap: `${gap}px` }}>
-        {round.matches.map((match: MatchFrontend, idx: number) => {
-          // Calculate margin for first match starting from round 2
-          let marginTop = 0
-          if (idx === 0 && roundIndex >= 1) {
-            // Calculate margin using quadratic formula: 97*r² - 313*r + 314
-            // where r = roundIndex + 1 (round numbers start from 2 for roundIndex=1)
-            const r = roundIndex + 1
-            marginTop = 97 * r * r - 313 * r + 314
-          }
-
-          return (
-            <div
-              key={idx}
-              className='relative'
-              ref={matchRefs[idx]}
-              style={{ marginTop: `${marginTop}px` }}
-            >
-              <div className='w-48'>
-                <MatchCard match={match} />
-              </div>
-
-              {/* Right Connector - horizontal dotted line */}
-              {roundIndex < totalRounds - 1 && (
-                <div
-                  className='absolute left-full h-px border-t-2 border-dotted border-border'
-                  style={{
-                    width: 'calc(var(--round-gap, 4rem) / 2)',
-                    top: `${connectorOffset}px`,
-                  }}
-                />
-              )}
+        {round.matches.map((match: MatchFrontend, idx: number) => (
+          <div
+            key={idx}
+            className='relative'
+            ref={matchRefs[idx]}
+          >
+            <div className='w-48'>
+              <MatchCard match={match} />
             </div>
-          )
-        })}
+
+            {/* Right Connector - horizontal dotted line */}
+            {roundIndex < totalRounds - 1 && (
+              <div
+                className='absolute left-full h-px border-t-2 border-dotted border-border'
+                style={{
+                  width: 'calc(var(--round-gap, 4rem) / 2)',
+                  top: `${connectorOffset}px`,
+                }}
+              />
+            )}
+          </div>
+        ))}
       </div>
 
       {/* Vertical Connectors */}
@@ -205,15 +179,9 @@ const BracketRound: React.FC<BracketRoundProps> = ({
             const shouldConnect = bracketType === 'winner' || isLoserMajorRound
 
             if (shouldConnect && idx % 2 === 0 && idx + 1 < matchCount) {
-              // The top of the vertical line should connect with the end of the right connector of match idx
-              // The bottom of the vertical line should connect with the end of the right connector of match idx+1
-              const fallbackMatch1Anchor =
-                computeOffsetForIndex(idx) + connectorOffset
-              const fallbackMatch2Anchor =
-                computeOffsetForIndex(idx + 1) + connectorOffset
-
-              const match1Anchor = anchorYs[idx] ?? fallbackMatch1Anchor
-              const match2Anchor = anchorYs[idx + 1] ?? fallbackMatch2Anchor
+              // Simple calculation without complex margins
+              const match1Anchor = labelHeight + idx * (cardHeight + gap) + connectorOffset
+              const match2Anchor = labelHeight + (idx + 1) * (cardHeight + gap) + connectorOffset
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (

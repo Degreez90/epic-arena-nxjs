@@ -61,18 +61,15 @@ const BracketRound: React.FC<BracketRoundProps> = ({
   const roundNames = ['Round 1', 'Round 2', 'Semifinals', 'Finals']
   const matchCount = round.matches.length
 
-  // Geometry constants tuned to the MatchCard layout
-  const cardHeight = 104 // header + opponents + divider - adjusted to better match actual rendered height
-  const connectorOffset = 56 // vertical offset to the divider inside the card (matches h-px bg-slate-600) - adjusted from 80px to 56px
-  const labelHeight = 44 // round label height + margin bottom
-  const baseGap = 64 // consistent gap between matches in all rounds
+  // Geometry constants - made more compact
+  const cardHeight = 88 // Reduced from 104px
+  const connectorOffset = 44 // Center of the divider (header: 26px + opponent1: 30px + 0.5px)
+  const labelHeight = 36 // Reduced from 44px
+  const baseGap = 20 // Reduced from 64px
 
-  // Gap doubles each round: round 1: 64px, round 2: 108px, round 3: 216px, etc.
-  const gap = roundIndex === 0 ? baseGap : 108 * Math.pow(2, roundIndex - 1)
+  // Gap increases with each round, but more moderately
+  const gap = baseGap * Math.pow(1.5, roundIndex)
   const matchBlock = cardHeight + gap
-  
-  // No vertical offset needed
-  const roundVerticalOffset = 0
 
   return (
     <div className='flex flex-col relative'>
@@ -85,36 +82,21 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
       {/* Matches with Connectors */}
       <div className='flex flex-col' style={{ gap: `${gap}px` }}>
-        {round.matches.map((match: MatchFrontend, idx: number) => {
-          // Calculate margin for first match starting from round 2
-          let marginTop = 0
-          if (idx === 0 && roundIndex >= 1) {
-            // Calculate margin using quadratic formula: 97*r² - 313*r + 314
-            // where r = roundIndex + 1 (round numbers start from 2 for roundIndex=1)
-            const r = roundIndex + 1
-            marginTop = 97 * r * r - 313 * r + 314
-          }
-          
-          return (
-            <div 
-              key={idx} 
-              className='relative'
-              style={{ marginTop: `${marginTop}px` }}
-            >
-              <div className='w-48'>
-                <MatchCard match={match} />
-              </div>
-
-              {/* Right Connector - horizontal dotted line to next round */}
-              {roundIndex < totalRounds - 1 && (
-                <div
-                  className='absolute left-full h-px border-t-2 border-dotted border-border'
-                  style={{ width: '1.5rem', top: `${connectorOffset}px` }}
-                />
-              )}
+        {round.matches.map((match: MatchFrontend, idx: number) => (
+          <div key={idx} className='relative'>
+            <div className='w-48'>
+              <MatchCard match={match} />
             </div>
-          )
-        })}
+
+            {/* Right Connector - horizontal dotted line to next round */}
+            {roundIndex < totalRounds - 1 && (
+              <div
+                className='absolute left-full h-px border-t-2 border-dotted border-border'
+                style={{ width: '1.5rem', top: `${connectorOffset}px` }}
+              />
+            )}
+          </div>
+        ))}
       </div>
 
       {/* Vertical Connectors between match pairs */}
@@ -129,22 +111,9 @@ const BracketRound: React.FC<BracketRoundProps> = ({
         >
           {round.matches.map((_: any, idx: number) => {
             if (idx % 2 === 0 && idx + 1 < matchCount) {
-              // Calculate positions with margins
-              const getMatchTop = (index: number) => {
-                // Base position
-                let top = index * matchBlock
-                // Add margin for first match starting from round 2
-                if (index === 0 && roundIndex >= 1) {
-                  // Calculate margin using quadratic formula: 97*r² - 313*r + 314
-                  // where r = roundIndex + 1 (round numbers start from 2 for roundIndex=1)
-                  const r = roundIndex + 1
-                  top += 97 * r * r - 313 * r + 314
-                }
-                return top
-              }
-              
-              const match1Anchor = labelHeight + getMatchTop(idx) + connectorOffset
-              const match2Anchor = labelHeight + getMatchTop(idx + 1) + connectorOffset
+              // Simple calculation without margins
+              const match1Anchor = labelHeight + idx * matchBlock + connectorOffset
+              const match2Anchor = labelHeight + (idx + 1) * matchBlock + connectorOffset
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (
