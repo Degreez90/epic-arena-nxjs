@@ -25,7 +25,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
             <h3 className='text-lg md:text-xl font-semibold mb-8'>
               Winners Bracket
             </h3>
-            <div className='flex gap-16 md:gap-20 [--round-gap:4rem] md:[--round-gap:5rem] [--connector-inline:calc(var(--round-gap)_/_2)]'>
+            <div className='flex flex-row gap-16 md:gap-20 [--round-gap:4rem] md:[--round-gap:5rem] [--connector-inline:calc(var(--round-gap)_/_2)]'>
               {winnersGroup.rounds.map((round, roundIdx) => (
                 <WinnerBracketRound
                   key={roundIdx}
@@ -93,12 +93,15 @@ const WinnerBracketRound: React.FC<WinnerBracketRoundProps> = ({
   // Each subsequent round doubles the gap to align with previous round's matches
   const baseGap = 20
   const gapBetweenMatches = baseGap * Math.pow(2, roundIndex)
-  
+
   const gapBetweenRounds = 64 // Fixed gap between rounds
   const cardHeight = 88 // Height of match card
 
   return (
-    <div className='flex flex-col relative' style={{ marginRight: `${gapBetweenRounds}px` }}>
+    <div
+      className='flex flex-col relative'
+      style={{ marginRight: `${gapBetweenRounds}px` }}
+    >
       {/* Round Label */}
       <div className='mb-4 text-center'>
         <h4 className='text-sm font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap'>
