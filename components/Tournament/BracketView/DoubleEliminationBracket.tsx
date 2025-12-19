@@ -1,7 +1,8 @@
 'use client'
-import React, { useLayoutEffect, useMemo, useState } from 'react'
-import { StageFrontend, MatchFrontend } from '@/types/tournament/tournament'
+import React from 'react'
+import { StageFrontend } from '@/types/tournament/tournament'
 import MatchCard from './MatchCard'
+import LoserBracket from './LoserBracket'
 
 interface DoubleEliminationBracketProps {
   stage: StageFrontend
@@ -26,12 +27,11 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
             </h3>
             <div className='flex gap-16 md:gap-20 [--round-gap:4rem] md:[--round-gap:5rem] [--connector-inline:calc(var(--round-gap)_/_2)]'>
               {winnersGroup.rounds.map((round, roundIdx) => (
-                <BracketRound
+                <WinnerBracketRound
                   key={roundIdx}
                   round={round}
                   roundIndex={roundIdx}
                   totalRounds={winnersGroup.rounds.length}
-                  bracketType='winner'
                 />
               ))}
             </div>
@@ -46,12 +46,11 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
             </h3>
             <div className='flex gap-16 md:gap-20 [--round-gap:4rem] md:[--round-gap:5rem] [--connector-inline:calc(var(--round-gap)_/_2)]'>
               {losersGroup.rounds.map((round, roundIdx) => (
-                <BracketRound
+                <LoserBracket
                   key={roundIdx}
                   round={round}
                   roundIndex={roundIdx}
                   totalRounds={losersGroup.rounds.length}
-                  bracketType='loser'
                 />
               ))}
             </div>
@@ -76,27 +75,18 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
   )
 }
 
-interface BracketRoundProps {
+interface WinnerBracketRoundProps {
   round: any
   roundIndex: number
   totalRounds: number
-  bracketType: 'winner' | 'loser'
 }
 
-const BracketRound: React.FC<BracketRoundProps> = ({
+const WinnerBracketRound: React.FC<WinnerBracketRoundProps> = ({
   round,
   roundIndex,
   totalRounds,
-  bracketType,
 }) => {
   const matchCount = round.matches.length
-
-  // Measure actual match block positions so vertical connectors line up with the right connectors
-  const matchRefs = useMemo(
-    () => round.matches.map(() => React.createRef<HTMLDivElement>()),
-    [round.matches.length]
-  )
-  const [anchorYs, setAnchorYs] = useState<number[]>([])
 
   // Geometry constants - made consistent with SingleEliminationBracket
   const cardHeight = 88 // Reduced from 104px
@@ -106,28 +96,6 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
   // Gap increases with each round, matching SingleEliminationBracket
   const gap = baseGap * Math.pow(1.5, roundIndex)
-
-  // Simple position calculation
-  const getMatchTopPosition = (idx: number) => {
-    return idx * (cardHeight + gap)
-  }
-
-  // For vertical connector anchors
-  const computeOffsetForIndex = (idx: number) => {
-    return labelHeight + getMatchTopPosition(idx)
-  }
-
-  // Determine if this is a loser major round for connector logic
-  const isLoserMajorRound = bracketType === 'loser' && roundIndex % 2 === 0
-
-  useLayoutEffect(() => {
-    const ys = matchRefs.map((ref: React.RefObject<HTMLDivElement>) => {
-      if (!ref.current) return undefined
-      // OffsetTop is relative to the round container; add connectorOffset to reach the right connector anchor
-      return ref.current.offsetTop + connectorOffset
-    })
-    setAnchorYs(ys as number[])
-  }, [matchRefs, connectorOffset])
 
   return (
     <div className='flex flex-col relative'>
@@ -140,11 +108,10 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
       {/* Matches with Connectors */}
       <div className='flex flex-col relative' style={{ gap: `${gap}px` }}>
-        {round.matches.map((match: MatchFrontend, idx: number) => (
+        {round.matches.map((match: any, idx: number) => (
           <div
             key={idx}
             className='relative'
-            ref={matchRefs[idx]}
           >
             <div className='w-48'>
               <MatchCard match={match} />
@@ -175,17 +142,11 @@ const BracketRound: React.FC<BracketRoundProps> = ({
           }}
         >
           {round.matches.map((_: any, idx: number) => {
-            // For winners bracket and loser major rounds, connect pairs
-            const shouldConnect = bracketType === 'winner' || isLoserMajorRound
-
-            if (shouldConnect && idx % 2 === 0 && idx + 1 < matchCount) {
-              // Simple calculation without complex margins
-              const fallbackMatch1Anchor = labelHeight + idx * (cardHeight + gap) + connectorOffset
-              const fallbackMatch2Anchor = labelHeight + (idx + 1) * (cardHeight + gap) + connectorOffset
-              const fallbackMidPoint = (fallbackMatch1Anchor + fallbackMatch2Anchor) / 2
-
-              const match1Anchor = anchorYs[idx] ?? fallbackMatch1Anchor
-              const match2Anchor = anchorYs[idx + 1] ?? fallbackMatch2Anchor
+            // For winners bracket, always connect pairs
+            if (idx % 2 === 0 && idx + 1 < matchCount) {
+              // Simple calculation
+              const match1Anchor = labelHeight + idx * (cardHeight + gap) + connectorOffset
+              const match2Anchor = labelHeight + (idx + 1) * (cardHeight + gap) + connectorOffset
               const midPoint = (match1Anchor + match2Anchor) / 2
 
               return (
