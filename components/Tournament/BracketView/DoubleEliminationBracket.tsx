@@ -88,11 +88,14 @@ const WinnerBracketRound: React.FC<WinnerBracketRoundProps> = ({
 }) => {
   const matchCount = round.matches.length
 
-  // Fixed gaps - no complex calculations
-  const gapBetweenMatches = 20 // Fixed gap between match cards in the same round
-  const gapBetweenRounds = 16 // Fixed gap between rounds
+  // Calculate gap between matches to create proper tournament bracket spacing
+  // Round 1: 20px (as requested)
+  // Each subsequent round doubles the gap to align with previous round's matches
+  const baseGap = 20
+  const gapBetweenMatches = baseGap * Math.pow(2, roundIndex)
+  
+  const gapBetweenRounds = 64 // Fixed gap between rounds
   const cardHeight = 88 // Height of match card
-  const connectorOffset = 44 // Center point of the match card for connectors
 
   return (
     <div className='flex flex-col relative' style={{ marginRight: `${gapBetweenRounds}px` }}>
@@ -103,7 +106,7 @@ const WinnerBracketRound: React.FC<WinnerBracketRoundProps> = ({
         </h4>
       </div>
 
-      {/* Matches */}
+      {/* Matches with proper vertical spacing */}
       <div className='flex flex-col' style={{ gap: `${gapBetweenMatches}px` }}>
         {round.matches.map((match: any, idx: number) => (
           <div key={idx}>
