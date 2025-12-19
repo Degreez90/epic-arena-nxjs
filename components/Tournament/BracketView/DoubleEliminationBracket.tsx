@@ -118,7 +118,18 @@ const BracketRound: React.FC<BracketRoundProps> = ({
     }
     // Add margin for first match starting from round 2
     if (idx === 0 && roundIndex >= 1) {
-      top += 76 * Math.pow(2, roundIndex - 1)
+      // Round 2: 76px
+      if (roundIndex === 1) {
+        top += 76
+      } 
+      // Round 3: 248px
+      else if (roundIndex === 2) {
+        top += 248
+      }
+      // For rounds >= 4: double the previous round's margin
+      else {
+        top += 248 * Math.pow(2, roundIndex - 2)
+      }
     }
     return top
   }
@@ -155,8 +166,18 @@ const BracketRound: React.FC<BracketRoundProps> = ({
           // Calculate margin for first match starting from round 2
           let marginTop = 0
           if (idx === 0 && roundIndex >= 1) {
-            // For round 2: 76px, round 3: 152px, round 4: 304px, etc.
-            marginTop = 76 * Math.pow(2, roundIndex - 1)
+            // Round 2: 76px
+            if (roundIndex === 1) {
+              marginTop = 76
+            } 
+            // Round 3: 248px
+            else if (roundIndex === 2) {
+              marginTop = 248
+            }
+            // For rounds >= 4: double the previous round's margin
+            else {
+              marginTop = 248 * Math.pow(2, roundIndex - 2)
+            }
           }
 
           return (
