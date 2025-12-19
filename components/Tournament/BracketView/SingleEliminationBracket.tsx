@@ -76,74 +76,16 @@ const BracketRound: React.FC<BracketRoundProps> = ({
         </h4>
       </div>
 
-      {/* Matches with Connectors */}
+      {/* Matches */}
       <div className='flex flex-col' style={{ gap: `${gapBetweenMatches}px` }}>
         {round.matches.map((match: MatchFrontend, idx: number) => (
-          <div key={idx} className='relative'>
+          <div key={idx}>
             <div className='w-48'>
               <MatchCard match={match} />
             </div>
-
-            {/* Right Connector - horizontal dotted line to next round */}
-            {roundIndex < totalRounds - 1 && (
-              <div
-                className='absolute left-full h-px border-t-2 border-dotted border-border'
-                style={{ width: '1.5rem', top: `${connectorOffset}px` }}
-              />
-            )}
           </div>
         ))}
       </div>
-
-      {/* Vertical Connectors between match pairs */}
-      {roundIndex < totalRounds - 1 && (
-        <svg
-          className='absolute top-0 pointer-events-none'
-          style={{
-            left: 'calc(100% + 1.5rem)',
-            width: '1.5rem',
-            height: '100%',
-          }}
-        >
-          {round.matches.map((_: any, idx: number) => {
-            if (idx % 2 === 0 && idx + 1 < matchCount) {
-              // Simple calculation: each match is spaced by (cardHeight + gapBetweenMatches)
-              const match1Top = idx * (cardHeight + gapBetweenMatches)
-              const match2Top = (idx + 1) * (cardHeight + gapBetweenMatches)
-              
-              const match1Anchor = match1Top + connectorOffset
-              const match2Anchor = match2Top + connectorOffset
-              const midPoint = (match1Anchor + match2Anchor) / 2
-
-              return (
-                <g key={idx}>
-                  {/* Vertical dotted line connecting two matches */}
-                  <line
-                    x1='0'
-                    y1={match1Anchor}
-                    x2='0'
-                    y2={match2Anchor}
-                    stroke='hsl(var(--border))'
-                    strokeWidth='2'
-                    strokeDasharray='4 4'
-                  />
-                  {/* Horizontal dotted line to next round at right angle */}
-                  <line
-                    x1='0'
-                    y1={midPoint}
-                    x2='100%'
-                    y2={midPoint}
-                    stroke='hsl(var(--border))'
-                    strokeWidth='2'
-                    strokeDasharray='4 4'
-                  />
-                </g>
-              )
-            }
-            return null
-          })}
-        </svg>
-      )}
     </div>
   )
 }
