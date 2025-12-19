@@ -202,21 +202,12 @@ const BracketRound: React.FC<BracketRoundProps> = ({
             const shouldConnect = bracketType === 'winner' || isLoserMajorRound
 
             if (shouldConnect && idx % 2 === 0 && idx + 1 < matchCount) {
-              // Calculate fallback positions with margins
-              const getFallbackTop = (index: number) => {
-                let top = 0
-                if (index > 0) {
-                  top = index * (cardHeight + gap)
-                }
-                // Add margin for first match starting from round 2
-                if (index === 0 && roundIndex >= 1) {
-                  top += 140 * Math.pow(2, roundIndex - 1)
-                }
-                return labelHeight + top + connectorOffset
-              }
-              
-              const fallbackMatch1Anchor = getFallbackTop(idx)
-              const fallbackMatch2Anchor = getFallbackTop(idx + 1)
+              // The top of the vertical line should connect with the end of the right connector of match idx
+              // The bottom of the vertical line should connect with the end of the right connector of match idx+1
+              const fallbackMatch1Anchor =
+                computeOffsetForIndex(idx) + connectorOffset
+              const fallbackMatch2Anchor =
+                computeOffsetForIndex(idx + 1) + connectorOffset
 
               const match1Anchor = anchorYs[idx] ?? fallbackMatch1Anchor
               const match2Anchor = anchorYs[idx + 1] ?? fallbackMatch2Anchor
