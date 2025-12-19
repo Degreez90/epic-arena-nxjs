@@ -100,24 +100,39 @@ const BracketRound: React.FC<BracketRoundProps> = ({
 
   // Geometry constants tuned to the MatchCard layout
   const cardHeight = 104 // Adjusted to better match actual rendered height
-  const connectorOffset = 56 // This aligns with the h-px bg-slate-600 divider in MatchCard (adjusted from 80px to 56px)
+  const connectorOffset = 70 // Aligns to the divider inside MatchCard
   const labelHeight = 44
-  const baseGap = 40 // Increased for more space between rounds
+  const baseGap = 40 // Base vertical gap between matches in round 1
 
-  // Use same spacing calculation for both winner and loser brackets
-  // Linear increase for gap to prevent excessive spacing
-  const gap = baseGap + roundIndex * 130 // Adjusted to give more space while maintaining proper alignment
-  const matchBlock = cardHeight + gap
+  // Standard tournament bracket tapering:
+  // - Round 1: uniform spacing
+  // - Round 2+: each match centers between its 2 parent matches from previous round
+  // Gap doubles each round to maintain centering
+  const gap = baseGap * Math.pow(2, roundIndex)
+  
+  // Top offset for the first match increases each round to center it
+  // Formula: half of (cardHeight + gap) to center between first pair
+  const firstMatchOffset = roundIndex === 0 
+    ? 0 
+    : (cardHeight + gap) / 2 - cardHeight / 2
 
-  // Adjust vertical position for tapering effect
-  // Increase offset for later rounds to create a downward taper
-  const roundVerticalOffset = roundIndex > 0 ? roundIndex * 80 : 0
+  // Compute Y position for match at index
+  const getMatchTopPosition = (idx: number) => {
+    if (idx === 0) return firstMatchOffset
+    // Each subsequent match is spaced by (cardHeight + gap)
+    return firstMatchOffset + idx * (cardHeight + gap)
+  }
+
+  // For vertical connector anchors
+  const computeOffsetForIndex = (idx: number) => {
+    return labelHeight + getMatchTopPosition(idx)
+  }
 
   // Determine if this is a loser major round for connector logic
   const isLoserMajorRound = bracketType === 'loser' && roundIndex % 2 === 0
 
   useLayoutEffect(() => {
-    const ys = matchRefs.map((ref) => {
+    const ys = matchRefs.map((ref: React.RefObject<HTMLDivElement>) => {
       if (!ref.current) return undefined
       // OffsetTop is relative to the round container; add connectorOffset to reach the right connector anchor
       return ref.current.offsetTop + connectorOffset
@@ -135,12 +150,16 @@ const BracketRound: React.FC<BracketRoundProps> = ({
       </div>
 
       {/* Matches with Connectors */}
-      <div
-        className='flex flex-col'
-        style={{ gap: `${gap}px`, marginTop: `${roundVerticalOffset}px` }}
-      >
+      <div className='flex flex-col relative'>
         {round.matches.map((match: MatchFrontend, idx: number) => (
-          <div key={idx} className='relative' ref={matchRefs[idx]}>
+          <div
+            key={idx}
+            className='relative'
+            ref={matchRefs[idx]}
+            style={{
+              marginTop: idx === 0 ? `${firstMatchOffset}px` : `${gap}px`,
+            }}
+          >
             <div className='w-48'>
               <MatchCard match={match} />
             </div>
@@ -177,15 +196,9 @@ const BracketRound: React.FC<BracketRoundProps> = ({
               // The top of the vertical line should connect with the end of the right connector of match idx
               // The bottom of the vertical line should connect with the end of the right connector of match idx+1
               const fallbackMatch1Anchor =
-                labelHeight +
-                idx * matchBlock +
-                roundVerticalOffset +
-                connectorOffset
+                computeOffsetForIndex(idx) + connectorOffset
               const fallbackMatch2Anchor =
-                labelHeight +
-                (idx + 1) * matchBlock +
-                roundVerticalOffset +
-                connectorOffset
+                computeOffsetForIndex(idx + 1) + connectorOffset
 
               const match1Anchor = anchorYs[idx] ?? fallbackMatch1Anchor
               const match2Anchor = anchorYs[idx + 1] ?? fallbackMatch2Anchor
