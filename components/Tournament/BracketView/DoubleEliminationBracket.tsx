@@ -2,6 +2,7 @@
 import React, { useLayoutEffect, useRef, useState } from 'react'
 import { StageFrontend } from '@/types/tournament/tournament'
 import MatchCard from './MatchCard'
+import LoserBracket from './LoserBracket'
 
 interface DoubleEliminationBracketProps {
   stage: StageFrontend
@@ -323,26 +324,14 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
             </svg>
             <div className='relative flex gap-2 md:gap-3 z-10 items-stretch'>
               {losersGroup.rounds.map((round, roundIdx) => (
-                <div key={roundIdx} className='flex flex-col flex-1'>
-                  {/* Round Label */}
-                  <div className='mb-4 text-center'>
-                    <h4 className='text-sm font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap'>
-                      Round {roundIdx + 1}
-                    </h4>
-                  </div>
-                  {/* Matches container - no justify-around */}
-                  <div className='flex flex-col flex-1'>
-                    {round.matches.map((match, matchIdx) => (
-                      <div
-                        key={matchIdx}
-                        className='w-48 ml-0 mr-auto my-2'
-                        ref={attachMatchRef('losers', roundIdx, matchIdx)}
-                      >
-                        <MatchCard match={match} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <LoserBracket
+                  key={roundIdx}
+                  ref={null}
+                  round={round}
+                  roundIndex={roundIdx}
+                  totalRounds={losersGroup.rounds.length}
+                  attachMatchRef={(matchIdx) => attachMatchRef('losers', roundIdx, matchIdx)}
+                />
               ))}
             </div>
           </div>
