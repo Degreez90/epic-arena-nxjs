@@ -132,10 +132,10 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
 
   return (
     <div className='w-full overflow-x-auto pb-8'>
-      <div className='min-w-max space-y-12 p-4'>
+      <div className='min-w-max space-y-12 p-4 min-h-[800px]'>
         {/* Winners Bracket */}
         {winnersGroup && (
-          <div className='relative' ref={containerRef}>
+          <div className='relative min-h-[600px]' ref={containerRef}>
             <h3 className='text-lg md:text-xl font-semibold mb-8'>
               Winners Bracket
             </h3>
@@ -161,21 +161,23 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
               })}
             </svg>
             {/* Match cards container */}
-            <div className='relative flex gap-16 md:gap-20 z-10'>
+            <div className='relative flex gap-16 md:gap-20 z-10 items-stretch'>
               {winnersGroup.rounds.map((round, roundIdx) => (
-                <div key={roundIdx} className='flex flex-col'>
+                <div key={roundIdx} className='flex flex-col flex-1'>
                   {/* Round Label */}
                   <div className='mb-4 text-center'>
                     <h4 className='text-sm font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap'>
                       Round {roundIdx + 1}
                     </h4>
                   </div>
-                  {/* Matches */}
-                  <div className='flex flex-col gap-8'>
+                  {/* Matches container with equal height and space-around distribution */}
+                  <div 
+                    className='flex flex-col justify-around flex-1'
+                  >
                     {round.matches.map((match, matchIdx) => (
                       <div 
                         key={matchIdx} 
-                        className='w-48'
+                        className='w-48 mx-auto my-2'
                         ref={attachMatchRef('winners', roundIdx, matchIdx)}
                       >
                         <MatchCard match={match} />
