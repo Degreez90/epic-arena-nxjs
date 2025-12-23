@@ -112,9 +112,18 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
         matchIndex++
       ) {
         const childKey = `losers:${roundIndex}:${matchIndex}`
-        // In loser's bracket, connections may be different
-        // For now, connect to the next round's match at the same index
-        const parentMatchIndex = matchIndex
+        
+        // Determine parent match index based on progression logic
+        let parentMatchIndex
+        if (nextRound.matches.length === currentRound.matches.length) {
+          parentMatchIndex = matchIndex
+        } else if (nextRound.matches.length === currentRound.matches.length / 2) {
+          parentMatchIndex = Math.floor(matchIndex / 2)
+        } else {
+          // Default to same index if no clear pattern
+          parentMatchIndex = matchIndex
+        }
+        
         const parentKey = `losers:${roundIndex + 1}:${parentMatchIndex}`
 
         const childEl = matchRefs.current.get(childKey)
@@ -124,6 +133,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
           const childRect = childEl.getBoundingClientRect()
           const parentRect = parentEl.getBoundingClientRect()
 
+          // Both startY and endY should be at the vertical center of their respective cards
           const startX = childRect.right - containerRect.left
           const startY = childRect.top + childRect.height / 2 - containerRect.top
           const endX = parentRect.left - containerRect.left
@@ -208,7 +218,17 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
           matchIndex++
         ) {
           const childKey = `losers:${roundIndex}:${matchIndex}`
-          const parentMatchIndex = matchIndex
+          
+          // Determine parent match index based on progression logic
+          let parentMatchIndex
+          if (nextRound.matches.length === currentRound.matches.length) {
+            parentMatchIndex = matchIndex
+          } else if (nextRound.matches.length === currentRound.matches.length / 2) {
+            parentMatchIndex = Math.floor(matchIndex / 2)
+          } else {
+            parentMatchIndex = matchIndex
+          }
+          
           const parentKey = `losers:${roundIndex + 1}:${parentMatchIndex}`
 
           const childEl = matchRefs.current.get(childKey)
@@ -296,32 +316,43 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
 
         {/* Losers Bracket */}
         {losersGroup && (
-          <div className='pt-12 border-t' ref={losersContainerRef}>
+          <div className='pt-12 border-t relative' ref={losersContainerRef}>
             <h3 className='text-lg md:text-xl font-semibold mb-8'>
               Losers Bracket
             </h3>
-            <div className='relative flex gap-2 md:gap-3 z-10 items-stretch'>
-              {losersGroup.rounds.map((round, roundIdx) => {
-                // Filter connections that start from this round
-                const roundConnections = losersConnections.filter(conn => {
-                  // We need to know which connection belongs to which round
-                  // Since we don't have that information directly, we'll need to compute it
-                  // For now, let's pass all connections and let the component figure it out
-                  // But to be precise, we should pass only relevant connections
-                  return true
-                })
+            {/* SVG overlay for loser bracket connector lines */}
+            <svg
+              className='absolute inset-0 pointer-events-none z-0'
+              width='100%'
+              height='100%'
+            >
+              {losersConnections.map((conn, idx) => {
+                // Create a 'short' exit from the match before turning to prevent overlap
+                const d = `M ${conn.startX} ${conn.startY} L ${conn.startX + 20} ${conn.startY} L ${conn.startX + 20} ${conn.endY} L ${conn.endX} ${conn.endY}`
                 return (
-                  <LoserBracket
-                    key={roundIdx}
-                    ref={null}
-                    round={round}
-                    roundIndex={roundIdx}
-                    totalRounds={losersGroup.rounds.length}
-                    attachMatchRef={(matchIdx) => attachMatchRef('losers', roundIdx, matchIdx)}
-                    connections={losersConnections}
+                  <path
+                    key={idx}
+                    d={d}
+                    stroke='currentColor'
+                    strokeWidth={2}
+                    fill='none'
+                    strokeDasharray='4 4'
+                    className='text-muted-foreground/50'
                   />
                 )
               })}
+            </svg>
+            <div className='relative flex gap-2 md:gap-3 z-10'>
+              {losersGroup.rounds.map((round, roundIdx) => (
+                <LoserBracket
+                  key={roundIdx}
+                  ref={null}
+                  round={round}
+                  roundIndex={roundIdx}
+                  totalRounds={losersGroup.rounds.length}
+                  attachMatchRef={(matchIdx) => attachMatchRef('losers', roundIdx, matchIdx)}
+                />
+              ))}
             </div>
           </div>
         )}
