@@ -25,10 +25,13 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
 
   // Refs for measuring positions
   const containerRef = useRef<HTMLDivElement>(null)
+  const winnersContainerRef = useRef<HTMLDivElement>(null)
+  const losersContainerRef = useRef<HTMLDivElement>(null)
   const matchRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
   // State for connections
-  const [connections, setConnections] = useState<Connection[]>([])
+  const [winnersConnections, setWinnersConnections] = useState<Connection[]>([])
+  const [losersConnections, setLosersConnections] = useState<Connection[]>([])
 
   // Function to attach ref to each match
   const attachMatchRef =
@@ -41,17 +44,16 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
       }
     }
 
-  // Compute connections using useLayoutEffect
+  // Compute winners bracket connections
   useLayoutEffect(() => {
-    if (!containerRef.current || !winnersGroup) {
-      setConnections([])
+    if (!winnersContainerRef.current || !winnersGroup) {
+      setWinnersConnections([])
       return
     }
 
-    const containerRect = containerRef.current.getBoundingClientRect()
+    const containerRect = winnersContainerRef.current.getBoundingClientRect()
     const newConnections: Connection[] = []
 
-    // Process winners bracket connections
     const rounds = winnersGroup.rounds
     for (let roundIndex = 0; roundIndex < rounds.length - 1; roundIndex++) {
       const currentRound = rounds[roundIndex]
@@ -59,14 +61,12 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
 
       if (!currentRound || !nextRound) continue
 
-      // For each match in current round, connect to appropriate match in next round
       for (
         let matchIndex = 0;
         matchIndex < currentRound.matches.length;
         matchIndex++
       ) {
         const childKey = `winners:${roundIndex}:${matchIndex}`
-        // Determine parent match index (two children per parent in standard brackets)
         const parentMatchIndex = Math.floor(matchIndex / 2)
         const parentKey = `winners:${roundIndex + 1}:${parentMatchIndex}`
 
@@ -77,21 +77,66 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
           const childRect = childEl.getBoundingClientRect()
           const parentRect = parentEl.getBoundingClientRect()
 
-          // Calculate coordinates relative to container
           const startX = childRect.right - containerRect.left
-          const startY =
-            childRect.top + childRect.height / 2 - containerRect.top
+          const startY = childRect.top + childRect.height / 2 - containerRect.top
           const endX = parentRect.left - containerRect.left
-          const endY =
-            parentRect.top + parentRect.height / 2 - containerRect.top
+          const endY = parentRect.top + parentRect.height / 2 - containerRect.top
 
           newConnections.push({ startX, startY, endX, endY })
         }
       }
     }
 
-    setConnections(newConnections)
+    setWinnersConnections(newConnections)
   }, [winnersGroup])
+
+  // Compute losers bracket connections
+  useLayoutEffect(() => {
+    if (!losersContainerRef.current || !losersGroup) {
+      setLosersConnections([])
+      return
+    }
+
+    const containerRect = losersContainerRef.current.getBoundingClientRect()
+    const newConnections: Connection[] = []
+
+    const rounds = losersGroup.rounds
+    for (let roundIndex = 0; roundIndex < rounds.length - 1; roundIndex++) {
+      const currentRound = rounds[roundIndex]
+      const nextRound = rounds[roundIndex + 1]
+
+      if (!currentRound || !nextRound) continue
+
+      for (
+        let matchIndex = 0;
+        matchIndex < currentRound.matches.length;
+        matchIndex++
+      ) {
+        const childKey = `losers:${roundIndex}:${matchIndex}`
+        // In loser's bracket, connections may be different
+        // For now, connect to the next round's match at the same index
+        const parentMatchIndex = matchIndex
+        const parentKey = `losers:${roundIndex + 1}:${parentMatchIndex}`
+
+        const childEl = matchRefs.current.get(childKey)
+        const parentEl = matchRefs.current.get(parentKey)
+
+        if (childEl && parentEl) {
+          const childRect = childEl.getBoundingClientRect()
+          const parentRect = parentEl.getBoundingClientRect()
+
+          const startX = childRect.right - containerRect.left
+          const startY = childRect.top + childRect.height / 2 - containerRect.top
+          const endX = parentRect.left - containerRect.left
+          const endY = parentRect.top + parentRect.height / 2 - containerRect.top
+
+          newConnections.push({ startX, startY, endX, endY })
+        }
+      }
+    }
+
+    setLosersConnections(newConnections)
+  }, [losersGroup])
 
   // Handle window resize
   useLayoutEffect(() => {
@@ -148,7 +193,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
       <div className='min-w-max space-y-8 p-2 min-h-[800px]'>
         {/* Winners Bracket */}
         {winnersGroup && (
-          <div className='relative min-h-[600px]' ref={containerRef}>
+          <div className='relative min-h-[600px]' ref={winnersContainerRef}>
             <h3 className='text-lg md:text-xl font-semibold mb-8'>
               Winners Bracket
             </h3>
@@ -158,7 +203,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
               width='100%'
               height='100%'
             >
-              {connections.map((conn, idx) => {
+              {winnersConnections.map((conn, idx) => {
                 const midX = conn.startX + (conn.endX - conn.startX) / 2
                 const d = `M ${conn.startX} ${conn.startY} H ${midX} V ${conn.endY} H ${conn.endX}`
                 return (
@@ -204,18 +249,54 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
 
         {/* Losers Bracket */}
         {losersGroup && (
-          <div className='pt-12 border-t'>
+          <div className='pt-12 border-t' ref={losersContainerRef}>
             <h3 className='text-lg md:text-xl font-semibold mb-8'>
               Losers Bracket
             </h3>
-            <div className='flex gap-2 md:gap-3'>
+            {/* SVG overlay for loser bracket connector lines */}
+            <svg
+              className='absolute inset-0 pointer-events-none z-0'
+              width='100%'
+              height='100%'
+            >
+              {losersConnections.map((conn, idx) => {
+                const midX = conn.startX + (conn.endX - conn.startX) / 2
+                const d = `M ${conn.startX} ${conn.startY} H ${midX} V ${conn.endY} H ${conn.endX}`
+                return (
+                  <path
+                    key={idx}
+                    d={d}
+                    stroke='currentColor'
+                    strokeWidth={2}
+                    fill='none'
+                    strokeDasharray='4 4'
+                    className='text-muted-foreground/50'
+                  />
+                )
+              })}
+            </svg>
+            <div className='relative flex gap-2 md:gap-3 z-10'>
               {losersGroup.rounds.map((round, roundIdx) => (
-                <LoserBracket
-                  key={roundIdx}
-                  round={round}
-                  roundIndex={roundIdx}
-                  totalRounds={losersGroup.rounds.length}
-                />
+                <div key={roundIdx} className='flex flex-col flex-1'>
+                  {/* Round Label */}
+                  <div className='mb-4 text-center'>
+                    <h4 className='text-sm font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap'>
+                      Round {roundIdx + 1}
+                    </h4>
+                  </div>
+                  {/* Matches container */}
+                  <div className='flex flex-col flex-1'>
+                    {round.matches.map((match, matchIdx) => (
+                      <div
+                        key={matchIdx}
+                        className='w-48 ml-0 mr-auto my-2'
+                        ref={attachMatchRef('losers', roundIdx, matchIdx)}
+                      >
+                        <MatchCard match={match} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
