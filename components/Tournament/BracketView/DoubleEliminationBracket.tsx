@@ -77,9 +77,11 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
           const parentRect = parentEl.getBoundingClientRect()
 
           const startX = childRect.right - containerRect.left
-          const startY = childRect.top + childRect.height / 2 - containerRect.top
+          const startY =
+            childRect.top + childRect.height / 2 - containerRect.top
           const endX = parentRect.left - containerRect.left
-          const endY = parentRect.top + parentRect.height / 2 - containerRect.top
+          const endY =
+            parentRect.top + parentRect.height / 2 - containerRect.top
 
           newConnections.push({ startX, startY, endX, endY })
         }
@@ -112,18 +114,21 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
         matchIndex++
       ) {
         const childKey = `losers:${roundIndex}:${matchIndex}`
-        
+
         // Determine parent match index based on progression logic
         let parentMatchIndex
         if (nextRound.matches.length === currentRound.matches.length) {
           parentMatchIndex = matchIndex
-        } else if (nextRound.matches.length === currentRound.matches.length / 2) {
+        } else if (
+          nextRound.matches.length ===
+          currentRound.matches.length / 2
+        ) {
           parentMatchIndex = Math.floor(matchIndex / 2)
         } else {
           // Default to same index if no clear pattern
           parentMatchIndex = matchIndex
         }
-        
+
         const parentKey = `losers:${roundIndex + 1}:${parentMatchIndex}`
 
         const childEl = matchRefs.current.get(childKey)
@@ -135,9 +140,11 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
 
           // Both startY and endY should be at the vertical center of their respective cards
           const startX = childRect.right - containerRect.left
-          const startY = childRect.top + childRect.height / 2 - containerRect.top
+          const startY =
+            childRect.top + childRect.height / 2 - containerRect.top
           const endX = parentRect.left - containerRect.left
-          const endY = parentRect.top + parentRect.height / 2 - containerRect.top
+          const endY =
+            parentRect.top + parentRect.height / 2 - containerRect.top
 
           newConnections.push({ startX, startY, endX, endY })
         }
@@ -218,17 +225,20 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
           matchIndex++
         ) {
           const childKey = `losers:${roundIndex}:${matchIndex}`
-          
+
           // Determine parent match index based on progression logic
           let parentMatchIndex
           if (nextRound.matches.length === currentRound.matches.length) {
             parentMatchIndex = matchIndex
-          } else if (nextRound.matches.length === currentRound.matches.length / 2) {
+          } else if (
+            nextRound.matches.length ===
+            currentRound.matches.length / 2
+          ) {
             parentMatchIndex = Math.floor(matchIndex / 2)
           } else {
             parentMatchIndex = matchIndex
           }
-          
+
           const parentKey = `losers:${roundIndex + 1}:${parentMatchIndex}`
 
           const childEl = matchRefs.current.get(childKey)
@@ -239,9 +249,11 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
             const parentRect = parentEl.getBoundingClientRect()
 
             const startX = childRect.right - containerRect.left
-            const startY = childRect.top + childRect.height / 2 - containerRect.top
+            const startY =
+              childRect.top + childRect.height / 2 - containerRect.top
             const endX = parentRect.left - containerRect.left
-            const endY = parentRect.top + parentRect.height / 2 - containerRect.top
+            const endY =
+              parentRect.top + parentRect.height / 2 - containerRect.top
 
             newConnections.push({ startX, startY, endX, endY })
           }
@@ -327,17 +339,26 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
               height='100%'
             >
               {losersConnections.map((conn, idx) => {
-                // Create a 'short' exit from the match before turning to prevent overlap
-                const d = `M ${conn.startX} ${conn.startY} L ${conn.startX + 20} ${conn.startY} L ${conn.startX + 20} ${conn.endY} L ${conn.endX} ${conn.endY}`
+                // We use the startX to determine which round we are in
+                // and stagger the vertical line so they don't overlap.
+                const stagger = 15
+                const elbowX = conn.startX + stagger
+
+                // Use a 'C' (Curve) or 'L' (Line). 'L' is cleaner for brackets.
+                const d = `M ${conn.startX} ${conn.startY} 
+            L ${elbowX} ${conn.startY} 
+            L ${elbowX} ${conn.endY} 
+            L ${conn.endX} ${conn.endY}`
+
                 return (
                   <path
                     key={idx}
                     d={d}
                     stroke='currentColor'
-                    strokeWidth={2}
+                    strokeWidth={1.5} // Slightly thinner looks more premium
                     fill='none'
-                    strokeDasharray='4 4'
-                    className='text-muted-foreground/50'
+                    strokeDasharray='4 2' // Tighter dots look cleaner than 4 4
+                    className='text-muted-foreground/40'
                   />
                 )
               })}
@@ -350,7 +371,9 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
                   round={round}
                   roundIndex={roundIdx}
                   totalRounds={losersGroup.rounds.length}
-                  attachMatchRef={(matchIdx) => attachMatchRef('losers', roundIdx, matchIdx)}
+                  attachMatchRef={(matchIdx) =>
+                    attachMatchRef('losers', roundIdx, matchIdx)
+                  }
                 />
               ))}
             </div>
