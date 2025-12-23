@@ -2,7 +2,6 @@
 import React, { useLayoutEffect, useRef, useState } from 'react'
 import { StageFrontend } from '@/types/tournament/tournament'
 import MatchCard from './MatchCard'
-import LoserBracket from './LoserBracket'
 
 interface DoubleEliminationBracketProps {
   stage: StageFrontend
@@ -322,7 +321,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
                 )
               })}
             </svg>
-            <div className='relative flex gap-2 md:gap-3 z-10'>
+            <div className='relative flex gap-2 md:gap-3 z-10 items-stretch'>
               {losersGroup.rounds.map((round, roundIdx) => (
                 <div key={roundIdx} className='flex flex-col flex-1'>
                   {/* Round Label */}
@@ -331,7 +330,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
                       Round {roundIdx + 1}
                     </h4>
                   </div>
-                  {/* Matches container */}
+                  {/* Matches container - no justify-around */}
                   <div className='flex flex-col flex-1'>
                     {round.matches.map((match, matchIdx) => (
                       <div
