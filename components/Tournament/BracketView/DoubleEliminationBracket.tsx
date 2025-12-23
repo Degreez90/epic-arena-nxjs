@@ -24,7 +24,6 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
   const grandFinalGroup = groups[2]
 
   // Refs for measuring positions
-  const containerRef = useRef<HTMLDivElement>(null)
   const winnersContainerRef = useRef<HTMLDivElement>(null)
   const losersContainerRef = useRef<HTMLDivElement>(null)
   const matchRefs = useRef<Map<string, HTMLDivElement>>(new Map())
@@ -138,12 +137,12 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
     setLosersConnections(newConnections)
   }, [losersGroup])
 
-  // Handle window resize
+  // Handle window resize for winners bracket
   useLayoutEffect(() => {
     const handleResize = () => {
-      if (!containerRef.current || !winnersGroup) return
+      if (!winnersContainerRef.current || !winnersGroup) return
 
-      const containerRect = containerRef.current.getBoundingClientRect()
+      const containerRect = winnersContainerRef.current.getBoundingClientRect()
       const newConnections: Connection[] = []
 
       const rounds = winnersGroup.rounds
@@ -181,12 +180,60 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
         }
       }
 
-      setConnections(newConnections)
+      setWinnersConnections(newConnections)
     }
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [winnersGroup])
+
+  // Handle window resize for losers bracket
+  useLayoutEffect(() => {
+    const handleResize = () => {
+      if (!losersContainerRef.current || !losersGroup) return
+
+      const containerRect = losersContainerRef.current.getBoundingClientRect()
+      const newConnections: Connection[] = []
+
+      const rounds = losersGroup.rounds
+      for (let roundIndex = 0; roundIndex < rounds.length - 1; roundIndex++) {
+        const currentRound = rounds[roundIndex]
+        const nextRound = rounds[roundIndex + 1]
+
+        if (!currentRound || !nextRound) continue
+
+        for (
+          let matchIndex = 0;
+          matchIndex < currentRound.matches.length;
+          matchIndex++
+        ) {
+          const childKey = `losers:${roundIndex}:${matchIndex}`
+          const parentMatchIndex = matchIndex
+          const parentKey = `losers:${roundIndex + 1}:${parentMatchIndex}`
+
+          const childEl = matchRefs.current.get(childKey)
+          const parentEl = matchRefs.current.get(parentKey)
+
+          if (childEl && parentEl) {
+            const childRect = childEl.getBoundingClientRect()
+            const parentRect = parentEl.getBoundingClientRect()
+
+            const startX = childRect.right - containerRect.left
+            const startY = childRect.top + childRect.height / 2 - containerRect.top
+            const endX = parentRect.left - containerRect.left
+            const endY = parentRect.top + parentRect.height / 2 - containerRect.top
+
+            newConnections.push({ startX, startY, endX, endY })
+          }
+        }
+      }
+
+      setLosersConnections(newConnections)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [losersGroup])
 
   return (
     <div className='w-full overflow-x-auto pb-8'>
