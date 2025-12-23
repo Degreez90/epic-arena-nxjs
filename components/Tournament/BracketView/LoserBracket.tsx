@@ -20,7 +20,9 @@ interface Connection {
 
 const LoserBracket = forwardRef<HTMLDivElement, LoserBracketProps>(
   ({ round, roundIndex, totalRounds, attachMatchRef, connections = [] }, ref) => {
+    const containerRef = useRef<HTMLDivElement>(null)
     const matchRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+    const [adjustedConnections, setAdjustedConnections] = useState<Connection[]>([])
 
     // Attach ref to each match
     const internalAttachMatchRef = (matchIndex: number) => (el: HTMLDivElement | null) => {
@@ -33,8 +35,69 @@ const LoserBracket = forwardRef<HTMLDivElement, LoserBracketProps>(
       attachMatchRef(matchIndex)(el)
     }
 
+    // Adjust connections to be relative to this component's container
+    useLayoutEffect(() => {
+      if (!containerRef.current) return
+      
+      const containerRect = containerRef.current.getBoundingClientRect()
+      const newAdjustedConnections: Connection[] = []
+      
+      // Filter connections that start from the current round
+      // Since we don't know which round each connection belongs to, we'll need to infer
+      // For now, we'll adjust all connections to be relative to this container
+      // But this may not be accurate
+      // A better approach is to only pass connections relevant to this round
+      for (const conn of connections) {
+        // Adjust coordinates to be relative to this container
+        // Since the original coordinates are relative to the entire loser bracket container
+        // We need to subtract the position of this container
+        const adjustedStartX = conn.startX - containerRect.left
+        const adjustedStartY = conn.startY - containerRect.top
+        const adjustedEndX = conn.endX - containerRect.left
+        const adjustedEndY = conn.endY - containerRect.top
+        
+        newAdjustedConnections.push({
+          startX: adjustedStartX,
+          startY: adjustedStartY,
+          endX: adjustedEndX,
+          endY: adjustedEndY
+        })
+      }
+      
+      setAdjustedConnections(newAdjustedConnections)
+    }, [connections])
+
+    // Handle window resize
+    useLayoutEffect(() => {
+      const handleResize = () => {
+        // Recompute adjusted connections on resize
+        if (!containerRef.current) return
+        const containerRect = containerRef.current.getBoundingClientRect()
+        const newAdjustedConnections: Connection[] = []
+        
+        for (const conn of connections) {
+          const adjustedStartX = conn.startX - containerRect.left
+          const adjustedStartY = conn.startY - containerRect.top
+          const adjustedEndX = conn.endX - containerRect.left
+          const adjustedEndY = conn.endY - containerRect.top
+          
+          newAdjustedConnections.push({
+            startX: adjustedStartX,
+            startY: adjustedStartY,
+            endX: adjustedEndX,
+            endY: adjustedEndY
+          })
+        }
+        
+        setAdjustedConnections(newAdjustedConnections)
+      }
+      
+      window.addEventListener('resize', handleResize)
+      return () => window.removeEventListener('resize', handleResize)
+    }, [connections])
+
     return (
-      <div ref={ref} className='flex flex-col relative flex-1'>
+      <div ref={containerRef} className='flex flex-col relative flex-1'>
         {/* Round Label */}
         <div className='mb-4 text-center'>
           <h4 className='text-sm font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap'>
@@ -47,7 +110,7 @@ const LoserBracket = forwardRef<HTMLDivElement, LoserBracketProps>(
           width='100%'
           height='100%'
         >
-          {connections.map((conn, idx) => {
+          {adjustedConnections.map((conn, idx) => {
             const midX = conn.startX + (conn.endX - conn.startX) / 2
             const d = `M ${conn.startX} ${conn.startY} H ${midX} V ${conn.endY} H ${conn.endX}`
             return (
