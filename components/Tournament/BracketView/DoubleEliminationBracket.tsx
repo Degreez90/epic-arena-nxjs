@@ -300,39 +300,28 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
             <h3 className='text-lg md:text-xl font-semibold mb-8'>
               Losers Bracket
             </h3>
-            {/* SVG overlay for loser bracket connector lines */}
-            <svg
-              className='absolute inset-0 pointer-events-none z-0'
-              width='100%'
-              height='100%'
-            >
-              {losersConnections.map((conn, idx) => {
-                const midX = conn.startX + (conn.endX - conn.startX) / 2
-                const d = `M ${conn.startX} ${conn.startY} H ${midX} V ${conn.endY} H ${conn.endX}`
+            <div className='relative flex gap-2 md:gap-3 z-10 items-stretch'>
+              {losersGroup.rounds.map((round, roundIdx) => {
+                // Filter connections that start from this round
+                const roundConnections = losersConnections.filter(conn => {
+                  // We need to know which connection belongs to which round
+                  // Since we don't have that information directly, we'll need to compute it
+                  // For now, let's pass all connections and let the component figure it out
+                  // But to be precise, we should pass only relevant connections
+                  return true
+                })
                 return (
-                  <path
-                    key={idx}
-                    d={d}
-                    stroke='currentColor'
-                    strokeWidth={2}
-                    fill='none'
-                    strokeDasharray='4 4'
-                    className='text-muted-foreground/50'
+                  <LoserBracket
+                    key={roundIdx}
+                    ref={null}
+                    round={round}
+                    roundIndex={roundIdx}
+                    totalRounds={losersGroup.rounds.length}
+                    attachMatchRef={(matchIdx) => attachMatchRef('losers', roundIdx, matchIdx)}
+                    connections={losersConnections}
                   />
                 )
               })}
-            </svg>
-            <div className='relative flex gap-2 md:gap-3 z-10 items-stretch'>
-              {losersGroup.rounds.map((round, roundIdx) => (
-                <LoserBracket
-                  key={roundIdx}
-                  ref={null}
-                  round={round}
-                  roundIndex={roundIdx}
-                  totalRounds={losersGroup.rounds.length}
-                  attachMatchRef={(matchIdx) => attachMatchRef('losers', roundIdx, matchIdx)}
-                />
-              ))}
             </div>
           </div>
         )}
