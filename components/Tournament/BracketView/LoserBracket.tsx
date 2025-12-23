@@ -20,9 +20,7 @@ interface Connection {
 
 const LoserBracket = forwardRef<HTMLDivElement, LoserBracketProps>(
   ({ round, roundIndex, totalRounds, attachMatchRef, connections = [] }, ref) => {
-    const containerRef = useRef<HTMLDivElement>(null)
     const matchRefs = useRef<Map<number, HTMLDivElement>>(new Map())
-    const [connections, setConnections] = useState<Connection[]>([])
 
     // Attach ref to each match
     const internalAttachMatchRef = (matchIndex: number) => (el: HTMLDivElement | null) => {
@@ -34,26 +32,6 @@ const LoserBracket = forwardRef<HTMLDivElement, LoserBracketProps>(
       // Also call the parent's attachMatchRef to maintain compatibility
       attachMatchRef(matchIndex)(el)
     }
-
-    // Compute connections for this round to the next round
-    // Since we don't have access to the next round here, we'll handle this differently
-    // For now, we'll compute connections within this component
-    useLayoutEffect(() => {
-      // We need to know about the next round to compute connections
-      // Since this information isn't available, we'll leave connections empty for now
-      // The parent component should handle connections between rounds
-      setConnections([])
-    }, [round, roundIndex])
-
-    // Handle window resize
-    useLayoutEffect(() => {
-      const handleResize = () => {
-        // Recompute connections on resize
-        setConnections([])
-      }
-      window.addEventListener('resize', handleResize)
-      return () => window.removeEventListener('resize', handleResize)
-    }, [])
 
     return (
       <div ref={ref} className='flex flex-col relative flex-1'>
