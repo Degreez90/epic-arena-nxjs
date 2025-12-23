@@ -174,7 +174,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
               })}
             </svg>
             {/* Match cards container */}
-            <div className='relative flex z-10 items-stretch'>
+            <div className='relative flex gap-2 md:gap-3 z-10 items-stretch'>
               {winnersGroup.rounds.map((round, roundIdx) => (
                 <div key={roundIdx} className='flex flex-col flex-1'>
                   {/* Round Label */}
@@ -207,7 +207,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
             <h3 className='text-lg md:text-xl font-semibold mb-8'>
               Losers Bracket
             </h3>
-            <div className='flex gap-4 md:gap-6'>
+            <div className='flex gap-2 md:gap-3'>
               {losersGroup.rounds.map((round, roundIdx) => (
                 <LoserBracket
                   key={roundIdx}
