@@ -339,12 +339,11 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
               height='100%'
             >
               {losersConnections.map((conn, idx) => {
-                // We use the startX to determine which round we are in
-                // and stagger the vertical line so they don't overlap.
-                const stagger = 15
+                // Stagger the vertical line to sit closer to the child match
+                // This creates clear white space between the vertical line and the next round
+                const stagger = 8
                 const elbowX = conn.startX + stagger
 
-                // Use a 'C' (Curve) or 'L' (Line). 'L' is cleaner for brackets.
                 const d = `M ${conn.startX} ${conn.startY} 
             L ${elbowX} ${conn.startY} 
             L ${elbowX} ${conn.endY} 
@@ -355,10 +354,10 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
                     key={idx}
                     d={d}
                     stroke='currentColor'
-                    strokeWidth={1.5} // Slightly thinner looks more premium
+                    strokeWidth={1.5}
                     fill='none'
-                    strokeDasharray='4 2' // Tighter dots look cleaner than 4 4
-                    className='text-muted-foreground/40'
+                    strokeDasharray='4 2'
+                    className='text-gray-400/30'
                   />
                 )
               })}
