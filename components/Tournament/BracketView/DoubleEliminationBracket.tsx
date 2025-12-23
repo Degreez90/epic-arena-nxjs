@@ -168,6 +168,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
                     stroke='currentColor'
                     strokeWidth={2}
                     fill='none'
+                    strokeDasharray='4 4'
                     className='text-muted-foreground/50'
                   />
                 )
