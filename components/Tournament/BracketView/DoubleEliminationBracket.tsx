@@ -145,7 +145,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
 
   return (
     <div className='w-full overflow-x-auto pb-8'>
-      <div className='min-w-max space-y-12 p-4 min-h-[800px]'>
+      <div className='min-w-max space-y-8 p-2 min-h-[800px]'>
         {/* Winners Bracket */}
         {winnersGroup && (
           <div className='relative min-h-[600px]' ref={containerRef}>
@@ -174,7 +174,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
               })}
             </svg>
             {/* Match cards container */}
-            <div className='relative flex gap-16 md:gap-20 z-10 items-stretch'>
+            <div className='relative flex gap-8 md:gap-12 z-10 items-stretch'>
               {winnersGroup.rounds.map((round, roundIdx) => (
                 <div key={roundIdx} className='flex flex-col flex-1'>
                   {/* Round Label */}
@@ -188,7 +188,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
                     {round.matches.map((match, matchIdx) => (
                       <div
                         key={matchIdx}
-                        className='w-48 mx-auto my-2'
+                        className='w-48 ml-0 mr-auto my-2'
                         ref={attachMatchRef('winners', roundIdx, matchIdx)}
                       >
                         <MatchCard match={match} />
@@ -207,7 +207,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
             <h3 className='text-lg md:text-xl font-semibold mb-8'>
               Losers Bracket
             </h3>
-            <div className='flex gap-16 md:gap-20'>
+            <div className='flex gap-8 md:gap-12'>
               {losersGroup.rounds.map((round, roundIdx) => (
                 <LoserBracket
                   key={roundIdx}
