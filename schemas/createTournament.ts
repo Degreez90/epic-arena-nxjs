@@ -15,7 +15,7 @@ export enum SeedOrdering {
 
 export const CreateTournamentSchema = z.object({
   tournamentName: z.string().min(1, { message: 'Tournament name is required' }),
-  description: z.string().min(1, { message: 'Tournament name is required' }),
+  description: z.string().min(1, { message: 'Description is required' }),
   type: z.enum(
     [
       tournamentStageType.singleElimination,

@@ -3,7 +3,7 @@
 
 // const connectDB = async () => {
 //   try {
-//     const conn = await mongoose.connect("mongodb+srv://offitt:offitt123@cluster0.joy0t8g.mongodb.net/test")
+//     const conn = await mongoose.connect(process.env.MONGODB_URI as string)
 //     console.log(chalk.cyan.underline(`MongoDB Connected: ${conn.connection.host}`))
 //   } catch (error: any) {
 //     console.log(chalk.red.underline(`Error: ${(error as Error).message}`))

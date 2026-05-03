@@ -140,7 +140,7 @@ export const getTournamentParticipants = async (
 ): Promise<BracketsParticipant[]> => {
   const manager = await getTournamentManager(tournamentId)
   const participants = await manager.storage.select('participant', {
-    tournament_id: tournamentId,
+    tournament_id: Number(tournamentId),
   })
   return participants || []
 }

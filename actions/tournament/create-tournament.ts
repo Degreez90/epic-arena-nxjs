@@ -26,7 +26,17 @@ export interface TournamentResponse {
 const createTournament = async (
   data: CreateTournamentType
 ): Promise<TournamentResponse> => {
-  const validatedData = CreateTournamentSchema.parse(data)
+  const parsed = CreateTournamentSchema.safeParse(data)
+
+  if (!parsed.success) {
+    const flattened = parsed.error.flatten()
+    const firstFieldError =
+      Object.values(flattened.fieldErrors).flat()[0] ||
+      'Invalid tournament data'
+    return { error: firstFieldError }
+  }
+
+  const validatedData = parsed.data
 
   const user = await currentUser()
 
@@ -53,14 +63,14 @@ const createTournament = async (
     // Create dummy participants for testing
     // In a real application, these would come from user input or API
     const participants: Omit<Participant, 'id'>[] = [
-      { name: 'Seed 1', tournament_id: tournament.id },
-      { name: 'Seed 2', tournament_id: tournament.id },
-      { name: 'Seed 3', tournament_id: tournament.id },
-      { name: 'Seed 4', tournament_id: tournament.id },
-      { name: 'Seed 5', tournament_id: tournament.id },
-      { name: 'Seed 6', tournament_id: tournament.id },
-      { name: 'Seed 7', tournament_id: tournament.id },
-      { name: 'Seed 8', tournament_id: tournament.id },
+      { name: 'Seed 1', tournament_id: Number(tournament.id) },
+      { name: 'Seed 2', tournament_id: Number(tournament.id) },
+      { name: 'Seed 3', tournament_id: Number(tournament.id) },
+      { name: 'Seed 4', tournament_id: Number(tournament.id) },
+      { name: 'Seed 5', tournament_id: Number(tournament.id) },
+      { name: 'Seed 6', tournament_id: Number(tournament.id) },
+      { name: 'Seed 7', tournament_id: Number(tournament.id) },
+      { name: 'Seed 8', tournament_id: Number(tournament.id) },
     ]
 
     // Add participants to tournament
@@ -72,9 +82,14 @@ const createTournament = async (
       name: tournament.name,
       type: validatedData.type as StageType,
       seeding: participants.map((p, i) => ({ ...p, id: i + 1 })),
-      settings: {
+      settings: {},
+    }
+
+    if (validatedData.seedOrdering) {
+      inputStage.settings = {
+        ...inputStage.settings,
         seedOrdering: [validatedData.seedOrdering as SeedOrdering],
-      },
+      }
     }
 
     if (validatedData.type === 'double_elimination') {
