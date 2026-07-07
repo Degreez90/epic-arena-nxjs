@@ -28,7 +28,7 @@ const SideNav: React.FC = () => {
 
   const displayName = useMemo(
     () => user?.userName || user?.name || 'Guest',
-    [user?.name, user?.userName]
+    [user?.name, user?.userName],
   )
 
   const initials = useMemo(() => {
