@@ -10,11 +10,11 @@ import {
 import { Round, Group, Stage } from 'brackets-model'
 
 export const addParcticipantNameInMatch = (
-  tournamentData: SerializedTournament
+  tournamentData: SerializedTournament,
 ) => {
   const getParticipantName = (Id: number) => {
     const participant = tournamentData.participant.find(
-      (participant: CustomParticipantFrontend) => participant.id === Id
+      (participant: CustomParticipantFrontend) => participant.id === Id,
     )
     if (!participant) return 'N/A'
     return participant.name
@@ -41,7 +41,7 @@ export const addParcticipantNameInMatch = (
 }
 
 export const categorizeData = (
-  tournamentData: SerializedTournament
+  tournamentData: SerializedTournament,
 ): OrganizedTournamentData => {
   // Handle tournaments without bracket data
   if (
@@ -56,8 +56,8 @@ export const categorizeData = (
       description: tournamentData.description,
       participants: tournamentData.participant || [],
       stages: [],
-      match_games: tournamentData.match_games || [],
-      games: tournamentData.games || [],
+      match_games: tournamentData.match_game || [],
+      games: tournamentData.game || [],
       status: tournamentData.status,
       player: tournamentData.player,
     }
@@ -76,7 +76,7 @@ export const categorizeData = (
     (round) => ({
       ...round,
       matches: matches.filter((match) => match.round_id === round.id),
-    })
+    }),
   )
 
   // 3. Nest rounds into groups
@@ -84,7 +84,7 @@ export const categorizeData = (
     (group) => ({
       ...group,
       rounds: rounds.filter((round) => round.group_id === group.id),
-    })
+    }),
   )
 
   // 4. Nest groups into stages
@@ -92,7 +92,7 @@ export const categorizeData = (
     (stage) => ({
       ...stage,
       groups: groups.filter((group) => group.stage_id === stage.id),
-    })
+    }),
   )
 
   // 5. Return the final object

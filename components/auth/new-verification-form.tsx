@@ -4,9 +4,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { BeatLoader } from 'react-spinners'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { newVerification } from '@/actions/auth/new-verification'
-import { CardWrapper } from '@/components/Auth/Card-Wrapper'
-import { FormError } from '@/components/Form-Error'
-import { FormSuccess } from '@/components/Form-Success'
+import { CardWrapper } from '@/components/auth/Card-wrapper'
+import { FormError } from '@/components/form-error'
+import { FormSuccess } from '@/components/form-success'
 import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
 
 export const NewVerificationForm = () => {

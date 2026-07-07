@@ -1,10 +1,9 @@
-import type { Prisma } from '@prisma/client'
 import type { TournamentDTO } from '@/data/Tournaments/tournaments'
 
 export type type = 'Single Elimination' | 'Double Elimination'
 
 // Minimal shapes for UI usage
-export type Game = Prisma.Tournament['game'] extends object ? any : any
+export type Game = any
 export type TournamentStatus = string
 
 import {

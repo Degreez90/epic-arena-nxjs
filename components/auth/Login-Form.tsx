@@ -16,11 +16,11 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { CardWrapper } from '@/components/Auth/Card-Wrapper'
+import { CardWrapper } from '@/components/auth/Card-wrapper'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { FormError } from '@/components/Form-Error'
-import { FormSuccess } from '@/components/Form-Success'
+import { FormError } from '@/components/form-error'
+import { FormSuccess } from '@/components/form-success'
 import { login } from '@/actions/auth/login'
 
 export const LoginForm = () => {

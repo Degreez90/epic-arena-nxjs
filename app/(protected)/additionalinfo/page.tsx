@@ -3,10 +3,10 @@
 import React from 'react'
 import { useEffect } from 'react'
 import { Suspense } from 'react'
-import AddInfo from '@/components/AdditionalInfo/Add-Info'
+import AddInfo from '@/components/additionalinfo/Add-Info'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
-const page = () => {
+const Page = () => {
   const user = useCurrentUser()
 
   //TODO:: Find a better solution then a reload
@@ -29,4 +29,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

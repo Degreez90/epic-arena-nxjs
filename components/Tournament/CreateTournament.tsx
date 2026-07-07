@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import React, { useState, useTransition } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import * as z from 'zod'
-import { CardWrapper } from '../Auth/Card-Wrapper'
+import { CardWrapper } from '../auth/Card-wrapper'
 import {
   FormControl,
   FormField,
@@ -21,8 +21,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Input } from '../ui/input'
-import { FormError } from '../Form-Error'
-import { FormSuccess } from '../Form-Success'
+import { FormError } from '../form-error'
+import { FormSuccess } from '../form-success'
 import { Button } from '../ui/button'
 import { Checkbox } from '../ui/checkbox'
 

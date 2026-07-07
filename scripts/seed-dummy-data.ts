@@ -163,12 +163,11 @@ async function seedDummyData() {
           hasThirdPlaceMatch: tournamentData.hasThirdPlaceMatch,
           createdBy: adminUser.id,
           gameId: selectedGame.id,
-          bracketData: {},
           progress: Math.floor(Math.random() * 100),
         },
       })
       console.log(
-        `  ✓ Created tournament: ${tournament.name} (${tournament.status})`
+        `  ✓ Created tournament: ${tournament.name} (${tournament.status})`,
       )
     }
 

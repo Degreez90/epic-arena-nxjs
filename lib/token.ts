@@ -7,7 +7,7 @@ import { getPasswordResetTokenByEmail } from '@/data/password-reset-token'
 import { getTwoFactorTokenByEmail } from '@/data/two-factor-token'
 import { TwoFactorToken } from '@/models/TwoFactorToken'
 import { PasswordResetToken } from '@/models/PasswordResetToken'
-import { VerificationToken } from '@/models/VerificationToken'
+import { VerificationToken } from '@/models/verificationToken'
 
 export const generateTwoFactorToken = async (email: string) => {
   await connectDB() // Ensure the database connection is established
@@ -18,7 +18,7 @@ export const generateTwoFactorToken = async (email: string) => {
   const existingToken = await getTwoFactorTokenByEmail(email)
 
   if (existingToken) {
-    await TwoFactorToken.deleteOne({ _id: existingToken.id })
+    await TwoFactorToken.deleteOne({ token: existingToken.token })
   }
 
   await TwoFactorToken.create({
@@ -39,7 +39,7 @@ export const generatePasswordResetToken = async (email: string) => {
   const existingToken = await getPasswordResetTokenByEmail(email)
 
   if (existingToken) {
-    await PasswordResetToken.deleteOne({ _id: existingToken.id })
+    await PasswordResetToken.deleteOne({ token: existingToken.token })
   }
 
   await PasswordResetToken.create({
@@ -60,7 +60,7 @@ export const generateVerificationToken = async (email: string) => {
   const existingToken = await getVerificationTokenByEmail(email)
 
   if (existingToken) {
-    await VerificationToken.deleteOne({ _id: existingToken.id })
+    await VerificationToken.deleteOne({ token: existingToken.token })
     console.log('lib/token.ts: Deleted existing token')
   }
 

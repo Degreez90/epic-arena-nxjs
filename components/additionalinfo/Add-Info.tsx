@@ -1,5 +1,5 @@
 import * as z from 'zod'
-import { CardWrapper } from '@/components/Auth/Card-Wrapper'
+import { CardWrapper } from '@/components/auth/Card-wrapper'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -10,8 +10,8 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { FormError } from '@/components/Form-Error'
-import { FormSuccess } from '@/components/Form-Success'
+import { FormError } from '@/components/form-error'
+import { FormSuccess } from '@/components/form-success'
 import { useForm } from 'react-hook-form'
 
 import { AdditionInfoSchema } from '@/schemas'

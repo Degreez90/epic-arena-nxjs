@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Container from '@/components/Container'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import SideNav from '@/components/Nav/SideNav'
+import SideNav from '@/components/nav/SideNav'
 import type { ExtendedUser } from '@/next-auth'
 import { useSession } from 'next-auth/react'
 

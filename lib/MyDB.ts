@@ -8,6 +8,7 @@ import {
   Participant,
 } from 'brackets-model'
 import prisma from '@/lib/prisma'
+import type { Prisma } from '@prisma/client'
 import { deepMerge, filterArrayOfObjects } from '@/utils/crudUtils'
 
 interface DataTypes {
@@ -66,12 +67,14 @@ export class MyDB implements CrudInterface {
       await prisma.tournament.update({
         where: { id: this.tournamentId },
         data: {
-          stage: this.tournamentData.stage,
-          group: this.tournamentData.group,
-          round: this.tournamentData.round,
-          match: this.tournamentData.match,
-          match_game: this.tournamentData.match_game,
-          participant: this.tournamentData.participant,
+          stage: this.tournamentData.stage as unknown as Prisma.InputJsonValue,
+          group: this.tournamentData.group as unknown as Prisma.InputJsonValue,
+          round: this.tournamentData.round as unknown as Prisma.InputJsonValue,
+          match: this.tournamentData.match as unknown as Prisma.InputJsonValue,
+          match_game: this.tournamentData
+            .match_game as unknown as Prisma.InputJsonValue,
+          participant: this.tournamentData
+            .participant as unknown as Prisma.InputJsonValue,
         },
       })
     } catch (error) {
@@ -89,7 +92,7 @@ export class MyDB implements CrudInterface {
    */
   public async insert<T extends Table>(
     table: T,
-    value: OmitId<DataTypes[T]>
+    value: OmitId<DataTypes[T]>,
   ): Promise<number>
   /**
    * Inserts multiple values in a table.
@@ -99,7 +102,7 @@ export class MyDB implements CrudInterface {
    */
   public async insert<T extends Table>(
     table: T,
-    values: OmitId<DataTypes[T]>[]
+    values: OmitId<DataTypes[T]>[],
   ): Promise<boolean>
 
   /**
@@ -110,7 +113,7 @@ export class MyDB implements CrudInterface {
    */
   public async insert<T extends Table>(
     table: T,
-    arg: OmitId<DataTypes[T]> | OmitId<DataTypes[T]>[]
+    arg: OmitId<DataTypes[T]> | OmitId<DataTypes[T]>[],
   ): Promise<number | boolean> {
     try {
       let lastIndex = (this.tournamentData[table] as any[]).length - 1
@@ -123,16 +126,20 @@ export class MyDB implements CrudInterface {
           id,
         } as DataTypes[T]
 
-        this.tournamentData[table].push(newValue)
+        ;(this.tournamentData[table] as DataTypes[T][]).push(
+          newValue as DataTypes[T],
+        )
         await this.saveTournament()
         return id
       }
 
       // add the array to the database
       const newValues = arg.map(
-        (el) => ({ ...el, id: ++lastIndex } as DataTypes[T])
+        (el) => ({ ...el, id: ++lastIndex }) as DataTypes[T],
       )
-      this.tournamentData[table].push(...newValues)
+      ;(this.tournamentData[table] as DataTypes[T][]).push(
+        ...(newValues as DataTypes[T][]),
+      )
       await this.saveTournament()
       return true
     } catch (error) {
@@ -156,7 +163,7 @@ export class MyDB implements CrudInterface {
    */
   public select<T extends Table>(
     table: T,
-    id: number
+    id: number,
   ): Promise<DataTypes[T] | null>
   /**
    * Gets data from a table in the database with a filter.
@@ -166,7 +173,7 @@ export class MyDB implements CrudInterface {
    */
   public select<T extends Table>(
     table: T,
-    filter: Partial<DataTypes[T]>
+    filter: Partial<DataTypes[T]>,
   ): Promise<Array<DataTypes[T]> | null>
 
   /**
@@ -177,7 +184,7 @@ export class MyDB implements CrudInterface {
    */
   public async select<T extends Table>(
     table: T,
-    arg?: number | Partial<DataTypes[T]>
+    arg?: number | Partial<DataTypes[T]>,
   ): Promise<DataTypes[T] | Array<DataTypes[T]> | null> {
     try {
       if (arg === undefined) {
@@ -189,7 +196,7 @@ export class MyDB implements CrudInterface {
       if (typeof arg === 'number') {
         // return the specific data
         const data = (this.tournamentData[table] as DataTypes[T][]).find(
-          (value) => value.id === arg
+          (value) => value.id === arg,
         )
         return data || null
       }
@@ -197,7 +204,7 @@ export class MyDB implements CrudInterface {
       // there is a filter, and use the filter to select the data
       const filteredArr = filterArrayOfObjects(
         this.tournamentData[table] as any[],
-        arg as any
+        arg as any,
       )
       if (filteredArr.length === 0) return null
       return filteredArr as DataTypes[T][]
@@ -218,7 +225,7 @@ export class MyDB implements CrudInterface {
   public update<T extends Table>(
     table: T,
     id: number,
-    value: DataTypes[T]
+    value: DataTypes[T],
   ): Promise<boolean>
   /**
    * Updates data in a table.
@@ -230,7 +237,7 @@ export class MyDB implements CrudInterface {
   public update<T extends Table>(
     table: T,
     filter: Partial<DataTypes[T]>,
-    value: Partial<DataTypes[T]>
+    value: Partial<DataTypes[T]>,
   ): Promise<boolean>
 
   /**
@@ -243,13 +250,13 @@ export class MyDB implements CrudInterface {
   public async update<T extends Table>(
     table: T,
     arg: number | Partial<DataTypes[T]>,
-    value: DataTypes[T] | Partial<DataTypes[T]>
+    value: DataTypes[T] | Partial<DataTypes[T]>,
   ): Promise<boolean> {
     try {
       if (typeof arg === 'number') {
         // update the value and return true or false based on the success
         const index = (this.tournamentData[table] as DataTypes[T][]).findIndex(
-          (val) => val.id === arg
+          (val) => val.id === arg,
         )
         if (index === -1) return false
 
@@ -265,7 +272,7 @@ export class MyDB implements CrudInterface {
       const tableData = this.tournamentData[table] as any[]
       tableData.forEach((el, index) => {
         const isMatch = Object.entries(arg).every(
-          ([key, filterValue]) => el[key] === filterValue
+          ([key, filterValue]) => el[key] === filterValue,
         )
         if (isMatch) {
           const merged = deepMerge(el, value)
@@ -296,7 +303,7 @@ export class MyDB implements CrudInterface {
    */
   delete<T extends Table>(
     table: T,
-    filter: Partial<DataTypes[T]>
+    filter: Partial<DataTypes[T]>,
   ): Promise<boolean>
 
   /**
@@ -307,7 +314,7 @@ export class MyDB implements CrudInterface {
    */
   public async delete<T extends Table>(
     table: T,
-    filter?: Partial<DataTypes[T]>
+    filter?: Partial<DataTypes[T]>,
   ): Promise<boolean> {
     try {
       if (!filter) {
@@ -321,7 +328,7 @@ export class MyDB implements CrudInterface {
       const initialLength = (this.tournamentData[table] as any[]).length
       this.tournamentData[table] = (this.tournamentData[table] as any[]).filter(
         (val) =>
-          Object.entries(filter).some(([key, value]) => val[key] !== value)
+          Object.entries(filter).some(([key, value]) => val[key] !== value),
       ) as any
 
       const deletedAny =

@@ -7,7 +7,7 @@ import { currentUser } from '@/lib/auth'
 
 const additonalInfo = async (
   userId: string,
-  values: z.infer<typeof AdditionInfoSchema>
+  values: z.infer<typeof AdditionInfoSchema>,
 ) => {
   console.log('userId:', userId, values) // Log the userId
 
@@ -40,6 +40,6 @@ const additonalInfo = async (
     console.log(error)
   }
   return { success: 'User Name Created!' }
-}}
+}
 
 export default additonalInfo

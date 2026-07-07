@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { AppError } from '../utils/AppError'
+import { AppError } from '../utils/appError'
 
 const ErrorSchema = new mongoose.Schema(
   {
@@ -25,7 +25,7 @@ const ErrorSchema = new mongoose.Schema(
       type: String,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 )
 
 export const Error = mongoose.model('Error', ErrorSchema)
@@ -45,7 +45,7 @@ export const saveError = async (error: AppError) => {
     if (process.env.NODE_ENV === 'development') console.log(payload)
   } catch (error) {
     console.log(
-      'error happening while saving error, this is the error of error'
+      'error happening while saving error, this is the error of error',
     )
   }
 }
