@@ -13,19 +13,19 @@ interface LoserBracketProps {
 const LoserBracket = forwardRef<HTMLDivElement, LoserBracketProps>(
   ({ round, roundIndex, totalRounds, attachMatchRef }, ref) => {
     return (
-      <div ref={ref} className='flex flex-col pt-8'>
+      <div ref={ref} className='flex flex-col flex-1'>
         {/* Round Label */}
         <div className='mb-4 text-center'>
           <h4 className='text-sm font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap'>
             Round {roundIndex + 1}
           </h4>
         </div>
-        {/* Matches container - compressed layout with gap-y-12 */}
-        <div className='flex flex-col justify-start gap-y-12'>
+        {/* Matches container - tree layout with space-around distribution */}
+        <div className='flex flex-col justify-around flex-1'>
           {round.matches.map((match: MatchFrontend, idx: number) => (
-            <div 
-              key={idx} 
-              className='w-48 ml-0 mr-auto'
+            <div
+              key={idx}
+              className='w-48 ml-0 mr-auto my-2'
               ref={attachMatchRef(idx)}
             >
               <MatchCard match={match} />
@@ -34,7 +34,7 @@ const LoserBracket = forwardRef<HTMLDivElement, LoserBracketProps>(
         </div>
       </div>
     )
-  }
+  },
 )
 
 LoserBracket.displayName = 'LoserBracket'

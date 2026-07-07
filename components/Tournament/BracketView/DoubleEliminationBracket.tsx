@@ -339,25 +339,17 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
               height='100%'
             >
               {losersConnections.map((conn, idx) => {
-                // Stagger the vertical line to sit closer to the child match
-                // This creates clear white space between the vertical line and the next round
-                const stagger = 8
-                const elbowX = conn.startX + stagger
-
-                const d = `M ${conn.startX} ${conn.startY} 
-            L ${elbowX} ${conn.startY} 
-            L ${elbowX} ${conn.endY} 
-            L ${conn.endX} ${conn.endY}`
-
+                const midX = conn.startX + (conn.endX - conn.startX) / 2
+                const d = `M ${conn.startX} ${conn.startY} H ${midX} V ${conn.endY} H ${conn.endX}`
                 return (
                   <path
                     key={idx}
                     d={d}
                     stroke='currentColor'
-                    strokeWidth={1.5}
+                    strokeWidth={2}
                     fill='none'
-                    strokeDasharray='4 2'
-                    className='text-gray-400/30'
+                    strokeDasharray='4 4'
+                    className='text-muted-foreground/50'
                   />
                 )
               })}
