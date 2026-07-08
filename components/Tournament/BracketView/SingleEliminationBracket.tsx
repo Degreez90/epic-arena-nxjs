@@ -1,10 +1,17 @@
 'use client'
-import React from 'react'
+import React, { useLayoutEffect, useRef, useState } from 'react'
 import { StageFrontend, MatchFrontend } from '@/types/tournament/tournament'
 import MatchCard from './MatchCard'
 
 interface SingleEliminationBracketProps {
   stage: StageFrontend
+}
+
+interface Connection {
+  startX: number
+  startY: number
+  endX: number
+  endY: number
 }
 
 const SingleEliminationBracket: React.FC<SingleEliminationBracketProps> = ({
@@ -14,140 +21,147 @@ const SingleEliminationBracket: React.FC<SingleEliminationBracketProps> = ({
   const consolationGroup = stage.groups[1]
   const isConsolationPresent = stage.settings?.consolationFinal
 
+  const containerRef = useRef<HTMLDivElement>(null)
+  const matchRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const [connections, setConnections] = useState<Connection[]>([])
+
+  // Attach ref to each match
+  const attachMatchRef =
+    (roundIndex: number, matchIndex: number) => (el: HTMLDivElement | null) => {
+      const key = `${roundIndex}:${matchIndex}`
+      if (el) {
+        matchRefs.current.set(key, el)
+      } else {
+        matchRefs.current.delete(key)
+      }
+    }
+
+  // Compute connections using actual DOM positions
+  const computeConnections = () => {
+    if (!containerRef.current || !mainGroup) {
+      setConnections([])
+      return
+    }
+
+    const containerRect = containerRef.current.getBoundingClientRect()
+    const newConnections: Connection[] = []
+
+    const rounds = mainGroup.rounds
+    for (let roundIndex = 0; roundIndex < rounds.length - 1; roundIndex++) {
+      const currentRound = rounds[roundIndex]
+      const nextRound = rounds[roundIndex + 1]
+
+      if (!currentRound || !nextRound) continue
+
+      for (
+        let matchIndex = 0;
+        matchIndex < currentRound.matches.length;
+        matchIndex++
+      ) {
+        const childKey = `${roundIndex}:${matchIndex}`
+        const parentMatchIndex = Math.floor(matchIndex / 2)
+        const parentKey = `${roundIndex + 1}:${parentMatchIndex}`
+
+        const childEl = matchRefs.current.get(childKey)
+        const parentEl = matchRefs.current.get(parentKey)
+
+        if (childEl && parentEl) {
+          const childRect = childEl.getBoundingClientRect()
+          const parentRect = parentEl.getBoundingClientRect()
+
+          const startX = childRect.right - containerRect.left
+          const startY =
+            childRect.top + childRect.height / 2 - containerRect.top
+          const endX = parentRect.left - containerRect.left
+          const endY =
+            parentRect.top + parentRect.height / 2 - containerRect.top
+
+          newConnections.push({ startX, startY, endX, endY })
+        }
+      }
+    }
+
+    setConnections(newConnections)
+  }
+
+  // Initial computation
+  useLayoutEffect(() => {
+    computeConnections()
+  }, [mainGroup])
+
+  // Handle window resize
+  useLayoutEffect(() => {
+    window.addEventListener('resize', computeConnections)
+    return () => window.removeEventListener('resize', computeConnections)
+  }, [mainGroup])
+
+  const roundNames = ['Round 1', 'Round 2', 'Semifinals', 'Finals']
+
   return (
     <div className='w-full overflow-x-auto pb-8'>
-      <div className='min-w-max p-4'>
-        {/* Main Bracket with Connectors */}
-        <div className='flex gap-12 md:gap-16'>
-          {mainGroup.rounds.map((round, roundIdx) => (
-            <BracketRound
-              key={roundIdx}
-              round={round}
-              roundIndex={roundIdx}
-              totalRounds={mainGroup.rounds.length}
-            />
-          ))}
-        </div>
-
-        {/* Third Place Match */}
-        {isConsolationPresent && consolationGroup?.rounds[0] && (
-          <div className='mt-12 pt-8 border-t'>
-            <h3 className='text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wide text-center'>
-              Third Place Match
-            </h3>
-            <div className='flex justify-center'>
-              <div className='w-48'>
-                <MatchCard match={consolationGroup.rounds[0].matches[0]} />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-interface BracketRoundProps {
-  round: any
-  roundIndex: number
-  totalRounds: number
-}
-
-const BracketRound: React.FC<BracketRoundProps> = ({
-  round,
-  roundIndex,
-  totalRounds,
-}) => {
-  const roundNames = ['Round 1', 'Round 2', 'Semifinals', 'Finals']
-  const matchCount = round.matches.length
-
-  // Calculate gap between matches to create proper tournament bracket spacing
-  // Round 1: 20px (as requested)
-  // Each subsequent round doubles the gap to align with previous round's matches
-  const baseGap = 20
-  const gapBetweenMatches = baseGap * Math.pow(2, roundIndex)
-  
-  const gapBetweenRounds = 64 // Fixed gap between rounds
-  const cardHeight = 88 // Height of match card
-
-  return (
-    <div className='flex flex-col relative' style={{ marginRight: `${gapBetweenRounds}px` }}>
-      {/* Round Label */}
-      <div className='mb-4 text-center'>
-        <h4 className='text-sm font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap'>
-          {roundNames[roundIndex] || `Round ${roundIndex + 1}`}
-        </h4>
-      </div>
-
-      {/* Matches with Connectors */}
-      <div className='flex flex-col' style={{ gap: `${gapBetweenMatches}px` }}>
-        {round.matches.map((match: MatchFrontend, idx: number) => (
-          <div key={idx} className='relative'>
-            <div className='w-48'>
-              <MatchCard match={match} />
-            </div>
-            {/* Right Connector - horizontal dotted line to next round */}
-            {roundIndex < totalRounds - 1 && (
-              <div
-                className='absolute left-full top-1/2 -translate-y-1/2 h-px border-t-2 border-dotted border-border'
-                style={{ width: `${gapBetweenRounds}px` }}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Vertical Connectors between match pairs */}
-      {roundIndex < totalRounds - 1 && (
+      <div className='relative min-h-[600px] p-4' ref={containerRef}>
+        {/* SVG overlay for connector lines */}
         <svg
-          className='absolute top-0 pointer-events-none'
-          style={{
-            left: `calc(100% + ${gapBetweenRounds}px)`,
-            width: `${gapBetweenRounds}px`,
-            height: '100%',
-          }}
+          className='absolute inset-0 pointer-events-none z-0'
+          width='100%'
+          height='100%'
         >
-          {round.matches.map((_: any, idx: number) => {
-            if (idx % 2 === 0 && idx + 1 < matchCount) {
-              // Calculate positions for the two matches to connect
-              const match1Top = idx * (cardHeight + gapBetweenMatches)
-              const match2Top = (idx + 1) * (cardHeight + gapBetweenMatches)
-              
-              // Center points of each match card
-              const match1Center = match1Top + cardHeight / 2
-              const match2Center = match2Top + cardHeight / 2
-              
-              // Midpoint between the two matches
-              const midPoint = (match1Center + match2Center) / 2
-
-              return (
-                <g key={idx}>
-                  {/* Vertical dotted line connecting two matches */}
-                  <line
-                    x1='0'
-                    y1={match1Center}
-                    x2='0'
-                    y2={match2Center}
-                    stroke='hsl(var(--border))'
-                    strokeWidth='2'
-                    strokeDasharray='4 4'
-                  />
-                  {/* Horizontal dotted line to next round at right angle */}
-                  <line
-                    x1='0'
-                    y1={midPoint}
-                    x2='100%'
-                    y2={midPoint}
-                    stroke='hsl(var(--border))'
-                    strokeWidth='2'
-                    strokeDasharray='4 4'
-                  />
-                </g>
-              )
-            }
-            return null
+          {connections.map((conn, idx) => {
+            const midX = conn.startX + (conn.endX - conn.startX) / 2
+            const d = `M ${conn.startX} ${conn.startY} H ${midX} V ${conn.endY} H ${conn.endX}`
+            return (
+              <path
+                key={idx}
+                d={d}
+                stroke='currentColor'
+                strokeWidth={2}
+                fill='none'
+                strokeDasharray='4 4'
+                className='text-muted-foreground/50'
+              />
+            )
           })}
         </svg>
+
+        {/* Match cards container */}
+        <div className='relative flex gap-2 md:gap-3 z-10 items-stretch'>
+          {mainGroup.rounds.map((round, roundIdx) => (
+            <div key={roundIdx} className='flex flex-col flex-1'>
+              {/* Round Label */}
+              <div className='mb-4 text-center'>
+                <h4 className='text-sm font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap'>
+                  {roundNames[roundIdx] || `Round ${roundIdx + 1}`}
+                </h4>
+              </div>
+              {/* Matches container with tree layout */}
+              <div className='flex flex-col justify-around flex-1'>
+                {round.matches.map((match: MatchFrontend, matchIdx: number) => (
+                  <div
+                    key={matchIdx}
+                    className='w-48 ml-0 mr-auto my-2'
+                    ref={attachMatchRef(roundIdx, matchIdx)}
+                  >
+                    <MatchCard match={match} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Third Place Match */}
+      {isConsolationPresent && consolationGroup?.rounds[0] && (
+        <div className='mt-12 pt-8 border-t'>
+          <h3 className='text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wide text-center'>
+            Third Place Match
+          </h3>
+          <div className='flex justify-center'>
+            <div className='w-48'>
+              <MatchCard match={consolationGroup.rounds[0].matches[0]} />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
