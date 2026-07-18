@@ -13,6 +13,7 @@ import {
   Match,
   MatchGame,
   Status,
+  StageType,
 } from 'brackets-model'
 
 /**
@@ -444,7 +445,7 @@ export async function autoResolveByeMatches(
 
     let totalResolved = 0
 
-    // --- Heal pass: reset matches corrupted by old buggy code ---
+    // --- Heal pass 1: reset TBD matches corrupted by old buggy code ---
     // Old code treated TBDs ({id: null}) as BYEs, giving them phony scores
     // and incorrect statuses. This pass resets those matches to clean state.
     {
@@ -469,6 +470,71 @@ export async function autoResolveByeMatches(
             resetPayload.opponent2 = { id: null }
           }
           await manager.storage.update('match', match.id, resetPayload as any)
+          healed++
+        }
+      }
+      if (healed > 0) {
+        totalResolved += healed
+      }
+    }
+
+    // --- Heal pass 2: detect BYE winners placed in the wrong parent slot ---
+    // Old code used "first empty slot" instead of the correct side determined
+    // by match number. This pass detects and fixes those misplacements so the
+    // sibling match's advancement doesn't overwrite them.
+    {
+      let healed = 0
+      const allMatches = (await manager.storage.select('match')) || []
+      for (const match of allMatches) {
+        // Only look at completed matches involving a BYE
+        if (match.status !== Status.Completed) continue
+        const opp1IsByeC = isBye(match.opponent1)
+        const opp2IsByeC = isBye(match.opponent2)
+        if (!opp1IsByeC && !opp2IsByeC) continue
+
+        // Determine the winner of this match
+        const score1 = (match.opponent1 as any)?.score ?? -1
+        const score2 = (match.opponent2 as any)?.score ?? -1
+        const winner =
+          score1 > score2
+            ? match.opponent1
+            : score2 > score1
+              ? match.opponent2
+              : null
+        if (!winner || (winner as any)?.id == null) continue
+
+        // Find where this winner should be in the parent
+        const parentInfo = await findParentMatchWithSide(manager, match)
+        if (!parentInfo) continue
+
+        const { parentMatch, targetSide } = parentInfo
+        const wrongSide =
+          targetSide === 'opponent1' ? 'opponent2' : 'opponent1'
+
+        // Check if winner is in the wrong slot AND the correct slot is empty
+        const parentOpp1Id = (parentMatch.opponent1 as any)?.id
+        const parentOpp2Id = (parentMatch.opponent2 as any)?.id
+        const winnerId = (winner as any).id
+
+        const isInWrongSlot =
+          (targetSide === 'opponent1' && parentOpp2Id === winnerId) ||
+          (targetSide === 'opponent2' && parentOpp1Id === winnerId)
+        const correctSlotEmpty =
+          targetSide === 'opponent1'
+            ? parentOpp1Id == null
+            : parentOpp2Id == null
+
+        if (isInWrongSlot && correctSlotEmpty) {
+          // Move winner to the correct slot, clear the wrong one
+          const fixPayload: any = {
+            [targetSide]: { id: winnerId },
+            [wrongSide]: { id: null },
+          }
+          await manager.storage.update(
+            'match',
+            parentMatch.id,
+            fixPayload as any,
+          )
           healed++
         }
       }
@@ -548,9 +614,11 @@ export async function autoResolveByeMatches(
 
         // Advance the winner (whether real user or BYE) to the parent match
         // using the shared parent-match lookup helper.
-        const parentMatch = await findParentMatch(manager, match)
+        const parentInfo = await findParentMatchWithSide(manager, match)
 
-        if (parentMatch) {
+        if (parentInfo) {
+          const { parentMatch, targetSide } = parentInfo
+
           // Strip score/result from winner when placing into parent slot.
           // Handle null BYE case: { ...null } === {} with no id, which
           // produces "N/A" in the UI. For a null BYE winner, advance a
@@ -561,32 +629,25 @@ export async function autoResolveByeMatches(
               ? ({ ...(winner as Record<string, unknown>), score: undefined, result: undefined } as any)
               : null
 
-          const updateData: any = {}
-          if (
-            !parentMatch.opponent1 ||
-            (parentMatch.opponent1 as any)?.id === null
-          ) {
-            updateData.opponent1 = advancingParticipant
-          } else if (
-            !parentMatch.opponent2 ||
-            (parentMatch.opponent2 as any)?.id === null
-          ) {
-            updateData.opponent2 = advancingParticipant
-          }
-          if (Object.keys(updateData).length > 0) {
-            await manager.storage.update(
-              'match',
-              parentMatch.id,
-              updateData as any,
-            )
+          // Use the correct side determined by match number, NOT first-empty.
+          // This matches the brackets-manager library's getNextSide() logic,
+          // preventing the sibling match's later advancement from overwriting
+          // the wrongly-placed participant.
+          const currentSlot =
+            parentMatch[targetSide as keyof typeof parentMatch]
+          const slotIsEmpty =
+            !currentSlot || (currentSlot as any)?.id === null
+
+          if (slotIsEmpty) {
+            await manager.storage.update('match', parentMatch.id, {
+              [targetSide]: advancingParticipant,
+            } as any)
             // Update the local reference so sibling resolutions in the same
             // loop pass see the filled slot and correctly use the other one.
-            if (updateData.opponent1 !== undefined) {
-              ;(parentMatch as any).opponent1 = advancingParticipant
-            } else if (updateData.opponent2 !== undefined) {
-              ;(parentMatch as any).opponent2 = advancingParticipant
-            }
+            ;(parentMatch as any)[targetSide] = advancingParticipant
           }
+          // If the correct slot is already filled, leave it alone — the other
+          // sibling match already placed its winner there correctly.
         }
       }
     }
@@ -696,12 +757,57 @@ export async function isBestOfTournament(
 }
 
 /**
+ * Determine which side (opponent1 or opponent2) in the parent match the winner
+ * of the given child match should occupy. Mirrors the brackets-manager library's
+ * `getNextSide()` logic so our manual BYE resolution matches what the library
+ * expects when it later advances the sibling match.
+ *
+ * @param matchNumber Number of the child match (e.g. 7 or 8)
+ * @param roundNumber Number of the child match's round
+ * @param roundCount Total number of rounds in the group
+ * @param matchLocation 'winner_bracket', 'loser_bracket', 'single_bracket', or 'final_group'
+ * @returns 'opponent1' or 'opponent2'
+ */
+export function getParentMatchSide(
+  matchNumber: number,
+  roundNumber: number,
+  roundCount: number,
+  matchLocation: string,
+): 'opponent1' | 'opponent2' {
+  // Loser bracket: odd rounds feed into opponent2
+  if (matchLocation === 'loser_bracket' && roundNumber % 2 === 1)
+    return 'opponent2'
+  // Loser bracket final round feeds into opponent2 (final group)
+  if (matchLocation === 'loser_bracket' && roundNumber === roundCount)
+    return 'opponent2'
+  // Default (single elim, winner bracket): odd → opponent1, even → opponent2
+  return matchNumber % 2 === 1 ? 'opponent1' : 'opponent2'
+}
+
+/**
+ * Determine the match location string for a given stage type and group number.
+ * Matches the brackets-manager library's `getMatchLocation()` helper.
+ */
+function getMatchLocation(
+  stageType: StageType,
+  groupNumber: number,
+): string {
+  if (stageType === 'single_elimination') return 'single_bracket'
+  if (stageType === 'double_elimination') {
+    if (groupNumber === 1) return 'winner_bracket'
+    if (groupNumber === 2) return 'loser_bracket'
+    return 'final_group'
+  }
+  return 'single_bracket'
+}
+
+/**
  * Find the parent match that the winner of the given match should advance to.
  * Returns null if this is the final match (no parent round exists).
  *
  * @param manager The brackets manager instance
  * @param match The current match whose winner needs to advance
- * @returns The parent match, or null if this is the final match
+ * @returns The parent match and the side to fill, or null if this is the final match
  */
 export async function findParentMatch(
   manager: BracketsManager,
@@ -731,6 +837,53 @@ export async function findParentMatch(
   })
 
   return parentMatch || null
+}
+
+/**
+ * Find the parent match and determine which side the winner should occupy.
+ * Returns null if no parent exists (final match).
+ */
+async function findParentMatchWithSide(
+  manager: BracketsManager,
+  match: Match,
+): Promise<{
+  parentMatch: Match
+  targetSide: 'opponent1' | 'opponent2'
+} | null> {
+  const parentMatch = await findParentMatch(manager, match)
+  if (!parentMatch) return null
+
+  const allRounds = (await manager.storage.select('round')) || []
+  const roundMap = new Map<number, any>()
+  for (const r of allRounds) {
+    roundMap.set(r.id as number, r)
+  }
+
+  const thisRound = roundMap.get(match.round_id as number)
+  if (!thisRound) return null
+
+  // Count total rounds in this group to determine match location
+  const allRoundsInGroup = allRounds.filter(
+    (r: any) => Number(r.group_id) === Number(thisRound.group_id),
+  )
+  const roundCount = allRoundsInGroup.length
+
+  // Determine the stage type and match location
+  const group = await manager.storage.select('group', thisRound.group_id)
+  const stage = group
+    ? await manager.storage.select('stage', group.stage_id)
+    : null
+  const stageType: StageType = (stage?.type as StageType) || 'single_elimination'
+  const matchLocation = getMatchLocation(stageType, Number(group?.number ?? 1))
+
+  const targetSide = getParentMatchSide(
+    Number(match.number),
+    Number(thisRound.number),
+    roundCount,
+    matchLocation,
+  )
+
+  return { parentMatch, targetSide }
 }
 
 export default {
