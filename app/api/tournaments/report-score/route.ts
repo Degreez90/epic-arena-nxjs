@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { reportScore } from '@/actions/tournament/report-score'
 import { getTournamentManager } from '@/data/Tournaments/tournaments'
-import { autoResolveByeMatches } from '@/lib/bracketHelpers'
-import { Status } from 'brackets-model'
+import {
+  autoResolveByeMatches,
+  reportMatchGameScore,
+} from '@/lib/bracketHelpers'
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +24,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // If a specific game number is provided, report just that game
+    // If a specific game number is provided, report just that game.
+    // Uses direct storage updates (does NOT auto-advance the winner).
     if (gameNumber !== undefined) {
       const manager = await getTournamentManager(tournamentId)
       const match = await manager.storage.select('match', matchId)
@@ -31,36 +34,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Match not found' }, { status: 404 })
       }
 
-      const matchGames =
-        (await manager.storage.select('match_game', {
-          parent_id: matchId,
-        })) || []
-
-      // Find the specified game or use the first incomplete one
-      const targetGame =
-        matchGames.find((g: any) => g.number === gameNumber) ||
-        matchGames.find((g: any) => g.status !== Status.Completed) ||
-        matchGames[matchGames.length - 1]
-
-      if (!targetGame) {
-        return NextResponse.json(
-          { error: 'No match game found for this match' },
-          { status: 404 },
-        )
-      }
-
       try {
-        await manager.update.matchGame({
-          id: targetGame.id,
-          opponent1: {
-            ...targetGame.opponent1,
-            score: opponent1Score,
-          },
-          opponent2: {
-            ...targetGame.opponent2,
-            score: opponent2Score,
-          },
-        })
+        await reportMatchGameScore(
+          tournamentId,
+          manager,
+          match,
+          opponent1Score,
+          opponent2Score,
+        )
       } catch (gameError) {
         console.error('Error updating match game:', gameError)
         return NextResponse.json(
@@ -75,7 +56,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: 'Game score updated successfully' })
     }
 
-    // Otherwise use the standard reportScore which auto-detects Bo3
+    // Otherwise use the standard reportScore which auto-detects Bo1 vs Bo3
     const result = await reportScore({
       tournamentId,
       matchId,

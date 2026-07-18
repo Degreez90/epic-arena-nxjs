@@ -662,9 +662,13 @@ export async function autoResolveByeMatches(
 /**
  * Report a score for a specific match game in a best-of series.
  *
- * For best-of-N matches, each game is reported individually. The brackets-manager
- * automatically aggregates child game results and advances the winner when the
- * required number of games is won.
+ * Saves the game score via direct storage (does NOT call
+ * manager.update.matchGame()) so that score reporting does NOT
+ * auto-advance the winner. Advancement must be done separately
+ * by an admin via advanceWinner().
+ *
+ * Updates both the match game and the parent match's aggregate
+ * scores so the UI reflects the current series state.
  *
  * @param tournamentId The tournament ID
  * @param manager The brackets manager instance
@@ -673,7 +677,7 @@ export async function autoResolveByeMatches(
  * @param opponent2Score Score for opponent 2 in this game
  */
 export async function reportMatchGameScore(
-  tournamentId: string,
+  _tournamentId: string,
   manager: BracketsManager,
   match: Match,
   opponent1Score: number,
@@ -685,18 +689,14 @@ export async function reportMatchGameScore(
       parent_id: match.id,
     })) || []
 
-  // Determine which game number this is
-  // Find the first pending/unplayed game, or use the last existing one
-  let targetGame: MatchGame | null = null
-
-  // Sort games by number (if available) or by ID
+  // Determine which game number this is — find the first incomplete one
   const sortedGames = [...existingGames].sort((a, b) => {
     const numA = (a as any).number ?? a.id
     const numB = (b as any).number ?? b.id
     return numA - numB
   })
 
-  // Find the first incomplete game (status !== Completed)
+  let targetGame: MatchGame | null = null
   for (const game of sortedGames) {
     if (game.status !== Status.Completed) {
       targetGame = game
@@ -705,20 +705,18 @@ export async function reportMatchGameScore(
   }
 
   if (!targetGame) {
-    // If all existing games are completed, we need to report on the last one
-    // (this shouldn't normally happen, but handle it gracefully)
     if (sortedGames.length > 0) {
       targetGame = sortedGames[sortedGames.length - 1]
     } else {
-      // No match games exist - fall back to direct match update
       throw new Error('No match games available for this match')
     }
   }
 
-  // Update the match game score using brackets-manager
-  // This will automatically aggregate results and advance the winner if the series is decided
-  await manager.update.matchGame({
-    id: targetGame.id,
+  // Save the game score via direct storage update — bypasses
+  // manager.update.matchGame() which would auto-advance the winner
+  // through updateParentMatch().
+  await manager.storage.update('match_game', targetGame.id, {
+    status: Status.Completed,
     opponent1: {
       ...targetGame.opponent1,
       score: opponent1Score,
@@ -727,7 +725,28 @@ export async function reportMatchGameScore(
       ...targetGame.opponent2,
       score: opponent2Score,
     },
+  } as any)
+
+  // Recalculate aggregate scores for the parent match so the UI
+  // shows up-to-date win counts without triggering advancement.
+  const allGames = await manager.storage.select('match_game', {
+    parent_id: match.id,
   })
+  let op1Wins = 0
+  let op2Wins = 0
+  for (const game of (allGames || [])) {
+    if (game.status === Status.Completed) {
+      const s1 = (game.opponent1 as any)?.score ?? 0
+      const s2 = (game.opponent2 as any)?.score ?? 0
+      if (s1 > s2) op1Wins++
+      else if (s2 > s1) op2Wins++
+    }
+  }
+
+  await manager.storage.update('match', match.id, {
+    opponent1: { ...(match.opponent1 as any), score: op1Wins },
+    opponent2: { ...(match.opponent2 as any), score: op2Wins },
+  } as any)
 }
 
 /**

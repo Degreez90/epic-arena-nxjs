@@ -5,7 +5,6 @@ import {
   getTournamentById,
   getTournamentManager,
 } from '@/data/Tournaments/tournaments'
-import { Status } from 'brackets-model'
 import {
   autoResolveByeMatches,
   reportMatchGameScore,
@@ -72,8 +71,9 @@ export const reportScore = async (
 
     if (isBoSeries) {
       // Best-of series: report the current game's score via match_game.
-      // The brackets-manager auto-aggregates child game results and
-      // advances the winner when the series is decided.
+      // Uses direct storage updates (not manager.update.matchGame()) so
+      // scores are recorded but the winner is NOT auto-advanced.
+      // Advancement must be done separately by an admin.
       await reportMatchGameScore(
         data.tournamentId,
         manager,
@@ -82,19 +82,20 @@ export const reportScore = async (
         data.opponent2Score,
       )
     } else {
-      // Single match (Bo1): update the match with scores and explicitly
-      // mark it as Completed. This lets brackets-manager determine the
-      // winner from scores and auto-advance them to the next round.
-      await manager.update.match({
-        id: match.id,
-        status: Status.Completed,
+      // Single match (Bo1): save scores via direct storage update.
+      // This bypasses manager.update.match() which would auto-advance
+      // the winner. Advancement must be done separately by an admin
+      // via advanceWinner().
+      await manager.storage.update('match', match.id, {
         opponent1: {
+          ...match.opponent1,
           score: data.opponent1Score,
         },
         opponent2: {
+          ...match.opponent2,
           score: data.opponent2Score,
         },
-      })
+      } as any)
     }
 
     // Auto-resolve any remaining BYE vs BYE matches that may have been
