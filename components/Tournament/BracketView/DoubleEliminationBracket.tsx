@@ -15,6 +15,15 @@ interface Connection {
   endY: number
 }
 
+/** Generate a human-readable round name based on position and total rounds */
+function getRoundName(roundIndex: number, totalRounds: number): string {
+  const positionFromEnd = totalRounds - 1 - roundIndex
+  if (positionFromEnd === 0) return 'Finals'
+  if (positionFromEnd === 1) return 'Semifinals'
+  if (positionFromEnd === 2) return 'Quarterfinals'
+  return `Round ${roundIndex + 1}`
+}
+
 const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
   stage,
 }) => {
@@ -299,13 +308,13 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
               })}
             </svg>
             {/* Match cards container */}
-            <div className='relative flex gap-2 md:gap-3 z-10 items-stretch'>
+            <div className='relative flex gap-8 md:gap-10 z-10 items-stretch'>
               {winnersGroup.rounds.map((round, roundIdx) => (
                 <div key={roundIdx} className='flex flex-col flex-1'>
                   {/* Round Label */}
                   <div className='mb-4 text-center'>
                     <h4 className='text-sm font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap'>
-                      Round {roundIdx + 1}
+                      {getRoundName(roundIdx, winnersGroup.rounds.length)}
                     </h4>
                   </div>
                   {/* Matches container with equal height and space-around distribution */}
@@ -354,7 +363,7 @@ const DoubleEliminationBracket: React.FC<DoubleEliminationBracketProps> = ({
                 )
               })}
             </svg>
-            <div className='relative flex gap-2 md:gap-3 z-10'>
+            <div className='relative flex gap-8 md:gap-10 z-10'>
               {losersGroup.rounds.map((round, roundIdx) => (
                 <LoserBracket
                   key={roundIdx}

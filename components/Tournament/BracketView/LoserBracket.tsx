@@ -10,6 +10,15 @@ interface LoserBracketProps {
   attachMatchRef: (matchIndex: number) => (el: HTMLDivElement | null) => void
 }
 
+/** Generate a human-readable round name based on position and total rounds */
+function getRoundName(roundIndex: number, totalRounds: number): string {
+  const positionFromEnd = totalRounds - 1 - roundIndex
+  if (positionFromEnd === 0) return 'Finals'
+  if (positionFromEnd === 1) return 'Semifinals'
+  if (positionFromEnd === 2) return 'Quarterfinals'
+  return `Round ${roundIndex + 1}`
+}
+
 const LoserBracket = forwardRef<HTMLDivElement, LoserBracketProps>(
   ({ round, roundIndex, totalRounds, attachMatchRef }, ref) => {
     return (
@@ -17,7 +26,7 @@ const LoserBracket = forwardRef<HTMLDivElement, LoserBracketProps>(
         {/* Round Label */}
         <div className='mb-4 text-center'>
           <h4 className='text-sm font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap'>
-            Round {roundIndex + 1}
+            {getRoundName(roundIndex, totalRounds)}
           </h4>
         </div>
         {/* Matches container - tree layout with space-around distribution */}

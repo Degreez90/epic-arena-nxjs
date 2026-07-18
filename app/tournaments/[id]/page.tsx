@@ -5,6 +5,9 @@ import { categorizeData } from '@/data/Tournaments/dataProcessors'
 import TournamentBracket from '@/components/Tournament/TournamentBracket'
 import { SerializedTournament } from '@/types/tournament/tournament'
 import Container from '@/components/Container'
+import { autoResolveByeMatches } from '@/lib/bracketHelpers'
+
+export const dynamic = 'force-dynamic'
 
 const TournamentDetailsPage = async ({
   params,
@@ -17,7 +20,7 @@ const TournamentDetailsPage = async ({
     return <div>Invalid tournament ID</div>
   }
 
-  const tournament: SerializedTournament | null = await getTournamentById(id)
+  let tournament: SerializedTournament | null = await getTournamentById(id)
 
   if (!tournament) {
     return <div>Tournament not found</div>
@@ -44,8 +47,20 @@ const TournamentDetailsPage = async ({
   }
 
   //todo:: use this to make brackets ( move into TournamentDetails component)
+  // Auto-resolve BYE vs BYE matches so bracket progresses
+  // (no-op if no BYE-only matches exist)
+  const resolveResult = await autoResolveByeMatches(id)
+
+  // Re-fetch tournament data if any matches were auto-resolved
+  if (resolveResult.resolved > 0) {
+    tournament = await getTournamentById(id)
+    if (!tournament) {
+      return <div>Tournament not found</div>
+    }
+  }
+
   const formatToUIModel = categorizeData(
-    addParcticipantNameInMatch(tournament as any)
+    addParcticipantNameInMatch(tournament as any),
   )
 
   const tournamentDataForUI = formatToUIModel

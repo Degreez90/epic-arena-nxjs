@@ -15,14 +15,68 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Loader2 } from 'lucide-react'
 import { MatchFrontend } from '@/types/tournament/tournament'
 import { reportScoreSchema, ReportScoreType } from '@/schemas/reportScore'
+import { useTournamentStore } from '@/store/useTournamentStore'
+import type { MatchGame } from 'brackets-model'
 
 interface ReportScoreTabProps {
   match: MatchFrontend
   onClose: () => void
 }
 
+/**
+ * Gets the current series state for a best-of match.
+ * Returns the number of games won by each opponent and the next game number.
+ */
+function getSeriesState(
+  match: MatchFrontend,
+  matchGames: MatchGame[],
+): {
+  isBestOf: boolean
+  totalGames: number
+  opponent1Wins: number
+  opponent2Wins: number
+  nextGameNumber: number
+  gamesCompleted: number
+} | null {
+  const childCount = match.child_count ?? 0
+  if (childCount === 0) return null
+
+  // Get match games for this match
+  const games = matchGames.filter((g) => g.parent_id === match.id)
+
+  let opponent1Wins = 0
+  let opponent2Wins = 0
+  let gamesCompleted = 0
+
+  for (const game of games) {
+    if (game.status === 2) {
+      // Completed
+      gamesCompleted++
+      if ((game.opponent1?.score ?? 0) > (game.opponent2?.score ?? 0)) {
+        opponent1Wins++
+      } else if ((game.opponent2?.score ?? 0) > (game.opponent1?.score ?? 0)) {
+        opponent2Wins++
+      }
+    }
+  }
+
+  return {
+    isBestOf: true,
+    totalGames: childCount,
+    opponent1Wins,
+    opponent2Wins,
+    nextGameNumber: gamesCompleted + 1,
+    gamesCompleted,
+  }
+}
+
 const ReportScoreTab: React.FC<ReportScoreTabProps> = ({ match, onClose }) => {
   const participants = match.participants ?? []
+  const tournamentData = useTournamentStore((state) => state.tournamentData)
+
+  // Get series state for best-of matches
+  const matchGames = tournamentData?.match_games ?? []
+  const seriesState = getSeriesState(match, matchGames)
 
   const {
     register,
@@ -30,7 +84,7 @@ const ReportScoreTab: React.FC<ReportScoreTabProps> = ({ match, onClose }) => {
     formState: { errors, isSubmitting },
     setError,
     reset,
-  } = useForm<ReportScoreType>({
+  } = useForm<ReportScoreType & { root?: { message?: string } }>({
     resolver: zodResolver(reportScoreSchema),
     defaultValues: {
       participant_one_score: participants[0]?.score ?? undefined,
@@ -39,30 +93,98 @@ const ReportScoreTab: React.FC<ReportScoreTabProps> = ({ match, onClose }) => {
   })
 
   const onSubmit = async (data: ReportScoreType) => {
-    // TODO: Replace with your actual API call
-    await new Promise((res) => setTimeout(res, 800))
-    reset()
-    onClose()
+    try {
+      const body: any = {
+        tournamentId: tournamentData?._id,
+        matchId: match.id,
+        opponent1Score: data.participant_one_score,
+        opponent2Score: data.participant_two_score,
+      }
+
+      // For best-of series, include the next game number
+      if (seriesState) {
+        body.gameNumber = seriesState.nextGameNumber
+      }
+
+      const response = await fetch('/api/tournaments/report-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || result.error) {
+        setError('root', {
+          message: result.error || 'Failed to report score',
+        })
+        return
+      }
+
+      reset()
+      onClose()
+      // Trigger a page reload to refresh bracket data
+      window.location.reload()
+    } catch (err) {
+      setError('root', {
+        message: 'An unexpected error occurred',
+      })
+    }
   }
 
   return (
     <Card>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardHeader>
-          <CardTitle>Report Score</CardTitle>
+          <CardTitle>
+            Report Score
+            {seriesState && (
+              <span className='block text-sm font-normal text-muted-foreground mt-1'>
+                Game {seriesState.nextGameNumber} of {seriesState.totalGames}{' '}
+                (Best of {seriesState.totalGames})
+              </span>
+            )}
+          </CardTitle>
+          {seriesState && (
+            <div className='mt-2 text-xs text-muted-foreground'>
+              Series: {seriesState.opponent1Wins} - {seriesState.opponent2Wins}
+              {seriesState.opponent1Wins >=
+                Math.ceil(seriesState.totalGames / 2) && (
+                <span className='ml-2 text-green-400 font-medium'>
+                  {participants[0]?.name || 'P1'} leads
+                </span>
+              )}
+              {seriesState.opponent2Wins >=
+                Math.ceil(seriesState.totalGames / 2) && (
+                <span className='ml-2 text-green-400 font-medium'>
+                  {participants[1]?.name || 'P2'} leads
+                </span>
+              )}
+            </div>
+          )}
         </CardHeader>
         <CardContent>
-          {(errors.participant_one_score || errors.participant_two_score) && (
+          {(errors.participant_one_score ||
+            errors.participant_two_score ||
+            (errors as any).root?.message) && (
             <Alert variant='destructive' className='mb-4'>
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>
                 {errors.participant_one_score?.message ||
-                  errors.participant_two_score?.message}
+                  errors.participant_two_score?.message ||
+                  (errors as any).root?.message}
               </AlertDescription>
             </Alert>
           )}
           <div className='grid grid-cols-2 gap-4 items-center mb-2'>
-            <Label>{participants[0]?.name || 'Participant 1'}</Label>
+            <Label>
+              {participants[0]?.name || 'Participant 1'}
+              {seriesState && (
+                <span className='ml-1 text-xs text-muted-foreground'>
+                  ({seriesState.opponent1Wins}W)
+                </span>
+              )}
+            </Label>
             <Input
               type='number'
               {...register('participant_one_score')}
@@ -71,7 +193,14 @@ const ReportScoreTab: React.FC<ReportScoreTabProps> = ({ match, onClose }) => {
               autoFocus
               disabled={isSubmitting}
             />
-            <Label>{participants[1]?.name || 'Participant 2'}</Label>
+            <Label>
+              {participants[1]?.name || 'Participant 2'}
+              {seriesState && (
+                <span className='ml-1 text-xs text-muted-foreground'>
+                  ({seriesState.opponent2Wins}W)
+                </span>
+              )}
+            </Label>
             <Input
               type='number'
               {...register('participant_two_score')}

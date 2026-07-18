@@ -84,7 +84,7 @@ const MatchScoreAndDetailDialog: React.FC<IMatchScoreAndDetailDialog> = ({
             </TabsList>
 
             <TabsContent value={tabs.matchDetails}>
-              <MatchDetailsTab />
+              <MatchDetailsTab match={match} />
             </TabsContent>
             <TabsContent value={tabs.reportScore}>
               <ReportScoreTab match={match} onClose={onClose} />

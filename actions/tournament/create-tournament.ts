@@ -16,6 +16,7 @@ import {
   SeedOrdering,
   Participant,
 } from 'brackets-model'
+import { autoResolveByeMatches } from '@/lib/bracketHelpers'
 
 export interface TournamentResponse {
   success?: string
@@ -24,7 +25,7 @@ export interface TournamentResponse {
 }
 
 const createTournament = async (
-  data: CreateTournamentType
+  data: CreateTournamentType,
 ): Promise<TournamentResponse> => {
   const parsed = CreateTournamentSchema.safeParse(data)
 
@@ -92,6 +93,14 @@ const createTournament = async (
       }
     }
 
+    // Support best-of-N (Bo3, Bo5, etc.) via matchesChildCount
+    // When matchesChildCount > 0, each match becomes a series of child games.
+    // The brackets-manager auto-aggregates results and advances the winner.
+    if (validatedData.bestOf && validatedData.bestOf > 1) {
+      inputStage.settings = inputStage.settings || {}
+      inputStage.settings.matchesChildCount = validatedData.bestOf
+    }
+
     if (validatedData.type === 'double_elimination') {
       inputStage.settings = inputStage.settings || {}
       inputStage.settings.grandFinal = 'double'
@@ -101,6 +110,9 @@ const createTournament = async (
     }
 
     await manager.create.stage(inputStage)
+
+    // Auto-resolve BYE vs BYE matches so bracket progresses
+    await autoResolveByeMatches(tournament.id)
 
     // Update tournament status
     await updateTournamentService(tournament.id, { status: 'progress' })

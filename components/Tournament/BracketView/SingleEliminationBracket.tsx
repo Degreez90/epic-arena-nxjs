@@ -14,6 +14,15 @@ interface Connection {
   endY: number
 }
 
+/** Generate a human-readable round name based on position and total rounds */
+function getRoundName(roundIndex: number, totalRounds: number): string {
+  const positionFromEnd = totalRounds - 1 - roundIndex
+  if (positionFromEnd === 0) return 'Finals'
+  if (positionFromEnd === 1) return 'Semifinals'
+  if (positionFromEnd === 2) return 'Quarterfinals'
+  return `Round ${roundIndex + 1}`
+}
+
 const SingleEliminationBracket: React.FC<SingleEliminationBracketProps> = ({
   stage,
 }) => {
@@ -95,7 +104,7 @@ const SingleEliminationBracket: React.FC<SingleEliminationBracketProps> = ({
     return () => window.removeEventListener('resize', computeConnections)
   }, [mainGroup])
 
-  const roundNames = ['Round 1', 'Round 2', 'Semifinals', 'Finals']
+  const totalRounds = mainGroup?.rounds.length ?? 0
 
   return (
     <div className='w-full overflow-x-auto pb-8'>
@@ -124,13 +133,13 @@ const SingleEliminationBracket: React.FC<SingleEliminationBracketProps> = ({
         </svg>
 
         {/* Match cards container */}
-        <div className='relative flex gap-2 md:gap-3 z-10 items-stretch'>
+        <div className='relative flex gap-8 md:gap-10 z-10 items-stretch'>
           {mainGroup.rounds.map((round, roundIdx) => (
             <div key={roundIdx} className='flex flex-col flex-1'>
               {/* Round Label */}
               <div className='mb-4 text-center'>
                 <h4 className='text-sm font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap'>
-                  {roundNames[roundIdx] || `Round ${roundIdx + 1}`}
+                  {getRoundName(roundIdx, totalRounds)}
                 </h4>
               </div>
               {/* Matches container with tree layout */}
