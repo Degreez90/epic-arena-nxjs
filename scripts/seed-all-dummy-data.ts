@@ -16,6 +16,7 @@ import bcrypt from 'bcryptjs'
 import { getTournamentManager } from '@/data/Tournaments/tournaments'
 import { InputStage, SeedOrdering } from 'brackets-model'
 import type { StageType, Participant } from 'brackets-model'
+import { autoResolveByeMatches } from '@/lib/bracketHelpers'
 
 const DUMMY_DATA = {
   users: [
@@ -409,6 +410,21 @@ const DUMMY_DATA = {
       gameIndex: 2,
       participantIndices: [7, 8, 9, 17, 18, 19, 20, 25], // 8 participants (power of 2)
     },
+    // Large bracket with all 30 users to test bye padding (30 → 32, 2 byes)
+    {
+      name: 'Massive Open Tournament',
+      description:
+        'Large-scale open bracket with maximum participants to test bye system',
+      type: 'single_elimination',
+      status: 'pending',
+      seedingOrder: 'natural',
+      hasThirdPlaceMatch: true,
+      gameIndex: 0, // Street Fighter 6
+      participantIndices: [
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+        20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+      ], // All 30 users → pads to 32 with 2 byes
+    },
   ],
 }
 
@@ -490,7 +506,7 @@ async function seedAllDummyData() {
           },
         })
         console.log(
-          `  ✓ Created tournament: ${tournament.name} (${tournament.status})`
+          `  ✓ Created tournament: ${tournament.name} (${tournament.status})`,
         )
       }
       createdTournaments.push(tournament)
@@ -509,7 +525,7 @@ async function seedAllDummyData() {
         // Skip if participant doesn't exist (shouldn't happen but be safe)
         if (!participant) {
           console.warn(
-            `  ⚠️  Participant at index ${userIndex} not found, skipping`
+            `  ⚠️  Participant at index ${userIndex} not found, skipping`,
           )
           continue
         }
@@ -549,7 +565,7 @@ async function seedAllDummyData() {
       // Only initialize brackets for tournaments without existing bracket data
       if (tournament.stage || tournament.match) {
         console.log(
-          `  ℹ️  ${tournament.name} already has bracket data, skipping`
+          `  ℹ️  ${tournament.name} already has bracket data, skipping`,
         )
         continue
       }
@@ -573,7 +589,7 @@ async function seedAllDummyData() {
           (p) => ({
             name: p.user?.userName || `Participant`,
             tournament_id: 1,
-          })
+          }),
         )
 
         // Create the stage
@@ -600,7 +616,7 @@ async function seedAllDummyData() {
             })
           }
           console.log(
-            `  ℹ️  Added ${byesNeeded} byes to make power-of-two for ${tournament.name}`
+            `  ℹ️  Added ${byesNeeded} byes to make power-of-two for ${tournament.name}`,
           )
         }
 
@@ -633,19 +649,27 @@ async function seedAllDummyData() {
           inputStage.settings = inputStage.settings || {}
           ;(inputStage.settings as any).groupCount = Math.max(
             2,
-            Math.ceil(participants.length / 4)
+            Math.ceil(participants.length / 4),
           )
         }
 
         await manager.create.stage(inputStage)
         console.log(
-          `  ✓ Initialized ${stageType} bracket for ${tournament.name} (${participants.length} participants)`
+          `  ✓ Initialized ${stageType} bracket for ${tournament.name} (${participants.length} participants)`,
         )
+
+        // Auto-resolve BYE matches to advance real users and progress the bracket
+        const byeResult = await autoResolveByeMatches(tournament.id)
+        if (byeResult.resolved > 0) {
+          console.log(
+            `  ✓ Auto-resolved ${byeResult.resolved} BYE matches for ${tournament.name}`,
+          )
+        }
       } catch (error) {
         console.error(
           `  ❌ Error initializing bracket for ${tournament.name}: ${
             error instanceof Error ? error.message : String(error)
-          }`
+          }`,
         )
       }
     }

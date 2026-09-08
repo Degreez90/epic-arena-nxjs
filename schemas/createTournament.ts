@@ -24,11 +24,17 @@ export const CreateTournamentSchema = z.object({
     ],
     {
       message: 'Tournament type is required',
-    }
+    },
   ),
   thirdPlaceMatch: z.boolean().default(false),
   Participants: z.string().optional(),
   seedOrdering: z.nativeEnum(SeedOrdering).optional(),
+  bestOf: z
+    .number()
+    .int()
+    .min(1, { message: 'Best of must be at least 1' })
+    .max(7, { message: 'Best of cannot exceed 7' })
+    .optional(),
 })
 
 export type CreateTournamentType = z.infer<typeof CreateTournamentSchema>

@@ -44,6 +44,7 @@ const CreateTournament = () => {
       type: tournamentStageType.singleElimination,
       thirdPlaceMatch: false,
       seedOrdering: SeedOrdering.InnerOuter,
+      bestOf: 1,
     },
   })
 
@@ -212,6 +213,31 @@ const CreateTournament = () => {
                         <SelectItem value={SeedOrdering.SeedOptimized}>
                           Seed Optimized
                         </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='bestOf'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Match Format</FormLabel>
+                    <Select
+                      onValueChange={(val) => field.onChange(Number(val))}
+                      defaultValue={String(field.value ?? 1)}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select match format' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value='1'>Best of 1</SelectItem>
+                        <SelectItem value='3'>Best of 3</SelectItem>
+                        <SelectItem value='5'>Best of 5</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

@@ -2,7 +2,10 @@ import NextAuth, { Account, Session, Users } from 'next-auth'
 import prisma from './lib/prisma'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import authConfig from '@/auth.config'
-import { getUserById } from '@/data/user'
+import Credentials from 'next-auth/providers/credentials'
+import bcrypt from 'bcryptjs'
+import { LoginSchema, LoginTokenSchema } from '@/schemas'
+import { getUserByEmail, getUserById } from '@/data/user'
 import { getAccountByUserId } from '@/data/accounts'
 import { getTwoFactorConfirmationByUserId } from '@/data/two-factor-confirmation'
 
@@ -29,6 +32,45 @@ export const {
     },
   },
   ...authConfig,
+  providers: [
+    ...(authConfig.providers ?? []),
+    Credentials({
+      async authorize(credentials): Promise<any> {
+        if (!credentials || typeof credentials !== 'object') return null
+
+        // Login user if they validated email through token flow.
+        if ('email' in credentials && 'existingToken' in credentials) {
+          const validatedFields = LoginTokenSchema.safeParse(credentials)
+
+          if (validatedFields.success) {
+            const email = validatedFields.data.email
+            const user = await getUserByEmail(email)
+            return user
+          }
+
+          throw new Error('Invalid credentials')
+        }
+
+        // Login user normally via email + password.
+        if ('email' in credentials && 'password' in credentials) {
+          const validatedFields = LoginSchema.safeParse(credentials)
+
+          if (validatedFields.success) {
+            const { email, password } = validatedFields.data
+            const user = await getUserByEmail(email)
+            if (!user || !user.password) return null
+
+            const passwordsMatch = await bcrypt.compare(password, user.password)
+            if (!passwordsMatch) return null
+
+            return user
+          }
+        }
+
+        return null
+      },
+    }),
+  ],
   callbacks: {
     ...authConfig.callbacks,
     async signIn({ user, account }: { user: Users; account?: Account | null }) {

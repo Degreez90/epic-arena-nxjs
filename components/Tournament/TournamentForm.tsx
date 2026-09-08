@@ -43,6 +43,13 @@ const tournamentFormSchema = z.object({
     'no_seeding',
   ]),
   hasThirdPlaceMatch: z.boolean().default(false),
+  bestOf: z
+    .number()
+    .int()
+    .min(1)
+    .max(7)
+    .optional()
+    .default(1),
   status: z.enum(['pending', 'progress', 'completed', 'archived']).optional(),
 })
 
@@ -86,6 +93,7 @@ export function TournamentForm({
       type: tournament?.type || 'single_elimination',
       seedingOrder: tournament?.seedingOrder || 'natural',
       hasThirdPlaceMatch: tournament?.hasThirdPlaceMatch || false,
+      bestOf: tournament?.bestOf || 1,
       status: tournament?.status || 'pending',
     },
   })
@@ -114,6 +122,7 @@ export function TournamentForm({
           description: values.description || '',
           type: values.type,
           thirdPlaceMatch: values.hasThirdPlaceMatch,
+          bestOf: values.bestOf,
           seedOrdering: (values.seedingOrder === 'no_seeding'
             ? undefined
             : values.seedingOrder) as any,
@@ -292,6 +301,35 @@ export function TournamentForm({
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='bestOf'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Match Format</FormLabel>
+                  <Select
+                    onValueChange={(val) => field.onChange(Number(val))}
+                    defaultValue={String(field.value ?? 1)}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select match format' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value='1'>Best of 1</SelectItem>
+                      <SelectItem value='3'>Best of 3</SelectItem>
+                      <SelectItem value='5'>Best of 5</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Number of games per match (single, Bo3, Bo5)
+                  </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />
